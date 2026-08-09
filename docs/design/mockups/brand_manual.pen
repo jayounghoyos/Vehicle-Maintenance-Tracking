@@ -1,0 +1,2745 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "lNkU8",
+      "x": 0,
+      "y": 0,
+      "name": "MTS Brand Manual",
+      "clip": true,
+      "width": 1600,
+      "fill": "$bg-page",
+      "layout": "vertical",
+      "padding": [
+        80,
+        88
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "R3TT2N",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Component Shelf",
+          "clip": true,
+          "width": 0,
+          "height": 0,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "L77O6",
+              "x": 0,
+              "y": 0,
+              "name": "Logo Lockup",
+              "reusable": true,
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "RhTkV",
+                  "name": "Logo Mark",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$accent",
+                  "cornerRadius": 12,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "illRr",
+                      "name": "Wrench Glyph",
+                      "width": 24,
+                      "height": 24,
+                      "icon": "wrench",
+                      "library": "lucide",
+                      "fill": "$bg-page"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kQ3uA",
+                  "name": "Wordmark Block",
+                  "layout": "vertical",
+                  "gap": 1,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qDNMX",
+                      "name": "Wordmark",
+                      "fill": "$text-primary",
+                      "content": "MTS",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font",
+                      "fontSize": 22,
+                      "fontWeight": "700",
+                      "letterSpacing": -0.4
+                    },
+                    {
+                      "type": "text",
+                      "id": "F80aSD",
+                      "name": "Tagline",
+                      "fill": "$text-secondary",
+                      "content": "Fleet maintenance",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aPC60",
+              "x": 0,
+              "y": 0,
+              "name": "Status Chip",
+              "reusable": true,
+              "fill": "#FF7A5926",
+              "cornerRadius": 999,
+              "gap": 7,
+              "padding": [
+                7,
+                13
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "G2fKT",
+                  "name": "Dot",
+                  "fill": "$overdue",
+                  "width": 6,
+                  "height": 6
+                },
+                {
+                  "type": "text",
+                  "id": "U6qP82",
+                  "name": "Chip Label",
+                  "fill": "$overdue",
+                  "content": "Overdue",
+                  "lineHeight": 1.2,
+                  "fontFamily": "$font",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kYByg",
+          "name": "Board Header",
+          "width": "fill_container",
+          "justifyContent": "space_between",
+          "alignItems": "end",
+          "children": [
+            {
+              "type": "frame",
+              "id": "G9Qrkh",
+              "name": "Header Left",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "NV2H2",
+                  "name": "Eyebrow",
+                  "fill": "$accent",
+                  "content": "BRAND MANUAL",
+                  "fontFamily": "$font",
+                  "fontSize": 12,
+                  "fontWeight": "600",
+                  "letterSpacing": 2.4
+                },
+                {
+                  "type": "text",
+                  "id": "pZjM3",
+                  "name": "Board Title",
+                  "fill": "$text-primary",
+                  "content": "MTS",
+                  "lineHeight": 1,
+                  "fontFamily": "$font",
+                  "fontSize": 88,
+                  "fontWeight": "700",
+                  "letterSpacing": -3
+                },
+                {
+                  "type": "text",
+                  "id": "m4HktS",
+                  "name": "Board Subtitle",
+                  "fill": "$text-secondary",
+                  "content": "Fleet maintenance tracking  ·  Visual identity v1.0",
+                  "fontFamily": "$font",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Dk4go",
+              "name": "Header Meta",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Cewrs",
+                  "name": "Meta Line 1",
+                  "fill": "$text-secondary",
+                  "content": "Dark mode primary",
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "XWFrl",
+                  "name": "Meta Line 2",
+                  "fill": "$text-secondary",
+                  "content": "August 2026",
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "YVsR0",
+          "name": "Header Rule",
+          "fill": "$hairline",
+          "width": "fill_container",
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "mZyI0",
+          "name": "01 Brand Mark",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            56,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "YSGaK",
+              "name": "Section Header",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "nsjxK",
+                  "name": "Number",
+                  "fill": "$accent",
+                  "content": "01",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "OrZ3N",
+                  "name": "Titles",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "t1Qfdk",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "content": "Brand mark",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font",
+                      "fontSize": 30,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "v7fyA5",
+                      "name": "Desc",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 720,
+                      "content": "A lime rounded square holding a wrench glyph, locked to the MTS wordmark. Keep the mark and wordmark on the same optical baseline; never separate the tagline from the wordmark.",
+                      "lineHeight": 1.55,
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "qxnxJ",
+              "name": "Mark Panels",
+              "width": "fill_container",
+              "gap": 26,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "GrWeM",
+                  "name": "On Dark",
+                  "width": "fill_container",
+                  "height": 300,
+                  "fill": "$bg-panel",
+                  "cornerRadius": 16,
+                  "stroke": "$hairline",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "layout": "vertical",
+                  "padding": 32,
+                  "justifyContent": "space_between",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FoGZ6",
+                      "name": "Panel Label",
+                      "fill": "$text-secondary",
+                      "content": "ON DARK  ·  #141718",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZThTE",
+                      "name": "Lockup Slot",
+                      "width": "fill_container",
+                      "justifyContent": "center",
+                      "children": [
+                        {
+                          "id": "w9skbc",
+                          "type": "ref",
+                          "ref": "L77O6",
+                          "name": "Logo on Dark",
+                          "gap": 18,
+                          "descendants": {
+                            "RhTkV": {
+                              "width": 76,
+                              "height": 76,
+                              "cornerRadius": 22,
+                              "fill": "$accent"
+                            },
+                            "illRr": {
+                              "width": 40,
+                              "height": 40,
+                              "fill": "$bg-page"
+                            },
+                            "kQ3uA": {
+                              "gap": 3
+                            },
+                            "qDNMX": {
+                              "fontSize": 38,
+                              "letterSpacing": -1,
+                              "fill": "$text-primary"
+                            },
+                            "F80aSD": {
+                              "fontSize": 16,
+                              "fill": "$text-secondary"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "byfwM",
+                      "name": "Panel Note",
+                      "fill": "$text-secondary",
+                      "content": "Primary application. Lime mark, white wordmark.",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "M0Ddq",
+                  "name": "On Lime",
+                  "width": "fill_container",
+                  "height": 300,
+                  "fill": "$accent",
+                  "cornerRadius": 16,
+                  "layout": "vertical",
+                  "padding": 32,
+                  "justifyContent": "space_between",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zqP28",
+                      "name": "Panel Label",
+                      "fill": "#0A0B0CB3",
+                      "content": "ON LIME  ·  #CFF255",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "sdi4r",
+                      "name": "Lockup Slot",
+                      "width": "fill_container",
+                      "justifyContent": "center",
+                      "children": [
+                        {
+                          "id": "v6foG",
+                          "type": "ref",
+                          "ref": "L77O6",
+                          "name": "Logo on Lime",
+                          "gap": 18,
+                          "descendants": {
+                            "RhTkV": {
+                              "fill": "$bg-page",
+                              "width": 76,
+                              "height": 76,
+                              "cornerRadius": 22
+                            },
+                            "illRr": {
+                              "fill": "$accent",
+                              "width": 40,
+                              "height": 40
+                            },
+                            "kQ3uA": {
+                              "gap": 3
+                            },
+                            "qDNMX": {
+                              "fill": "$bg-page",
+                              "fontSize": 38,
+                              "letterSpacing": -1
+                            },
+                            "F80aSD": {
+                              "fill": "#0A0B0CB3",
+                              "fontSize": 16
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "qbbsJ",
+                      "name": "Panel Note",
+                      "fill": "#0A0B0CB3",
+                      "content": "Inverted. Near-black mark, lime glyph.",
+                      "fontFamily": "$font",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "S8VaI",
+          "name": "Rule 1",
+          "fill": "$hairline",
+          "width": "fill_container",
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "GGf5i",
+          "name": "02 Typography",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 36,
+          "padding": [
+            56,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "rcdTS",
+              "name": "Section Header",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "VKw54",
+                  "name": "Number",
+                  "fill": "$accent",
+                  "content": "02",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "WUmwF",
+                  "name": "Titles",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "W5UJSq",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "content": "Typography",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font",
+                      "fontSize": 30,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "ETIex",
+                      "name": "Desc",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 720,
+                      "content": "Inter carries the entire interface. Its tall x-height and unambiguous figures keep plates, odometer readings and dates legible at small sizes on dark surfaces.",
+                      "lineHeight": 1.55,
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nE2LY",
+              "name": "Specimen",
+              "width": "fill_container",
+              "fill": "$bg-panel",
+              "cornerRadius": 16,
+              "stroke": "$hairline",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "layout": "vertical",
+              "gap": 20,
+              "padding": [
+                36,
+                40
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "zoCib",
+                  "name": "Specimen Head",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "eustN",
+                      "name": "Typeface Label",
+                      "fill": "$text-secondary",
+                      "content": "TYPEFACE",
+                      "fontFamily": "$font",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.6
+                    },
+                    {
+                      "type": "frame",
+                      "id": "t3Uppe",
+                      "name": "Weights",
+                      "gap": 22,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "qFnIJ",
+                          "name": "Weight Regular",
+                          "fill": "$text-secondary",
+                          "content": "Regular 400",
+                          "fontFamily": "$font",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Bssnj",
+                          "name": "Weight Medium",
+                          "fill": "$text-secondary",
+                          "content": "Medium 500",
+                          "fontFamily": "$font",
+                          "fontSize": 15,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "WAZap",
+                          "name": "Weight Semibold",
+                          "fill": "$text-secondary",
+                          "content": "Semibold 600",
+                          "fontFamily": "$font",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "t1AOi",
+                          "name": "Weight Bold",
+                          "fill": "$text-primary",
+                          "content": "Bold 700",
+                          "fontFamily": "$font",
+                          "fontSize": 15,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "o7iSy",
+                  "name": "Specimen Word",
+                  "fill": "$text-primary",
+                  "content": "Inter",
+                  "lineHeight": 1.05,
+                  "fontFamily": "$font",
+                  "fontSize": 132,
+                  "fontWeight": "700",
+                  "letterSpacing": -6
+                },
+                {
+                  "type": "text",
+                  "id": "EiI82",
+                  "name": "Glyph Line",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "ABCDEFGHIJKLMNOPQRSTUVWXYZ  1234567890  ABC123 · 128,450 km · 28 Jul 2026",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font",
+                  "fontSize": 15,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NUuCt",
+              "name": "Type Scale",
+              "width": "fill_container",
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Y4nZb",
+                  "name": "Scale · Page title",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    22,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZOFjW",
+                      "name": "Role",
+                      "width": 180,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "wY0NA",
+                          "name": "Role Label",
+                          "fill": "$text-secondary",
+                          "content": "Page title",
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "j0nEUd",
+                      "name": "Sample",
+                      "width": "fill_container",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uNbnL",
+                          "name": "Sample Text",
+                          "fill": "$text-primary",
+                          "content": "Good morning, Ana",
+                          "lineHeight": 1.25,
+                          "fontFamily": "$font",
+                          "fontSize": 32,
+                          "fontWeight": "700",
+                          "letterSpacing": -0.8
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "E7NM7e",
+                      "name": "Spec",
+                      "width": 160,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "SsxA4",
+                          "name": "Spec Text",
+                          "fill": "#737B77",
+                          "content": "32 / 700 / -0.8",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "w6M01K",
+                  "name": "Scale · Section heading",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    22,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "r1EMg",
+                      "name": "Role",
+                      "width": 180,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "l1xWT",
+                          "name": "Role Label",
+                          "fill": "$text-secondary",
+                          "content": "Section heading",
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kzM01",
+                      "name": "Sample",
+                      "width": "fill_container",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "rR3kA",
+                          "name": "Sample Text",
+                          "fill": "$text-primary",
+                          "content": "Needs attention",
+                          "lineHeight": 1.25,
+                          "fontFamily": "$font",
+                          "fontSize": 19,
+                          "fontWeight": "600",
+                          "letterSpacing": -0.2
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cBBjO",
+                      "name": "Spec",
+                      "width": 160,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "gB5JQ",
+                          "name": "Spec Text",
+                          "fill": "#737B77",
+                          "content": "19 / 600 / -0.2",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JIhr6",
+                  "name": "Scale · Body",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    22,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "r4Oqo9",
+                      "name": "Role",
+                      "width": 180,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nyRPA",
+                          "name": "Role Label",
+                          "fill": "$text-secondary",
+                          "content": "Body",
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "V1YuJd",
+                      "name": "Sample",
+                      "width": "fill_container",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nSJJm",
+                          "name": "Sample Text",
+                          "fill": "$text-secondary",
+                          "content": "Maintenance overdue or coming up",
+                          "lineHeight": 1.25,
+                          "fontFamily": "$font",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bfY86",
+                      "name": "Spec",
+                      "width": 160,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "EU8VR",
+                          "name": "Spec Text",
+                          "fill": "#737B77",
+                          "content": "14 / 400 / 0",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "GrjTk",
+                  "name": "Scale · Table label",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    22,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Pfe26",
+                      "name": "Role",
+                      "width": 180,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "KNlrs",
+                          "name": "Role Label",
+                          "fill": "$text-secondary",
+                          "content": "Table label",
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VV0dW",
+                      "name": "Sample",
+                      "width": "fill_container",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Kl508",
+                          "name": "Sample Text",
+                          "fill": "$text-secondary",
+                          "content": "ODOMETER (KM)",
+                          "lineHeight": 1.25,
+                          "fontFamily": "$font",
+                          "fontSize": 11,
+                          "fontWeight": "600",
+                          "letterSpacing": 1.2
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "HnRHb",
+                      "name": "Spec",
+                      "width": 160,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "pdmGl",
+                          "name": "Spec Text",
+                          "fill": "#737B77",
+                          "content": "11 / 600 / +1.2",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xFd8I",
+                  "name": "Scale · Nav label",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    22,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "fMMi9",
+                      "name": "Role",
+                      "width": 180,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "hKFkY",
+                          "name": "Role Label",
+                          "fill": "$text-secondary",
+                          "content": "Nav label",
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "P5fLQ",
+                      "name": "Sample",
+                      "width": "fill_container",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "X4VpZA",
+                          "name": "Sample Text",
+                          "fill": "$text-secondary",
+                          "content": "WORKSPACE",
+                          "lineHeight": 1.25,
+                          "fontFamily": "$font",
+                          "fontSize": 10,
+                          "fontWeight": "600",
+                          "letterSpacing": 1.8
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kAEHw",
+                      "name": "Spec",
+                      "width": 160,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "FhXSv",
+                          "name": "Spec Text",
+                          "fill": "#737B77",
+                          "content": "10 / 600 / +1.8",
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "T6aUWU",
+          "name": "Rule 2",
+          "fill": "$hairline",
+          "width": "fill_container",
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "T2AIz",
+          "name": "03 Colour",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            56,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "KB65G",
+              "name": "Section Header",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "w105X",
+                  "name": "Number",
+                  "fill": "$accent",
+                  "content": "03",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "MR0Ra",
+                  "name": "Titles",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "IEsrn",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "content": "Colour",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font",
+                      "fontSize": 30,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "mPhOg",
+                      "name": "Desc",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 720,
+                      "content": "One accent, three status hues, three near-black surfaces. Every colour is assigned to a role — no colour is used outside the role it is defined for.",
+                      "lineHeight": 1.55,
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "GjllO",
+              "name": "Palette",
+              "width": "fill_container",
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "H5LdHX",
+                  "name": "Group · Accent",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "r4uSqq",
+                      "name": "Group Label",
+                      "width": 180,
+                      "layout": "vertical",
+                      "gap": 5,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "lR1DD",
+                          "name": "Name",
+                          "fill": "$text-primary",
+                          "content": "Accent",
+                          "fontFamily": "$font",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "s8IkmU",
+                          "name": "Sub",
+                          "fill": "#737B77",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Primary actions, active nav item",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ek7XY",
+                      "name": "Swatches",
+                      "width": "fill_container",
+                      "gap": 21,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "elBsm",
+                          "name": "Swatch · Lime",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "hctsg",
+                              "name": "Chip",
+                              "fill": "#CFF255",
+                              "width": "fill_container",
+                              "height": 96
+                            },
+                            {
+                              "type": "frame",
+                              "id": "L9iuS",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "QF1A0",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "Lime",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "i5m6Cc",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#CFF255",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "rErOu",
+                          "name": "Group Note",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "padding": [
+                            4,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "mFKr6",
+                              "name": "Note Text",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Reserved for the one action that matters on screen — Log service, the active nav item, a linked plate. Never use it for status.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LbAst",
+                  "name": "Group · Status",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "NsiIZ",
+                      "name": "Group Label",
+                      "width": 180,
+                      "layout": "vertical",
+                      "gap": 5,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "gOOXm",
+                          "name": "Name",
+                          "fill": "$text-primary",
+                          "content": "Status",
+                          "fontFamily": "$font",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "bUvHu",
+                          "name": "Sub",
+                          "fill": "#737B77",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Maintenance state",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ESS2s",
+                      "name": "Swatches",
+                      "width": "fill_container",
+                      "gap": 21,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LssZ2",
+                          "name": "Swatch · Overdue",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "JRNyZ",
+                              "name": "Chip",
+                              "fill": "#FF7A59",
+                              "width": "fill_container",
+                              "height": 96
+                            },
+                            {
+                              "type": "frame",
+                              "id": "TrlD6",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "MlAJW",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "Overdue",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "LIhtW",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#FF7A59",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vgbrA",
+                          "name": "Swatch · Due soon",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "uDVWk",
+                              "name": "Chip",
+                              "fill": "#F2C14E",
+                              "width": "fill_container",
+                              "height": 96
+                            },
+                            {
+                              "type": "frame",
+                              "id": "t7ny1l",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "I5U3WT",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "Due soon",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "V3UpyV",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#F2C14E",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "FvQl7",
+                          "name": "Swatch · On track",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "s638R",
+                              "name": "Chip",
+                              "fill": "#7AD39B",
+                              "width": "fill_container",
+                              "height": 96
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Jsdwo",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "KUCn1",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "On track",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "ai8eF",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#7AD39B",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Km1YF",
+                  "name": "Group · Surface",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "rfzsu",
+                      "name": "Group Label",
+                      "width": 180,
+                      "layout": "vertical",
+                      "gap": 5,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "MhHXu",
+                          "name": "Name",
+                          "fill": "$text-primary",
+                          "content": "Surface",
+                          "fontFamily": "$font",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "OCo0a",
+                          "name": "Sub",
+                          "fill": "#737B77",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Backgrounds, elevation",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eNys6",
+                      "name": "Swatches",
+                      "width": "fill_container",
+                      "gap": 21,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ufLEj",
+                          "name": "Swatch · Page background",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "g5PiZj",
+                              "name": "Chip",
+                              "fill": "#0A0B0C",
+                              "width": "fill_container",
+                              "height": 96,
+                              "stroke": "$hairline",
+                              "strokeWidth": 1,
+                              "strokeAlignment": "inner"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "EvbCg",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "udNpN",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "Page background",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "xVJdA",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#0A0B0C",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "BVahj",
+                          "name": "Swatch · Sidebar",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "c0WX7",
+                              "name": "Chip",
+                              "fill": "#0E1011",
+                              "width": "fill_container",
+                              "height": 96,
+                              "stroke": "$hairline",
+                              "strokeWidth": 1,
+                              "strokeAlignment": "inner"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "YQWIu",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "X2pr3",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "Sidebar",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "mnn0Z",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#0E1011",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "qLu6W",
+                          "name": "Swatch · Panel surface",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "BOfsn",
+                              "name": "Chip",
+                              "fill": "#141718",
+                              "width": "fill_container",
+                              "height": 96,
+                              "stroke": "$hairline",
+                              "strokeWidth": 1,
+                              "strokeAlignment": "inner"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "xBSFR",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "zsFww",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "Panel surface",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "P8Og7",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#141718",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "uDRIZ",
+                  "name": "Group · Text",
+                  "width": "fill_container",
+                  "stroke": "$hairline",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "gap": 32,
+                  "padding": [
+                    28,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "C8jxu",
+                      "name": "Group Label",
+                      "width": 180,
+                      "layout": "vertical",
+                      "gap": 5,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "nuUol",
+                          "name": "Name",
+                          "fill": "$text-primary",
+                          "content": "Text",
+                          "fontFamily": "$font",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "y03qM",
+                          "name": "Sub",
+                          "fill": "#737B77",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Type on dark",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$font",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kv0Ea",
+                      "name": "Swatches",
+                      "width": "fill_container",
+                      "gap": 21,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "nm9o4",
+                          "name": "Swatch · Text primary",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "gF7IC",
+                              "name": "Chip",
+                              "fill": "#FFFFFF",
+                              "width": "fill_container",
+                              "height": 96
+                            },
+                            {
+                              "type": "frame",
+                              "id": "abqi9",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "BxcIA",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "Text primary",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "BygTP",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#FFFFFF",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Yt9Pt",
+                          "name": "Swatch · Text secondary",
+                          "width": 390,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 12,
+                              "id": "deCKW",
+                              "name": "Chip",
+                              "fill": "#8A928E",
+                              "width": "fill_container",
+                              "height": 96
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Eth5n",
+                              "name": "Meta",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "DKDDI",
+                                  "name": "Swatch Name",
+                                  "fill": "$text-primary",
+                                  "content": "Text secondary",
+                                  "fontFamily": "$font",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Lyxoo",
+                                  "name": "Hex",
+                                  "fill": "$text-secondary",
+                                  "content": "#8A928E",
+                                  "fontFamily": "$font",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZfC2X",
+                          "name": "Group Note",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "padding": [
+                            4,
+                            0,
+                            0,
+                            0
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Y7iEcE",
+                              "name": "Note Text",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Secondary carries labels, metadata and inactive nav. Primary is reserved for values and headings so the eye lands on data first.",
+                              "lineHeight": 1.6,
+                              "fontFamily": "$font",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "o3rq1",
+          "name": "Rule 3",
+          "fill": "$hairline",
+          "width": "fill_container",
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "cOv0F",
+          "name": "04 Status Chips",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            56,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "SaCjH",
+              "name": "Section Header",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jG6oV",
+                  "name": "Number",
+                  "fill": "$accent",
+                  "content": "04",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "V3fGZg",
+                  "name": "Titles",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "UqvDU",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "content": "Status chips",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font",
+                      "fontSize": 30,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "eKM32",
+                      "name": "Desc",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 720,
+                      "content": "A pill built from one hue: a 6px dot at full strength, the label at full strength, and the same hue at 15% opacity behind them. Three states, no more.",
+                      "lineHeight": 1.55,
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Hq1EE",
+              "name": "Chip Specimens",
+              "width": "fill_container",
+              "gap": 25,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "cYmn4",
+                  "name": "Chip Card · Overdue",
+                  "width": "fill_container",
+                  "fill": "$bg-panel",
+                  "cornerRadius": 16,
+                  "stroke": "$hairline",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 28,
+                  "children": [
+                    {
+                      "id": "fJGAB",
+                      "type": "ref",
+                      "ref": "aPC60",
+                      "name": "Chip · Overdue",
+                      "fill": "#FF7A5926",
+                      "descendants": {
+                        "G2fKT": {
+                          "fill": "$overdue"
+                        },
+                        "U6qP82": {
+                          "content": "Overdue",
+                          "fill": "$overdue"
+                        }
+                      }
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VVAGD",
+                      "name": "Chip Meta",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "oTIU9",
+                          "name": "Meaning",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Service date has passed",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "N1WqQ",
+                          "name": "Usage",
+                          "fill": "$text-secondary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Row emphasis, dashboard alert",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cWGTH",
+                      "name": "Chip Spec",
+                      "width": "fill_container",
+                      "stroke": "$hairline",
+                      "strokeWidth": {
+                        "top": 1
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "gap": 7,
+                      "padding": [
+                        16,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "FhdJ6",
+                          "name": "Spec Dot / label",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GHd7q",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Dot / label",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "m7gR0",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "#FF7A59",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "K2iQDR",
+                          "name": "Spec Background",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "P3M9a",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Background",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "wvcMG",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "#FF7A59 · 15%",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "wMXVp",
+                          "name": "Spec Radius",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "VGMwH",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Radius",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "t7s5Tz",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "999 · pill",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fCs82",
+                  "name": "Chip Card · Due soon",
+                  "width": "fill_container",
+                  "fill": "$bg-panel",
+                  "cornerRadius": 16,
+                  "stroke": "$hairline",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 28,
+                  "children": [
+                    {
+                      "id": "VbykI",
+                      "type": "ref",
+                      "ref": "aPC60",
+                      "name": "Chip · Due soon",
+                      "fill": "#F2C14E26",
+                      "descendants": {
+                        "G2fKT": {
+                          "fill": "$due-soon"
+                        },
+                        "U6qP82": {
+                          "content": "Due soon",
+                          "fill": "$due-soon"
+                        }
+                      }
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cO9uH",
+                      "name": "Chip Meta",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "my8ZH",
+                          "name": "Meaning",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Within the next 14 days",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Ss1YG",
+                          "name": "Usage",
+                          "fill": "$text-secondary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Planning window",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mjINC",
+                      "name": "Chip Spec",
+                      "width": "fill_container",
+                      "stroke": "$hairline",
+                      "strokeWidth": {
+                        "top": 1
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "gap": 7,
+                      "padding": [
+                        16,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "MKAds",
+                          "name": "Spec Dot / label",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "geT2U",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Dot / label",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "o3nzv",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "#F2C14E",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "iCwxs",
+                          "name": "Spec Background",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "h3hbC1",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Background",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "vVmr3",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "#F2C14E · 15%",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "J96Z5s",
+                          "name": "Spec Radius",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "zWmSA",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Radius",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "J0T6JD",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "999 · pill",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Gdpbb",
+                  "name": "Chip Card · On track",
+                  "width": "fill_container",
+                  "fill": "$bg-panel",
+                  "cornerRadius": 16,
+                  "stroke": "$hairline",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 28,
+                  "children": [
+                    {
+                      "id": "rsclN",
+                      "type": "ref",
+                      "ref": "aPC60",
+                      "name": "Chip · On track",
+                      "fill": "#7AD39B26",
+                      "descendants": {
+                        "G2fKT": {
+                          "fill": "$on-track"
+                        },
+                        "U6qP82": {
+                          "content": "On track",
+                          "fill": "$on-track"
+                        }
+                      }
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dwLJz",
+                      "name": "Chip Meta",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "o4ipr",
+                          "name": "Meaning",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "No action required",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "f8V8TW",
+                          "name": "Usage",
+                          "fill": "$text-secondary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Default resting state",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "I9t7aM",
+                      "name": "Chip Spec",
+                      "width": "fill_container",
+                      "stroke": "$hairline",
+                      "strokeWidth": {
+                        "top": 1
+                      },
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "gap": 7,
+                      "padding": [
+                        16,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Y3r3Lz",
+                          "name": "Spec Dot / label",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddgNH",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Dot / label",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "JvmlH",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "#7AD39B",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "G83K06",
+                          "name": "Spec Background",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GILGG",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Background",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dH6vA",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "#7AD39B · 15%",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "J7QKNW",
+                          "name": "Spec Radius",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "cnUdU",
+                              "name": "Key",
+                              "fill": "#737B77",
+                              "content": "Radius",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "HoXNW",
+                              "name": "Value",
+                              "fill": "$text-secondary",
+                              "content": "999 · pill",
+                              "fontFamily": "$font",
+                              "fontSize": 12,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "zKtM4",
+          "name": "Rule 4",
+          "fill": "$hairline",
+          "width": "fill_container",
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "vCNfp",
+          "name": "05 Usage Note",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            56,
+            0,
+            0,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "WtyqI",
+              "name": "Section Header",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "fCVEK",
+                  "name": "Number",
+                  "fill": "$accent",
+                  "content": "05",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "XOgT1",
+                  "name": "Titles",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Xbs06",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "content": "Usage",
+                      "lineHeight": 1.2,
+                      "fontFamily": "$font",
+                      "fontSize": 30,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.6
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "l3fzPk",
+              "name": "Usage Note",
+              "width": "fill_container",
+              "fill": "$bg-sidebar",
+              "cornerRadius": 20,
+              "stroke": "$hairline",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "gap": 48,
+              "padding": [
+                48,
+                52
+              ],
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "uC1Z3",
+                  "name": "Accent Rule",
+                  "fill": "$accent",
+                  "width": 3,
+                  "height": 120
+                },
+                {
+                  "type": "frame",
+                  "id": "CaSIP",
+                  "name": "Note Body",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 18,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Vh6CN",
+                      "name": "Statement",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Status colour always carries meaning, never decoration.",
+                      "lineHeight": 1.3,
+                      "fontFamily": "$font",
+                      "fontSize": 34,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "xg09c",
+                      "name": "Support",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "If a surface, border or label is orange, amber or green, it is reporting maintenance state — nothing else. Backgrounds, dividers and inactive type stay neutral so a single coloured chip is enough to pull the eye across a table of twenty-four vehicles.",
+                      "lineHeight": 1.65,
+                      "fontFamily": "$font",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "IzA93",
+          "name": "Footer Spacer",
+          "width": "fill_container",
+          "height": 24
+        },
+        {
+          "type": "frame",
+          "id": "T0qPl",
+          "name": "Board Footer",
+          "width": "fill_container",
+          "stroke": "$hairline",
+          "strokeWidth": {
+            "top": 1
+          },
+          "strokeAlignment": "inner",
+          "padding": [
+            24,
+            0,
+            0,
+            0
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "FPR4a",
+              "name": "Footer Left",
+              "fill": "#737B77",
+              "content": "MTS · Vehicle Maintenance Tracking",
+              "fontFamily": "$font",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "udf4V",
+              "name": "Footer Right",
+              "fill": "#737B77",
+              "content": "Brand manual · v1.0",
+              "fontFamily": "$font",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "accent": {
+      "type": "color",
+      "value": "#CFF255"
+    },
+    "overdue": {
+      "type": "color",
+      "value": "#FF7A59"
+    },
+    "due-soon": {
+      "type": "color",
+      "value": "#F2C14E"
+    },
+    "on-track": {
+      "type": "color",
+      "value": "#7AD39B"
+    },
+    "bg-page": {
+      "type": "color",
+      "value": "#0A0B0C"
+    },
+    "bg-sidebar": {
+      "type": "color",
+      "value": "#0E1011"
+    },
+    "bg-panel": {
+      "type": "color",
+      "value": "#141718"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "text-secondary": {
+      "type": "color",
+      "value": "#8A928E"
+    },
+    "hairline": {
+      "type": "color",
+      "value": "#242829"
+    },
+    "font": {
+      "type": "string",
+      "value": "Inter"
+    }
+  },
+  "fileToken": "62bae463-98a9-417d-8800-5bafe542c301"
+}

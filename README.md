@@ -22,6 +22,7 @@ Early planning. See `docs/` for the RFP and proposal documents.
 - [`docs/design/components_diagram.md`](docs/design/components_diagram.md) — Component diagram
 - [`docs/design/architecture_diagram.md`](docs/design/architecture_diagram.md) — AWS deployment architecture
 - [`docs/design/data_model.md`](docs/design/data_model.md) — Data model (ER)
+- [`docs/design/mockup.md`](docs/design/mockup.md) — Mockup and brand manual
 
 ## Stack
 
