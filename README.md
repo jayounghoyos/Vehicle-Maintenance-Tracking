@@ -1,6 +1,6 @@
 # Vehicle Maintenance Tracking
 
-Internal tool for a small delivery fleet to track vehicle records, preventive maintenance schedules, and service history — replacing spreadsheets and calendar reminders.
+Internal tool for a small delivery fleet to track vehicle records, preventive maintenance schedules, and service history (replacing spreadsheets and calendar reminders).
 
 ## Status
 
