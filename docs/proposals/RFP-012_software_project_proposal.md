@@ -25,23 +25,29 @@
 
 ## Project Overview
 
-City Logistics Fleet currently tracks vehicle service dates in spreadsheets and calendar reminders, and breakdown/maintenance notes are recorded inconsistently. This proposal covers building an internal application that gives the fleet team a single place to manage vehicle records, maintenance scheduling, and service history, so preventive maintenance is no longer missed.
+A missed oil change does not stay cheap. The van comes off the route, the repair costs more than the service would have, and the delivery it was carrying is somebody else's problem that day.
+
+City Logistics Fleet has no reliable way to know which vehicle is due. Service dates sit in spreadsheets, reminders sit in calendars, and breakdown notes are written down inconsistently or not at all so maintenance is usually discovered late, once the vehicle is already out of service. The information needed to prevent that exists; it is just scattered where nobody can act on it.
+
+This proposal covers an internal application that puts vehicle records, maintenance schedules and service history in one place, and uses them to answer one question the fleet cannot answer today: what is overdue right now.
 
 
 ## Purpose / Goals
 
-- Give fleet coordinators a single source of truth for vehicle records and maintenance history.
-- Make upcoming and overdue maintenance visible before it causes downtime.
-- Give operations managers a clear view of maintenance history to support operational decisions.
+What the fleet should be able to measure once this is in place:
+
+- **80% fewer overdue preventive maintenance items** than the current spreadsheet process produces.
+- **No vehicle silently drops off the list.** Overdue items are surfaced with zero false negatives   the system is only useful if it can be trusted to be complete.
+- **100% of logged services are usable**, each with its vehicle, date and outcome, so history is worth consulting when deciding what to put on the road.
 
 
 ## Scope of Work
 
-- Vehicle profiles (create/view/edit vehicle records).
-- Planned maintenance schedule per vehicle.
-- Service event log for completed maintenance and breakdowns.
-- Overdue/upcoming maintenance view.
-- Reporting snapshot and QA evidence at delivery.
+- **Vehicle profiles** — one record per vehicle, so the fleet stops living in a spreadsheet that only one person maintains.
+- **Planned maintenance schedule** — the interval rules per vehicle, so "when is it due" stops being someone's memory.
+- **Service event log** — what was actually done, including the breakdowns that today go unrecorded.
+- **Overdue and upcoming view** — the schedule compared against the log, so nothing is discovered late.
+- **Reporting snapshot and QA evidence** at delivery, so the client can verify what was built.
 
 
 ## Out of Scope
@@ -64,9 +70,11 @@ The application will be deployed as an internally accessible web application for
 
 ## Timeline / Milestones
 
-| Milestone | Reporting | Deadline |
-|---|---|---|
-| Vehicle profiles | Progress demo | 2026-09-19 |
-| Planned maintenance schedule | Progress demo | 2026-9-30 |
-| Service event log | Progress demo | 2026-10-31 |
-| Overdue view + final QA/demo | Final demo | 2026-11-30 |
+Each milestone ends with something the client can use, not just something built.
+
+| Milestone | What the client gets | Reporting | Deadline |
+|---|---|---|---|
+| Vehicle profiles | The fleet is registered in one place, off the spreadsheet | Progress demo | 2026-09-19 |
+| Planned maintenance schedule | Every vehicle has its intervals defined | Progress demo | 2026-09-30 |
+| Service event log | The workshop records services and breakdowns as they happen | Progress demo | 2026-10-31 |
+| Overdue view + final QA/demo | The question "what is overdue" is answered on screen | Final demo | 2026-11-30 |
