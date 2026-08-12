@@ -30,4 +30,6 @@ What the workshop recorded. The clutch on MNO345 shows "None, unplanned repair":
 
 Status colour always carries meaning: red overdue, amber due soon, green on track. Lime is only ever the primary action.
 
+The screens and the flow are also in [Figma](https://www.figma.com/design/fMaBXAqdPYR5PV6qh3xMvY/Pen.dev-to-Figma-%C2%B7-FREE--Community-?t=WU94WV9zbpYN4iTN-1).
+
 Source files are the `.pen` files in [`mockups/`](./mockups), edited with the [pen.dev](https://pen.dev) CLI.

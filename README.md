@@ -22,6 +22,7 @@ MTS brings the vehicles, their maintenance schedules and the record of the servi
 - [`docs/design/architecture_diagram.md`](docs/design/architecture_diagram.md) AWS deployment architecture
 - [`docs/design/data_model.md`](docs/design/data_model.md) Data model
 - [`docs/design/mockup.md`](docs/design/mockup.md) Mockup and brand manual
+- [Figma](https://www.figma.com/design/fMaBXAqdPYR5PV6qh3xMvY/Pen.dev-to-Figma-%C2%B7-FREE--Community-?t=WU94WV9zbpYN4iTN-1) Screens and flow
 
 ## Stack
 
