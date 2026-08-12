@@ -1,44 +1,33 @@
 # Mockup
 
-Visual design for the system described in [`architecture_diagram.md`](./architecture_diagram.md), using the data from [`data_model.md`](./data_model.md).
+## Flow
 
-## Dashboard
+![Screen flow](./mockups/flow.png)
 
-![MTS dashboard mockup](./mockups/dashboard.png)
+The highlighted arrow is the one that matters: a mechanic logs a service and the vehicle leaves the coordinator's "Needs attention" list. Everything else is navigation.
 
-- Sidebar: navigation, an overdue alert, and the signed-in user.
-- Summary cards: vehicles, overdue, due soon, in shop.
-- Needs attention: the vehicles that are overdue or coming up, each with its task and status.
-- Recent service events: what the workshop logged last.
-- Fleet table: plate, vehicle, odometer, next service and status.
+## Screens
 
-## Vehicles
+![Dashboard](./mockups/dashboard.png)
 
-![MTS vehicles screen](./mockups/vehicles.png)
+What needs attention now, plus recent activity and the fleet at a glance.
 
-The fleet, with a side panel for the selected vehicle: its profile, its active schedules and its last services. This is where the three tables of the data model meet in one view.
+![Vehicles](./mockups/vehicles.png)
 
-## Schedules
+The fleet, with the selected vehicle's profile, schedules and last services beside it.
 
-![MTS schedules screen](./mockups/schedules.png)
+![Schedules](./mockups/schedules.png)
 
-The rules themselves: repeat every N days or every N kilometres, when it was last done, when it falls due next. Logging a service moves the next due date forward.
+The rules: every N days or N kilometres, when it was last done, when it falls due.
 
-## Service log
+![Service log](./mockups/service_log.png)
 
-![MTS service log screen](./mockups/service_log.png)
-
-Everything the workshop recorded, newest first, tagged Preventive or Corrective. The clutch on MNO345 shows "None, unplanned repair" under linked schedule — that is the nullable `schedule_id` from the data model, a breakdown no schedule planned.
+What the workshop recorded. The clutch on MNO345 shows "None, unplanned repair": the nullable `schedule_id` from the data model.
 
 ## Brand manual
 
-![MTS brand manual](./mockups/brand_manual.png)
+![Brand manual](./mockups/brand_manual.png)
 
-- Brand mark on dark and on lime.
-- Typography: Inter, its weights, and the type scale used in the product.
-- Colour: one accent, three status hues, three surfaces, two text tones, each with its hex and role.
-- Status chips: Overdue, Due soon, On track.
+Status colour always carries meaning: red overdue, amber due soon, green on track. Lime is only ever the primary action.
 
-Status colour always carries meaning. Overdue is red, due soon is amber, on track is green, and lime is reserved for the primary action — never for status.
-
-Source files are `mockups/dashboard.pen` and `mockups/brand_manual.pen`, edited with the [pen.dev](https://pen.dev) CLI. Reference material sits in [`inspiration/`](./inspiration).
+Source files are the `.pen` files in [`mockups/`](./mockups), edited with the [pen.dev](https://pen.dev) CLI.

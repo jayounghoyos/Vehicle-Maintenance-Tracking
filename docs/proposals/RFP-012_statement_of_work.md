@@ -1,4 +1,4 @@
-# Statement Of Work — Vehicle Maintenance Tracking (RFP-012)
+# Statement Of Work: Vehicle Maintenance Tracking (RFP-012)
 
 Contents:
 
