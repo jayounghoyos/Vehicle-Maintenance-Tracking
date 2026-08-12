@@ -1,18 +1,31 @@
 # Data Model
 
-Entity-relationship model for the system described in [`components_diagram.md`](./components_diagram.md).
+## First version
 
-![Entity relationship diagram for the Vehicle Maintenance Tracking System](./entity_diagram.png)
+![First entity relationship diagram](./entity_diagram.png)
 
-Edited at [dbdiagram.io](https://dbdiagram.io/d/EMS-68be14fa61a46d388edda3bc).
+Four tables. It worked, but two things were repeated:
 
----
+- Every Chevrolet NHR wrote "Chevrolet" again in its own row.
+- The task was plain text, so "Oil change" and "oil change" counted as different work.
 
-- users: who logs in, and with which role.
-- vehicles: one row per vehicle in the fleet.
-- maintenance_schedules: the rule that says when a vehicle is due, by days or by kilometres.
-- service_events: what was actually done, and by whom.
+## After the feedback
 
-The whole overdue calculation comes from two tables. `maintenance_schedules` says when the work should happen, `service_events` says when it did. A vehicle is overdue when `next_due_date` has passed and no matching service event has been logged since.
+![Normalized entity relationship diagram](./entity_relation.png)
 
-`service_events.schedule_id` is nullable on purpose: a breakdown is real work that no schedule planned, so it is recorded without one.
+Two new tables, following the professor's note on normalization:
+
+| Table | What it fixes |
+|---|---|
+| `vehicle_models` | The make is written once. `vehicles` points at it. |
+| `maintenance_tasks` | One list of tasks. Schedules and events both point at the same row. |
+
+Second normal form had nothing to fix: every table has a single-column primary key, so partial dependencies cannot happen.
+
+## Two rules to know
+
+Due date passed and nobody logged that service = overdue.
+
+`schedule_id` can be empty. A breakdown is work nobody planned.
+
+Source: [`data_model.dbml`](./data_model.dbml), edited at [dbdiagram.io](https://dbdiagram.io/d/EMS-68be14fa61a46d388edda3bc).

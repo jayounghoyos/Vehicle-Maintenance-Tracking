@@ -43,10 +43,10 @@ What the fleet should be able to measure once this is in place:
 
 ## Scope of Work
 
-- **Vehicle profiles** — one record per vehicle, so the fleet stops living in a spreadsheet that only one person maintains.
-- **Planned maintenance schedule** — the interval rules per vehicle, so "when is it due" stops being someone's memory.
-- **Service event log** — what was actually done, including the breakdowns that today go unrecorded.
-- **Overdue and upcoming view** — the schedule compared against the log, so nothing is discovered late.
+- **Vehicle profiles:** one record per vehicle, so the fleet stops living in a spreadsheet that only one person maintains.
+- **Planned maintenance schedule:** the interval rules per vehicle, so "when is it due" stops being someone's memory.
+- **Service event log:** what was actually done, including the breakdowns that today go unrecorded.
+- **Overdue and upcoming view:** the schedule compared against the log, so nothing is discovered late.
 - **Reporting snapshot and QA evidence** at delivery, so the client can verify what was built.
 
 
@@ -65,7 +65,7 @@ What the fleet should be able to measure once this is in place:
 
 ## Deployment / Distribution
 
-The application will be deployed as an internally accessible web application for the fleet coordinator, mechanic/service recorder, and operations manager roles. Deployment approach and hosting details will be confirmed during the design phase.
+The application will be deployed as an internally accessible web application for the fleet coordinator, mechanic/service recorder, and operations manager roles.
 
 
 ## Timeline / Milestones
