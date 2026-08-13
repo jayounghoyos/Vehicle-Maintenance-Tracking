@@ -21,4 +21,4 @@ A platform that centralizes vehicles, maintenance schedules, and service events,
 ## Notes
 
 - No external systems are integrated at this stage. MTS is a closed, standalone application (no telematics, no third-party APIs).
-- All actors interact with the system over HTTPS through the same web client; role-based permissions determine what each can do once inside (see the [Container](./architecture_diagram.md) and [Component](./components_diagram.md) diagrams for how access is enforced).
+- All actors interact with the system over HTTPS through the same web client; role-based permissions determine what each can do once inside (see the [Component](./components_diagram.md) diagrams for how access is enforced).
