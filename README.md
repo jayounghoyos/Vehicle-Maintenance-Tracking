@@ -17,6 +17,7 @@ MTS brings the vehicles, their maintenance schedules and the record of the servi
 - [`docs/proposals/RFP-012_statement_of_work.md`](docs/proposals/RFP-012_statement_of_work.md) Statement of Work
 - [`docs/proposals/RFP-012_software_project_proposal.md`](docs/proposals/RFP-012_software_project_proposal.md) Project proposal
 - [`docs/proposals/mvp_scope.md`](docs/proposals/mvp_scope.md) MVP scope
+- [`docs/design/context_diagram.md`](docs/design/context_diagram.md) Context diagram
 - [`docs/design/use_cases_diagram.md`](docs/design/use_cases_diagram.md) Use case diagram
 - [`docs/design/components_diagram.md`](docs/design/components_diagram.md) Component diagram
 - [`docs/design/architecture_diagram.md`](docs/design/architecture_diagram.md) AWS deployment architecture
