@@ -121,3 +121,37 @@ export function recentEvents(
     })
     .slice(0, limit)
 }
+
+export type FleetRow = {
+  vehicle: Vehicle
+  model: VehicleModel
+  /** the soonest schedule, which is the one the table names */
+  next: { task: MaintenanceTask; dueDate: string | null } | null
+  state: MaintenanceState
+}
+
+/** One row per vehicle, worst state first. */
+export function fleetRows(data: Data, today = new Date()): FleetRow[] {
+  const items = dueItems(data, today)
+  const states = vehicleStates(items)
+  const models = byId(data.vehicleModels)
+  const ORDER: MaintenanceState[] = ['overdue', 'due_soon', 'on_track']
+
+  return data.vehicles
+    .flatMap((vehicle) => {
+      const model = models.get(vehicle.modelId)
+      if (!model) return []
+      // dueItems is already sorted worst first, so the first match is
+      // the schedule this vehicle is judged by
+      const next = items.find((i) => i.vehicle.id === vehicle.id)
+      return [
+        {
+          vehicle,
+          model,
+          next: next ? { task: next.task, dueDate: next.schedule.nextDueDate } : null,
+          state: states.get(vehicle.id) ?? ('on_track' as MaintenanceState),
+        },
+      ]
+    })
+    .sort((a, b) => ORDER.indexOf(a.state) - ORDER.indexOf(b.state))
+}
