@@ -52,4 +52,8 @@ Due date passed and nobody logged that service = overdue.
 
 `users.email` is unique across the whole table and a deleted organization keeps its rows, so that address stays taken. Fine while there is one company. Worth revisiting before the second.
 
+## Reading the diagram
+
+Every line is named with what it does, so the diagram explains itself. An organization `employs` users and `owns` vehicles; a vehicle `is_scheduled_for` maintenance; a user `records` a service event, and a photo `documents` one.
+
 Source: [`data_model.dbml`](./data_model.dbml), edited at [dbdiagram.io](https://dbdiagram.io/d/6a78f2a8829f06bdc8b425db).

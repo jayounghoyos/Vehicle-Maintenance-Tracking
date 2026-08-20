@@ -133,19 +133,22 @@ Table service_event_photos {
   Note: 'Metadata only. The file itself lives in the object store and storage_key points at it.'
 }
 
-Ref: users.organization_id > organizations.id
-Ref: vehicles.organization_id > organizations.id
-Ref: maintenance_tasks.organization_id > organizations.id
-Ref: maintenance_schedules.organization_id > organizations.id
-Ref: service_events.organization_id > organizations.id
-Ref: service_event_photos.organization_id > organizations.id
+// Every relationship is named, so the diagram says what the line means
+// and the label lives in the source instead of being drawn by hand.
 
-Ref: vehicles.model_id > vehicle_models.id
-Ref: maintenance_schedules.vehicle_id > vehicles.id
-Ref: maintenance_schedules.task_id > maintenance_tasks.id
-Ref: service_events.vehicle_id > vehicles.id
-Ref: service_events.schedule_id > maintenance_schedules.id
-Ref: service_events.task_id > maintenance_tasks.id
-Ref: service_events.recorded_by > users.id
-Ref: service_event_photos.service_event_id > service_events.id
-Ref: service_event_photos.uploaded_by > users.id
+Ref employs:   users.organization_id > organizations.id
+Ref owns:      vehicles.organization_id > organizations.id
+Ref defines:   maintenance_tasks.organization_id > organizations.id
+Ref plans:     maintenance_schedules.organization_id > organizations.id
+Ref logs:      service_events.organization_id > organizations.id
+Ref stores:    service_event_photos.organization_id > organizations.id
+
+Ref classifies:      vehicles.model_id > vehicle_models.id
+Ref is_scheduled_for: maintenance_schedules.vehicle_id > vehicles.id
+Ref repeats:         maintenance_schedules.task_id > maintenance_tasks.id
+Ref services:        service_events.vehicle_id > vehicles.id
+Ref fulfills:        service_events.schedule_id > maintenance_schedules.id
+Ref performs:        service_events.task_id > maintenance_tasks.id
+Ref records:         service_events.recorded_by > users.id
+Ref documents:       service_event_photos.service_event_id > service_events.id
+Ref uploads:         service_event_photos.uploaded_by > users.id
