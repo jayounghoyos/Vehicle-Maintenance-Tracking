@@ -1,11 +1,57 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
 
-/* Brand tokens from docs/design/mockups/brand_manual.png.
-   Status colour always carries meaning: red overdue, amber due soon,
-   green on track. Lime is only ever the primary action. */
+/* Design tokens, transcribed from docs/design/mockups/brand_manual.png.
+   Every colour is assigned to a role. No colour is used outside the role
+   it is defined for — status hues never decorate, lime is never status. */
 @theme {
-  --color-brand-lime: #c3f53c;
-  --color-status-overdue: #ef4444;
-  --color-status-due-soon: #f59e0b;
-  --color-status-on-track: #22c55e;
+  /* Accent — the one action that matters on screen, and the active nav item */
+  --color-lime: #cff255;
+
+  /* Status — maintenance state, and nothing else */
+  --color-overdue: #ff7a59;
+  --color-due-soon: #f2c14e;
+  --color-on-track: #7ad39b;
+
+  /* Surface — backgrounds and elevation */
+  --color-page: #0a0b0c;
+  --color-sidebar: #0e1011;
+  --color-panel: #141718;
+
+  /* Text on dark. Primary is reserved for values and headings so the eye
+     lands on data first; secondary carries labels, metadata, inactive nav. */
+  --color-ink: #ffffff;
+  --color-ink-muted: #8a928e;
+
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+
+  /* Type scale: size / weight / tracking, straight from the manual */
+  --text-page-title: 2rem; /* 32 / 700 / -0.8 */
+  --text-page-title--line-height: 1.15;
+  --text-page-title--letter-spacing: -0.8px;
+
+  --text-section: 1.1875rem; /* 19 / 600 / -0.2 */
+  --text-section--line-height: 1.3;
+  --text-section--letter-spacing: -0.2px;
+
+  --text-body: 0.875rem; /* 14 / 400 / 0 */
+  --text-body--line-height: 1.5;
+
+  --text-table-label: 0.6875rem; /* 11 / 600 / +1.2 */
+  --text-table-label--line-height: 1;
+  --text-table-label--letter-spacing: 1.2px;
+
+  --text-nav-label: 0.625rem; /* 10 / 600 / +1.8 */
+  --text-nav-label--line-height: 1;
+  --text-nav-label--letter-spacing: 1.8px;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    -webkit-font-smoothing: antialiased;
+  }
 }
