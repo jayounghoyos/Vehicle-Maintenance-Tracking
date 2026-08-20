@@ -1,20 +1,20 @@
 import { ArrowUpRight, Wrench } from 'lucide-react'
 
-import type { RecentEvent } from '../domain/dashboard'
+import type { DashboardResponse } from '../lib/api'
 import { relativeDay } from '../lib/format'
 import { Panel } from './Panel'
 
-export function RecentEvents({ events }: { events: RecentEvent[] }) {
+export function RecentEvents({ events }: { events: DashboardResponse['recentEvents'] }) {
   return (
     <Panel title="Recent service events" subtitle="Logged by the workshop">
       <ul className="flex-1 divide-y divide-white/5 border-t border-white/5">
-        {events.map(({ event, vehicle, task, recorder }) => (
-          <li key={event.id} className="flex gap-3.5 px-5 py-3.5">
+        {events.map(({ id, task, plate, recorder, performedAt, type }) => (
+          <li key={id} className="flex gap-3.5 px-5 py-3.5">
             {/* corrective work was unplanned, so it is the one thing
                 worth distinguishing here — and overdue is its hue */}
             <span
               className={`mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl ${
-                event.type === 'corrective'
+                type === 'corrective'
                   ? 'bg-overdue/15 text-overdue'
                   : 'bg-on-track/15 text-on-track'
               }`}
@@ -22,13 +22,13 @@ export function RecentEvents({ events }: { events: RecentEvent[] }) {
               <Wrench className="size-4" strokeWidth={2} />
             </span>
             <div className="min-w-0">
-              <p className="truncate font-medium">{task.name}</p>
+              <p className="truncate font-medium">{task}</p>
               <p className="mt-0.5 truncate text-body text-ink-muted">
-                <span className="text-lime">{vehicle.plate}</span>
+                <span className="text-lime">{plate}</span>
                 {' · '}
-                {recorder.fullName}
+                {recorder}
                 {' · '}
-                {relativeDay(event.performedAt)}
+                {relativeDay(performedAt)}
               </p>
             </div>
           </li>

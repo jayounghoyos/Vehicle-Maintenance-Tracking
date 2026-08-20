@@ -1,7 +1,7 @@
 import { ArrowRight, ChevronRight, Wrench } from 'lucide-react'
 
-import type { DueItem } from '../domain/dashboard'
 import { dueLabel } from '../domain/maintenance'
+import type { DashboardResponse } from '../lib/api'
 import { Panel } from './Panel'
 import { StatusChip } from './StatusChip'
 
@@ -17,7 +17,7 @@ const DUE_TEXT: Record<string, string> = {
   on_track: 'text-ink-muted',
 }
 
-export function NeedsAttention({ items }: { items: DueItem[] }) {
+export function NeedsAttention({ items }: { items: DashboardResponse['attention'] }) {
   return (
     <Panel
       title="Needs attention"
@@ -37,9 +37,9 @@ export function NeedsAttention({ items }: { items: DueItem[] }) {
         </p>
       ) : (
         <ul className="divide-y divide-white/5 border-t border-white/5">
-          {items.map(({ schedule, vehicle, model, task, state }) => (
+          {items.map(({ scheduleId, plate, make, model, task, nextDueDate, state }) => (
             <li
-              key={schedule.id}
+              key={scheduleId}
               className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
             >
               {/* the square is tinted by state, so it reports status.
@@ -51,18 +51,18 @@ export function NeedsAttention({ items }: { items: DueItem[] }) {
 
               <div className="min-w-0 flex-1">
                 <p className="truncate">
-                  <span className="font-semibold">{vehicle.plate}</span>{' '}
+                  <span className="font-semibold">{plate}</span>{' '}
                   <span className="text-ink-muted">
-                    {model.make} {model.name}
+                    {make} {model}
                   </span>
                 </p>
                 <p className="mt-0.5 truncate text-body text-ink-muted">
-                  {task.name}
-                  {schedule.nextDueDate && (
+                  {task}
+                  {nextDueDate && (
                     <>
                       {' · '}
                       <span className={DUE_TEXT[state]}>
-                        {dueLabel(schedule.nextDueDate)}
+                        {dueLabel(nextDueDate)}
                       </span>
                     </>
                   )}

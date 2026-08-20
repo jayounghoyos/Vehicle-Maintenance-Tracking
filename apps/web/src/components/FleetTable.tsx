@@ -1,11 +1,11 @@
-import type { FleetRow } from '../domain/dashboard'
+import type { DashboardResponse } from '../lib/api'
 import { odometer, shortDate } from '../lib/format'
 import { Panel } from './Panel'
 import { StatusChip } from './StatusChip'
 
 const TH = 'px-5 py-3 text-table-label font-semibold text-ink-muted uppercase'
 
-export function FleetTable({ rows }: { rows: FleetRow[] }) {
+export function FleetTable({ rows }: { rows: DashboardResponse['fleet'] }) {
   return (
     <Panel
       title="Fleet"
@@ -27,26 +27,26 @@ export function FleetTable({ rows }: { rows: FleetRow[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {rows.map(({ vehicle, model, next, state }) => (
-              <tr key={vehicle.id} className="transition-colors hover:bg-white/[0.02]">
-                <td className="px-5 py-4 font-semibold">{vehicle.plate}</td>
+            {rows.map(({ vehicleId, plate, make, model, year, odometerKm, nextTask, nextDueDate, state }) => (
+              <tr key={vehicleId} className="transition-colors hover:bg-white/[0.02]">
+                <td className="px-5 py-4 font-semibold">{plate}</td>
                 <td className="px-5 py-4">
-                  {model.make} {model.name}
+                  {make} {model}
                   {/* the mockup also prints a body type here — vehicle_models
                       has make and name only, so the year stands alone */}
-                  {vehicle.year && (
-                    <span className="mt-0.5 block text-body text-ink-muted">{vehicle.year}</span>
+                  {year && (
+                    <span className="mt-0.5 block text-body text-ink-muted">{year}</span>
                   )}
                 </td>
                 <td className="px-5 py-4 text-right tabular-nums">
-                  {odometer(vehicle.odometerKm)}
+                  {odometer(odometerKm)}
                 </td>
                 <td className="px-5 py-4">
-                  {next ? (
+                  {nextTask ? (
                     <>
-                      {next.task.name}
-                      {next.dueDate && (
-                        <span className="text-ink-muted"> · {shortDate(next.dueDate)}</span>
+                      {nextTask}
+                      {nextDueDate && (
+                        <span className="text-ink-muted"> · {shortDate(nextDueDate)}</span>
                       )}
                     </>
                   ) : (
