@@ -1,0 +1,80 @@
+import { ArrowRight, ChevronRight, Wrench } from 'lucide-react'
+
+import type { DueItem } from '../domain/dashboard'
+import { dueLabel } from '../domain/maintenance'
+import { Panel } from './Panel'
+import { StatusChip } from './StatusChip'
+
+const TINT: Record<string, string> = {
+  overdue: 'bg-overdue/15 text-overdue',
+  due_soon: 'bg-due-soon/15 text-due-soon',
+  on_track: 'bg-on-track/15 text-on-track',
+}
+
+const DUE_TEXT: Record<string, string> = {
+  overdue: 'text-overdue',
+  due_soon: 'text-due-soon',
+  on_track: 'text-ink-muted',
+}
+
+export function NeedsAttention({ items }: { items: DueItem[] }) {
+  return (
+    <Panel
+      title="Needs attention"
+      subtitle="Maintenance overdue or coming up"
+      action={
+        <button
+          type="button"
+          className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-1.5 text-body text-ink-muted transition-colors hover:text-ink"
+        >
+          View all <ArrowRight className="size-3.5" />
+        </button>
+      }
+    >
+      {items.length === 0 ? (
+        <p className="px-5 pb-6 text-body text-ink-muted">
+          Nothing overdue or due soon. The fleet is on track.
+        </p>
+      ) : (
+        <ul className="divide-y divide-white/5 border-t border-white/5">
+          {items.map(({ schedule, vehicle, model, task, state }) => (
+            <li
+              key={schedule.id}
+              className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
+            >
+              {/* the square is tinted by state, so it reports status.
+                  the glyph is the same for every task: maintenance_tasks
+                  has a name and nothing else to draw from */}
+              <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${TINT[state]}`}>
+                <Wrench className="size-4" strokeWidth={2} />
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate">
+                  <span className="font-semibold">{vehicle.plate}</span>{' '}
+                  <span className="text-ink-muted">
+                    {model.make} {model.name}
+                  </span>
+                </p>
+                <p className="mt-0.5 truncate text-body text-ink-muted">
+                  {task.name}
+                  {schedule.nextDueDate && (
+                    <>
+                      {' · '}
+                      <span className={DUE_TEXT[state]}>
+                        {dueLabel(schedule.nextDueDate)}
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
+
+              <StatusChip state={state} />
+              <ChevronRight className="size-4 shrink-0 text-ink-muted" />
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
+  )
+}
