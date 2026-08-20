@@ -24,6 +24,8 @@ Second normal form had nothing to fix: every table has a single-column primary k
 
 ## More than one fleet
 
+![Entity relationship diagram with organizations](./data_model_organizations.png)
+
 The model held one company's fleet and nothing else. Two more tables open it to several, which the professor confirmed is the right shape: what each company sees and is allowed to do gets decided in the business logic, not by handing every client its own database.
 
 | Table | What it adds |
