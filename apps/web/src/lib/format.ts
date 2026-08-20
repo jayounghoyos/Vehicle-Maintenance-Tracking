@@ -51,3 +51,11 @@ export function relativeDay(iso: string, today: Date = new Date()): string {
   const months = Math.floor(days / 30)
   return months === 1 ? '1 month ago' : `${months} months ago`
 }
+
+/** "Good morning" / "Good afternoon" / "Good evening" */
+export function greeting(now: Date = new Date()): string {
+  const hour = now.getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
+}
