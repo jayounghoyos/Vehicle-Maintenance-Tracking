@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: mts-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-mts}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mts}
+      POSTGRES_DB: ${DB_NAME:-mts}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      # postgres 18 puts PGDATA in /var/lib/postgresql/18/docker and
+      # declares the volume one level up, so mount the parent
+      - mts-db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-mts} -d ${DB_NAME:-mts}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: dev
+    container_name: mts-api
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-mts}
+      DB_PASSWORD: ${DB_PASSWORD:-mts}
+      DB_NAME: ${DB_NAME:-mts}
+      PORT: 3000
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:5173}
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mts-db-data:

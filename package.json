@@ -1,0 +1,24 @@
+{
+  "name": "vehicle-maintenance-tracking",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vehicle Maintenance Tracking System (MTS) — RFP-012",
+  "engines": {
+    "node": ">=24.11.0",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:api": "pnpm --filter api dev",
+    "dev:web": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f db",
+    "up": "docker compose up -d",
+    "down": "docker compose down"
+  }
+}

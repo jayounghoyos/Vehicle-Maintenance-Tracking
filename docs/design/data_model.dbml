@@ -1,0 +1,154 @@
+// Vehicle Maintenance Tracking System (MTS) — RFP-012
+// Source of the diagram in data_model.md.
+// Edited at https://dbdiagram.io/d/6a78f2a8829f06bdc8b425db
+
+Enum user_role {
+  fleet_coordinator
+  mechanic
+  operations_manager
+}
+
+Enum vehicle_status {
+  active
+  in_shop
+  out_of_service
+}
+
+Enum service_type {
+  preventive
+  corrective
+}
+
+Table organizations {
+  id integer [primary key]
+  name varchar [not null]
+  owner_name varchar [not null]
+  address varchar [not null]
+  phone varchar [not null]
+  email varchar [not null]
+  is_active boolean [not null, default: true]
+  deleted_at timestamp
+  created_at timestamp [default: `now()`]
+
+  Note: '''
+  Each client brand with its own fleet. The MVP seeds one row and never creates more.
+
+  owner_name, address, phone and email are the organization registry identity, not an
+  app user: the director is who you call about the account, and they may never log in.
+  A FK to users would also be circular, since users.organization_id is not null.
+
+  is_active and deleted_at are different states. is_active = false is a suspension the
+  organization comes back from; deleted_at is gone for good, with the rows kept so the
+  service history stays readable. Both block sign-in.
+
+  name is unique among the organizations that are not deleted. dbdiagram cannot express
+  a partial index, so in Postgres this is:
+    CREATE UNIQUE INDEX ON organizations (name) WHERE deleted_at IS NULL;
+
+  email is not unique: it is a contact address. The login namespace is users.email.
+  '''
+}
+
+Table users {
+  id integer [primary key]
+  organization_id integer [not null]
+  full_name varchar [not null]
+  email varchar [not null, unique]
+  password_hash varchar [not null]
+  role user_role [not null]
+  created_at timestamp [default: `now()`]
+
+  Note: 'email stays globally unique: it is the login identifier and the sign-in screen does not ask for an organization.'
+}
+
+Table vehicle_models {
+  id integer [primary key]
+  make varchar [not null]
+  name varchar [not null]
+
+  Indexes { (make, name) [unique] }
+  Note: 'No organization_id. "Chevrolet NHR" is reference data nobody owns or edits, so a copy per organization would duplicate rows for nothing.'
+}
+
+Table vehicles {
+  id integer [primary key]
+  organization_id integer [not null]
+  plate varchar [not null]
+  model_id integer [not null]
+  year integer
+  odometer_km integer [not null, default: 0]
+  status vehicle_status [not null, default: 'active']
+  created_at timestamp [default: `now()`]
+
+  Indexes { (organization_id, plate) [unique] }
+  Note: 'The plate was globally unique. Two client brands could not both own ABC123, so it becomes unique per organization.'
+}
+
+Table maintenance_tasks {
+  id integer [primary key]
+  organization_id integer [not null]
+  name varchar [not null]
+
+  Indexes { (organization_id, name) [unique] }
+  Note: 'Per organization, not shared: the coordinator edits this list, so one client renaming a task would change another client schedules.'
+}
+
+Table maintenance_schedules {
+  id integer [primary key]
+  organization_id integer [not null]
+  vehicle_id integer [not null]
+  task_id integer [not null]
+  interval_days integer
+  interval_km integer
+  next_due_date date
+  next_due_km integer
+  created_at timestamp [default: `now()`]
+
+  Note: 'At least one interval must be set.'
+}
+
+Table service_events {
+  id integer [primary key]
+  organization_id integer [not null]
+  vehicle_id integer [not null]
+  schedule_id integer [note: 'Null when the work was not planned, e.g. a breakdown']
+  task_id integer [not null]
+  recorded_by integer [not null]
+  type service_type [not null]
+  performed_at date [not null]
+  odometer_km integer
+  notes text
+  created_at timestamp [default: `now()`]
+}
+
+Table service_event_photos {
+  id integer [primary key]
+  organization_id integer [not null]
+  service_event_id integer [not null]
+  storage_key varchar [not null, unique]
+  uploaded_by integer [not null]
+  created_at timestamp [default: `now()`]
+
+  Indexes { service_event_id }
+  Note: 'Metadata only. The file itself lives in the object store and storage_key points at it.'
+}
+
+// Every relationship is named, so the diagram says what the line means
+// and the label lives in the source instead of being drawn by hand.
+
+Ref employs:   users.organization_id > organizations.id
+Ref owns:      vehicles.organization_id > organizations.id
+Ref defines:   maintenance_tasks.organization_id > organizations.id
+Ref plans:     maintenance_schedules.organization_id > organizations.id
+Ref logs:      service_events.organization_id > organizations.id
+Ref stores:    service_event_photos.organization_id > organizations.id
+
+Ref classifies:      vehicles.model_id > vehicle_models.id
+Ref is_scheduled_for: maintenance_schedules.vehicle_id > vehicles.id
+Ref repeats:         maintenance_schedules.task_id > maintenance_tasks.id
+Ref services:        service_events.vehicle_id > vehicles.id
+Ref fulfills:        service_events.schedule_id > maintenance_schedules.id
+Ref performs:        service_events.task_id > maintenance_tasks.id
+Ref records:         service_events.recorded_by > users.id
+Ref documents:       service_event_photos.service_event_id > service_events.id
+Ref uploads:         service_event_photos.uploaded_by > users.id
