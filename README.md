@@ -11,6 +11,41 @@ The fleet currently tracks service dates in spreadsheets and calendar reminders,
 MTS brings the vehicles, their maintenance schedules and the record of the services performed into one place. From those it works out on its own what is overdue or coming up, by comparing the schedule against the log, so nobody has to open a spreadsheet to find out.
 
 
+## Running it
+
+Requires Node (the version in `.nvmrc`), pnpm and Docker.
+
+```bash
+nvm use                 # node 24
+pnpm install
+cp .env.example .env
+pnpm db:up              # postgres in docker
+pnpm dev                # api on :3002, web on :5173
+```
+
+Then open http://localhost:5173. The page reports whether the API and the database are reachable.
+
+| | |
+|---|---|
+| Web | http://localhost:5173 |
+| API | http://localhost:3002/api |
+| Health | http://localhost:3002/api/health |
+| API docs | http://localhost:3002/docs |
+| Postgres | `localhost:5433` |
+
+`pnpm up` runs the API in Docker too, instead of on the host.
+
+Ports are set in `.env`. The defaults avoid 5432 and 3000 because a system Postgres and most editors' preview servers already hold them.
+
+## Layout
+
+```
+apps/api    NestJS + TypeORM
+apps/web    React + Vite + Tailwind
+docs        RFP, proposals, design
+```
+
+
 ## Docs
 
 - [`docs/RFP-012_Vehicle_Maintenance_Tracking.pdf`](docs/RFP-012_Vehicle_Maintenance_Tracking.pdf)  Original RFP
@@ -27,4 +62,4 @@ MTS brings the vehicles, their maintenance schedules and the record of the servi
 
 ## Stack
 
-React (web client), NestJS (back-end API), PostgreSQL, in Docker. Deployment options are compared in [`architecture_diagram.md`](docs/design/architecture_diagram.md).
+React 19 + Vite (web client), NestJS 11 (back-end API), PostgreSQL 18 and TypeORM, in Docker. Styling is Tailwind 4, data fetching is TanStack Query. Deployment options are compared in [`architecture_diagram.md`](docs/design/architecture_diagram.md).

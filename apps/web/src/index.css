@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Brand tokens from docs/design/mockups/brand_manual.png.
+   Status colour always carries meaning: red overdue, amber due soon,
+   green on track. Lime is only ever the primary action. */
+@theme {
+  --color-brand-lime: #c3f53c;
+  --color-status-overdue: #ef4444;
+  --color-status-due-soon: #f59e0b;
+  --color-status-on-track: #22c55e;
+}
