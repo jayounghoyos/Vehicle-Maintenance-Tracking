@@ -1,19 +1,23 @@
 import { AppShell } from '../components/AppShell'
 import { NeedsAttention } from '../components/NeedsAttention'
+import { RecentEvents } from '../components/RecentEvents'
 import { StatTiles } from '../components/StatTiles'
-import { dueItems, fleetCounts } from '../domain/dashboard'
+import { dueItems, fleetCounts, recentEvents } from '../domain/dashboard'
 import * as data from '../lib/fixtures'
 
 export default function Dashboard() {
   const counts = fleetCounts(data)
-  // the panel is for what needs doing, so on-track schedules stay out
   const attention = dueItems(data).filter((item) => item.state !== 'on_track')
+  const events = recentEvents(data)
 
   return (
     <AppShell title="Dashboard" subtitle="Fleet maintenance at a glance">
       <div className="space-y-5">
         <StatTiles counts={counts} />
-        <NeedsAttention items={attention} />
+        <div className="grid items-start gap-5 xl:grid-cols-[1.6fr_1fr]">
+          <NeedsAttention items={attention} />
+          <RecentEvents events={events} />
+        </div>
       </div>
     </AppShell>
   )

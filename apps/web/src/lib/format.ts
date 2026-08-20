@@ -38,3 +38,16 @@ export function roleLabel(role: string): string {
     .map((w) => w[0]!.toUpperCase() + w.slice(1))
     .join(' ')
 }
+
+/** "2 days ago" / "1 week ago" — coarse on purpose, like the mockup */
+export function relativeDay(iso: string, today: Date = new Date()): string {
+  const MS_PER_DAY = 86_400_000
+  const days = Math.round((today.getTime() - new Date(iso).getTime()) / MS_PER_DAY)
+  if (days <= 0) return 'today'
+  if (days === 1) return 'yesterday'
+  if (days < 7) return `${days} days ago`
+  const weeks = Math.floor(days / 7)
+  if (weeks < 5) return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`
+  const months = Math.floor(days / 30)
+  return months === 1 ? '1 month ago' : `${months} months ago`
+}

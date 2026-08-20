@@ -6,6 +6,8 @@ import {
 import type {
   MaintenanceSchedule,
   MaintenanceTask,
+  ServiceEvent,
+  User,
   Vehicle,
   VehicleModel,
 } from './types'
@@ -84,4 +86,38 @@ export function fleetCounts(data: Data, today = new Date()): FleetCounts {
     overdue: states.filter((s) => s === 'overdue').length,
     dueSoon: states.filter((s) => s === 'due_soon').length,
   }
+}
+
+export type RecentEvent = {
+  event: ServiceEvent
+  vehicle: Vehicle
+  task: MaintenanceTask
+  recorder: User
+}
+
+/** Newest first. What the workshop logged, joined to who logged it. */
+export function recentEvents(
+  data: {
+    serviceEvents: ServiceEvent[]
+    vehicles: Vehicle[]
+    maintenanceTasks: MaintenanceTask[]
+    users: User[]
+  },
+  limit = 3,
+): RecentEvent[] {
+  const vehicles = byId(data.vehicles)
+  const tasks = byId(data.maintenanceTasks)
+  const users = byId(data.users)
+
+  return data.serviceEvents
+    .slice()
+    .sort((a, b) => b.performedAt.localeCompare(a.performedAt))
+    .flatMap((event) => {
+      const vehicle = vehicles.get(event.vehicleId)
+      const task = tasks.get(event.taskId)
+      const recorder = users.get(event.recordedBy)
+      if (!vehicle || !task || !recorder) return []
+      return [{ event, vehicle, task, recorder }]
+    })
+    .slice(0, limit)
 }
