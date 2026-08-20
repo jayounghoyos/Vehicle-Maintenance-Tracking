@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { entities } from './entities';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -22,7 +23,7 @@ import { HealthModule } from './health/health.module';
         username: config.get<string>('DB_USER', 'mts'),
         password: config.get<string>('DB_PASSWORD', 'mts'),
         database: config.get<string>('DB_NAME', 'mts'),
-        autoLoadEntities: true,
+        entities,
         // never true: the schema is owned by migrations, so a stray
         // entity edit can't quietly rewrite the database
         synchronize: false,
