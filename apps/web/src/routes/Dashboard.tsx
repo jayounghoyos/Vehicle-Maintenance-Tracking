@@ -1,11 +1,14 @@
 import { AppShell } from '../components/AppShell'
+import { StatTiles } from '../components/StatTiles'
+import { fleetCounts } from '../domain/dashboard'
+import * as data from '../lib/fixtures'
 
 export default function Dashboard() {
+  const counts = fleetCounts(data)
+
   return (
     <AppShell title="Dashboard" subtitle="Fleet maintenance at a glance">
-      <div className="rounded-2xl border border-white/5 bg-panel p-8 text-body text-ink-muted">
-        Panels land here next.
-      </div>
+      <StatTiles counts={counts} />
     </AppShell>
   )
 }
