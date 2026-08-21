@@ -2,8 +2,8 @@ import {
   BarChart3,
   CalendarClock,
   LayoutGrid,
-  Settings,
   Truck,
+  Users,
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
@@ -21,7 +21,9 @@ const NAV: NavItem[] = [
   { to: '/schedules', label: 'Schedules', icon: CalendarClock, ready: false },
   { to: '/service-log', label: 'Service Log', icon: Wrench, ready: false },
   { to: '/reports', label: 'Reports', icon: BarChart3, ready: false },
-  { to: '/settings', label: 'Settings', icon: Settings, ready: false },
+  // the mockup's Settings slot, spent on the team: accounts are the only
+  // thing there is anything to configure yet
+  { to: '/team', label: 'Team', icon: Users, ready: true },
 ]
 
 export function Sidebar({ footer }: { footer?: React.ReactNode }) {

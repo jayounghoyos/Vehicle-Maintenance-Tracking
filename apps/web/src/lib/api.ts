@@ -1,6 +1,47 @@
+import type { Principal } from '../auth/session'
+import { tokenStore } from '../auth/session'
 import type { MaintenanceState } from '../domain/maintenance'
 
-/** Mirrors DashboardResponse in apps/api/src/dashboard/dashboard.types.ts */
+export class ApiError extends Error {
+  // declared and assigned rather than a parameter property: the tsconfig
+  // sets erasableSyntaxOnly, so the shorthand is not available
+  status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.status = status
+  }
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = tokenStore.get()
+  const res = await fetch(`/api${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...init.headers,
+    },
+  })
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string } | null
+    throw new ApiError(res.status, body?.message ?? `Request failed (${res.status})`)
+  }
+  return res.status === 204 ? (undefined as T) : ((await res.json()) as T)
+}
+
+export const api = {
+  get: <T>(path: string) => request<T>(path),
+  post: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+  patch: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
+  del: (path: string) => request<void>(path, { method: 'DELETE' }),
+}
+
+export type AuthResponse = { accessToken: string; principal: Principal }
+
 export type DashboardResponse = {
   user: { id: number; fullName: string; role: string }
   counts: { active: number; overdue: number; dueSoon: number; inShop: number }
@@ -34,8 +75,25 @@ export type DashboardResponse = {
   }[]
 }
 
-export async function fetchDashboard(): Promise<DashboardResponse> {
-  const res = await fetch('/api/dashboard')
-  if (!res.ok) throw new Error(`Dashboard request failed: ${res.status}`)
-  return (await res.json()) as DashboardResponse
+export type TeamMember = {
+  id: number
+  fullName: string
+  email: string
+  role: string
+  createdAt: string
 }
+
+export type AdminOrganization = {
+  id: number
+  name: string
+  ownerName: string
+  address: string
+  phone: string
+  email: string
+  isActive: boolean
+  deletedAt: string | null
+  memberCount: number
+  createdAt: string
+}
+
+export const fetchDashboard = () => api.get<DashboardResponse>('/dashboard')
