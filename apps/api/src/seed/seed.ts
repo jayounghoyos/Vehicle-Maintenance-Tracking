@@ -1,0 +1,112 @@
+import dataSource from '../data-source';
+import {
+  MaintenanceSchedule,
+  MaintenanceTask,
+  Organization,
+  ServiceEvent,
+  ServiceType,
+  User,
+  UserRole,
+  Vehicle,
+  VehicleModel,
+  VehicleStatus,
+} from '../entities';
+
+/**
+ * Development data, so there is something to look at. Wipes the tables
+ * and refills them, so running it twice does not pile rows on top of
+ * whatever was already there.
+ *
+ * Dates are relative to the day it runs, which keeps the derived states
+ * meaningful however long after seeding the app is opened.
+ */
+
+function isoDaysFromToday(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+// No authentication exists yet and nothing checks this value. It is a
+// marker, not a credential — these rows cannot be signed in as.
+const NO_LOGIN = 'seeded-user-cannot-sign-in';
+
+async function seed(): Promise<void> {
+  await dataSource.initialize();
+  const db = dataSource.manager;
+
+  await dataSource.query(`
+    TRUNCATE service_event_photos, service_events, maintenance_schedules,
+             maintenance_tasks, vehicles, vehicle_models, users, organizations
+    RESTART IDENTITY CASCADE
+  `);
+
+  const org = await db.save(
+    db.create(Organization, {
+      name: 'City Logistics Fleet',
+      ownerName: 'Ana Restrepo',
+      address: 'Cra 43A #1-50, El Poblado, Medellin',
+      phone: '3217240555',
+      email: 'logistics@citylogistics.co',
+      isActive: true,
+      deletedAt: null,
+    }),
+  );
+
+  const [ana, carlos] = await db.save(User, [
+    { organizationId: org.id, fullName: 'Ana Restrepo', email: 'ana@citylogistics.co', passwordHash: NO_LOGIN, role: UserRole.FLEET_COORDINATOR },
+    { organizationId: org.id, fullName: 'Carlos Mejia', email: 'carlos@citylogistics.co', passwordHash: NO_LOGIN, role: UserRole.MECHANIC },
+  ]);
+
+  const models = await db.save(VehicleModel, [
+    { make: 'Chevrolet', name: 'NHR' },
+    { make: 'Hyundai', name: 'H100' },
+    { make: 'Renault', name: 'Kangoo' },
+    { make: 'Chevrolet', name: 'N300' },
+    { make: 'Renault', name: 'Master' },
+    { make: 'Hyundai', name: 'Porter' },
+  ]);
+
+  const vehicles = await db.save(Vehicle, [
+    { organizationId: org.id, plate: 'ABC123', modelId: models[0].id, year: 2019, odometerKm: 128_450, status: VehicleStatus.ACTIVE },
+    { organizationId: org.id, plate: 'GHI789', modelId: models[1].id, year: 2020, odometerKm: 143_980, status: VehicleStatus.ACTIVE },
+    { organizationId: org.id, plate: 'DEF456', modelId: models[2].id, year: 2021, odometerKm: 96_210, status: VehicleStatus.ACTIVE },
+    { organizationId: org.id, plate: 'JKL012', modelId: models[3].id, year: 2018, odometerKm: 187_320, status: VehicleStatus.IN_SHOP },
+    { organizationId: org.id, plate: 'MNO345', modelId: models[4].id, year: 2022, odometerKm: 54_600, status: VehicleStatus.ACTIVE },
+    { organizationId: org.id, plate: 'STU901', modelId: models[5].id, year: 2020, odometerKm: 77_940, status: VehicleStatus.IN_SHOP },
+  ]);
+
+  const tasks = await db.save(MaintenanceTask, [
+    { organizationId: org.id, name: 'Oil change' },
+    { organizationId: org.id, name: 'Brake inspection' },
+    { organizationId: org.id, name: 'Tire rotation' },
+    { organizationId: org.id, name: 'Clutch check' },
+  ]);
+
+  const schedules = await db.save(MaintenanceSchedule, [
+    { organizationId: org.id, vehicleId: vehicles[0].id, taskId: tasks[0].id, intervalDays: 180, intervalKm: null, nextDueDate: isoDaysFromToday(-12), nextDueKm: null },
+    { organizationId: org.id, vehicleId: vehicles[1].id, taskId: tasks[1].id, intervalDays: 365, intervalKm: null, nextDueDate: isoDaysFromToday(3), nextDueKm: null },
+    { organizationId: org.id, vehicleId: vehicles[2].id, taskId: tasks[2].id, intervalDays: 120, intervalKm: null, nextDueDate: isoDaysFromToday(9), nextDueKm: null },
+    { organizationId: org.id, vehicleId: vehicles[3].id, taskId: tasks[0].id, intervalDays: 180, intervalKm: null, nextDueDate: isoDaysFromToday(-4), nextDueKm: null },
+    { organizationId: org.id, vehicleId: vehicles[4].id, taskId: tasks[3].id, intervalDays: 365, intervalKm: null, nextDueDate: isoDaysFromToday(32), nextDueKm: null },
+    { organizationId: org.id, vehicleId: vehicles[5].id, taskId: tasks[0].id, intervalDays: 180, intervalKm: null, nextDueDate: isoDaysFromToday(43), nextDueKm: null },
+  ]);
+
+  await db.save(ServiceEvent, [
+    { organizationId: org.id, vehicleId: vehicles[2].id, scheduleId: schedules[2].id, taskId: tasks[0].id, recordedBy: carlos.id, type: ServiceType.PREVENTIVE, performedAt: isoDaysFromToday(-2), odometerKm: 96_210, notes: 'Oil and filter changed, full synthetic' },
+    { organizationId: org.id, vehicleId: vehicles[1].id, scheduleId: schedules[1].id, taskId: tasks[1].id, recordedBy: carlos.id, type: ServiceType.PREVENTIVE, performedAt: isoDaysFromToday(-5), odometerKm: 143_980, notes: 'Pads at 40 percent, replace next service' },
+    // schedule_id null: the breakdown nobody planned
+    { organizationId: org.id, vehicleId: vehicles[4].id, scheduleId: null, taskId: tasks[3].id, recordedBy: carlos.id, type: ServiceType.CORRECTIVE, performedAt: isoDaysFromToday(-7), odometerKm: 54_600, notes: 'Clutch failure on route, vehicle towed in' },
+    { organizationId: org.id, vehicleId: vehicles[3].id, scheduleId: schedules[3].id, taskId: tasks[2].id, recordedBy: ana.id, type: ServiceType.PREVENTIVE, performedAt: isoDaysFromToday(-23), odometerKm: 187_320, notes: 'Rotated, front tires worn unevenly' },
+  ]);
+
+  console.log(
+    `seeded: 1 organization, 2 users, ${models.length} models, ${vehicles.length} vehicles, ${tasks.length} tasks, ${schedules.length} schedules, 4 service events`,
+  );
+  await dataSource.destroy();
+}
+
+seed().catch((err: unknown) => {
+  console.error(err);
+  process.exit(1);
+});

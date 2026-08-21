@@ -1,13 +1,13 @@
 import { AlertTriangle, ChevronRight } from 'lucide-react'
 
-import type { User } from '../domain/types'
+import type { DashboardResponse } from '../lib/api'
 import { initials, roleLabel } from '../lib/format'
 
 export function SidebarFooter({
   user,
   overdueCount,
 }: {
-  user: User
+  user: DashboardResponse['user']
   overdueCount: number
 }) {
   return (

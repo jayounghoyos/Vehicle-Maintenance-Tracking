@@ -1,20 +1,46 @@
+import { useQuery } from '@tanstack/react-query'
+
 import { AppShell } from '../components/AppShell'
 import { FleetTable } from '../components/FleetTable'
 import { NeedsAttention } from '../components/NeedsAttention'
 import { RecentEvents } from '../components/RecentEvents'
 import { SidebarFooter } from '../components/SidebarFooter'
 import { StatTiles } from '../components/StatTiles'
-import { dueItems, fleetCounts, fleetRows, recentEvents } from '../domain/dashboard'
-import * as data from '../lib/fixtures'
+import { fetchDashboard } from '../lib/api'
 import { greeting, longDate, roleLabel } from '../lib/format'
 
 export default function Dashboard() {
-  const user = data.currentUser
-  const counts = fleetCounts(data)
-  const attention = dueItems(data).filter((item) => item.state !== 'on_track')
-  const events = recentEvents(data)
-  const rows = fleetRows(data)
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: fetchDashboard,
+  })
   const today = new Date()
+
+  if (isPending) {
+    return (
+      <AppShell title="Dashboard" subtitle={longDate(today.toISOString())}>
+        <div className="rounded-2xl border border-white/5 bg-panel p-8 text-body text-ink-muted">
+          Loading the fleet…
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (isError) {
+    return (
+      <AppShell title="Dashboard" subtitle={longDate(today.toISOString())}>
+        <div className="rounded-2xl bg-overdue/15 p-8">
+          <p className="font-semibold text-overdue">The fleet could not be loaded.</p>
+          <p className="mt-1.5 text-body text-overdue/70">
+            {error instanceof Error ? error.message : 'Unknown error'} — check that the API
+            is running and the database has been seeded.
+          </p>
+        </div>
+      </AppShell>
+    )
+  }
+
+  const { user, counts, attention, recentEvents, fleet } = data
 
   return (
     <AppShell
@@ -26,9 +52,9 @@ export default function Dashboard() {
         <StatTiles counts={counts} />
         <div className="grid items-start gap-5 xl:grid-cols-[1.6fr_1fr]">
           <NeedsAttention items={attention} />
-          <RecentEvents events={events} />
+          <RecentEvents events={recentEvents} />
         </div>
-        <FleetTable rows={rows} />
+        <FleetTable rows={fleet} />
       </div>
     </AppShell>
   )

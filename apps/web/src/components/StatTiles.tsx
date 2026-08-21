@@ -1,6 +1,6 @@
 import { AlertTriangle, Timer, Truck, Wrench } from 'lucide-react'
 
-import type { FleetCounts } from '../domain/dashboard'
+import type { DashboardResponse } from '../lib/api'
 
 type Tile = {
   label: string
@@ -11,7 +11,7 @@ type Tile = {
   tone?: 'overdue' | 'due-soon'
 }
 
-export function StatTiles({ counts }: { counts: FleetCounts }) {
+export function StatTiles({ counts }: { counts: DashboardResponse['counts'] }) {
   const tiles: Tile[] = [
     { label: 'Vehicles', value: counts.active, caption: 'Active in fleet', icon: Truck },
     { label: 'Overdue', value: counts.overdue, caption: 'Needs service now', icon: AlertTriangle, tone: 'overdue' },
