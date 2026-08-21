@@ -4,8 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AdminModule } from './admin/admin.module';
+import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { entities } from './entities';
+import { TeamModule } from './team/team.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -31,7 +34,10 @@ import { HealthModule } from './health/health.module';
       }),
     }),
     HealthModule,
+    AuthModule,
     DashboardModule,
+    TeamModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
   MaintenanceSchedule,
-  Organization,
   ServiceEvent,
   User,
   Vehicle,
@@ -14,7 +13,6 @@ import { DashboardService } from './dashboard.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Organization,
       User,
       Vehicle,
       MaintenanceSchedule,

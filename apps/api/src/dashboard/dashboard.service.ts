@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import {
   MaintenanceSchedule,
-  Organization,
   ServiceEvent,
   User,
   Vehicle,
@@ -28,8 +27,6 @@ const RECENT_EVENT_LIMIT = 3;
 @Injectable()
 export class DashboardService {
   constructor(
-    @InjectRepository(Organization)
-    private readonly organizations: Repository<Organization>,
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Vehicle) private readonly vehicles: Repository<Vehicle>,
     @InjectRepository(MaintenanceSchedule)
@@ -38,21 +35,17 @@ export class DashboardService {
     private readonly events: Repository<ServiceEvent>,
   ) {}
 
-  async build(today = new Date()): Promise<DashboardResponse> {
-    // Until sign-in exists there is one organization and its coordinator
-    // stands in for the signed-in user. Both lookups become the session
-    // once auth is built, and nothing else here changes.
-    const org = await this.organizations.findOne({
-      where: { deletedAt: IsNull(), isActive: true },
-      order: { id: 'ASC' },
-    });
-    if (!org) throw new NotFoundException('No active organization');
+  async build(
+    userId: number,
+    organizationId: number,
+    today = new Date(),
+  ): Promise<DashboardResponse> {
+    const user = await this.users.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
 
-    const user = await this.users.findOne({
-      where: { organizationId: org.id },
-      order: { id: 'ASC' },
-    });
-    if (!user) throw new NotFoundException('No user in the organization');
+    // every query below is filtered by the organization on the token, so
+    // one client's dashboard can never be assembled from another's rows
+    const org = { id: organizationId };
 
     const vehicles = await this.vehicles.find({
       where: { organizationId: org.id },
