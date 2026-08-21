@@ -1,8 +1,10 @@
+import { hashPassword } from '../auth/password';
 import dataSource from '../data-source';
 import {
   MaintenanceSchedule,
   MaintenanceTask,
   Organization,
+  PlatformAdmin,
   ServiceEvent,
   ServiceType,
   User,
@@ -27,9 +29,10 @@ function isoDaysFromToday(days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-// No authentication exists yet and nothing checks this value. It is a
-// marker, not a credential — these rows cannot be signed in as.
-const NO_LOGIN = 'seeded-user-cannot-sign-in';
+// Development credentials, printed on the way out so they are never a
+// secret anybody has to guess. Fine for a local database full of made-up
+// vehicles; nothing here is a real account.
+const DEV_PASSWORD = process.env.SEED_PASSWORD ?? 'mts-dev-password';
 
 async function seed(): Promise<void> {
   await dataSource.initialize();
@@ -37,7 +40,8 @@ async function seed(): Promise<void> {
 
   await dataSource.query(`
     TRUNCATE service_event_photos, service_events, maintenance_schedules,
-             maintenance_tasks, vehicles, vehicle_models, users, organizations
+             maintenance_tasks, vehicles, vehicle_models, users, organizations,
+             platform_admins
     RESTART IDENTITY CASCADE
   `);
 
@@ -53,10 +57,21 @@ async function seed(): Promise<void> {
     }),
   );
 
+  const passwordHash = await hashPassword(DEV_PASSWORD);
+
   const [ana, carlos] = await db.save(User, [
-    { organizationId: org.id, fullName: 'Ana Restrepo', email: 'ana@citylogistics.co', passwordHash: NO_LOGIN, role: UserRole.FLEET_COORDINATOR },
-    { organizationId: org.id, fullName: 'Carlos Mejia', email: 'carlos@citylogistics.co', passwordHash: NO_LOGIN, role: UserRole.MECHANIC },
+    { organizationId: org.id, fullName: 'Ana Restrepo', email: 'ana@citylogistics.co', passwordHash, role: UserRole.FLEET_COORDINATOR },
+    { organizationId: org.id, fullName: 'Carlos Mejia', email: 'carlos@citylogistics.co', passwordHash, role: UserRole.MECHANIC },
   ]);
+
+  // whoever runs the service, in no organization at all
+  await db.save(
+    db.create(PlatformAdmin, {
+      fullName: 'MTS Admin',
+      email: 'admin@mts.local',
+      passwordHash,
+    }),
+  );
 
   const models = await db.save(VehicleModel, [
     { make: 'Chevrolet', name: 'NHR' },
@@ -101,8 +116,14 @@ async function seed(): Promise<void> {
   ]);
 
   console.log(
-    `seeded: 1 organization, 2 users, ${models.length} models, ${vehicles.length} vehicles, ${tasks.length} tasks, ${schedules.length} schedules, 4 service events`,
+    `seeded: 1 organization, 2 users, 1 platform admin, ${models.length} models, ${vehicles.length} vehicles, ${tasks.length} tasks, ${schedules.length} schedules, 4 service events`,
   );
+  console.log('');
+  console.log('  sign in with            password');
+  console.log(`  ana@citylogistics.co    ${DEV_PASSWORD}   (fleet coordinator)`);
+  console.log(`  carlos@citylogistics.co ${DEV_PASSWORD}   (mechanic)`);
+  console.log(`  admin@mts.local         ${DEV_PASSWORD}   (platform admin)`);
+  console.log('');
   await dataSource.destroy();
 }
 
