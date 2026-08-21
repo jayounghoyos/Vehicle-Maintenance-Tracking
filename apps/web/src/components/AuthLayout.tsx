@@ -1,4 +1,4 @@
-import { Logo } from './Logo'
+import { Logo } from './Logo';
 
 /** The shell the signed-out screens share. */
 export function AuthLayout({
@@ -7,10 +7,10 @@ export function AuthLayout({
   children,
   footer,
 }: {
-  title: string
-  subtitle: string
-  children: React.ReactNode
-  footer?: React.ReactNode
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
 }) {
   return (
     <main className="grid min-h-screen place-items-center bg-page px-6 py-12 text-ink">
@@ -22,7 +22,7 @@ export function AuthLayout({
         {footer && <div className="mt-6 text-body text-ink-muted">{footer}</div>}
       </div>
     </main>
-  )
+  );
 }
 
 export function Field({
@@ -37,15 +37,15 @@ export function Field({
         className="w-full rounded-xl border border-white/10 bg-panel px-3.5 py-2.5 text-body placeholder:text-ink-muted/60 focus:border-lime/40 focus:outline-none"
       />
     </label>
-  )
+  );
 }
 
 export function SubmitButton({
   pending,
   children,
 }: {
-  pending: boolean
-  children: React.ReactNode
+  pending: boolean;
+  children: React.ReactNode;
 }) {
   return (
     <button
@@ -55,14 +55,14 @@ export function SubmitButton({
     >
       {pending ? 'Working…' : children}
     </button>
-  )
+  );
 }
 
 export function FormError({ message }: { message: string | null }) {
-  if (!message) return null
+  if (!message) return null;
   return (
     <p className="rounded-xl bg-overdue/15 px-3.5 py-2.5 text-body text-overdue">
       {message}
     </p>
-  )
+  );
 }

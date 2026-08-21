@@ -1,20 +1,20 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query';
 
-import { AppShell } from '../components/AppShell'
-import { FleetTable } from '../components/FleetTable'
-import { NeedsAttention } from '../components/NeedsAttention'
-import { RecentEvents } from '../components/RecentEvents'
-import { SidebarFooter } from '../components/SidebarFooter'
-import { StatTiles } from '../components/StatTiles'
-import { fetchDashboard } from '../lib/api'
-import { greeting, longDate, roleLabel } from '../lib/format'
+import { AppShell } from '../components/AppShell';
+import { FleetTable } from '../components/FleetTable';
+import { NeedsAttention } from '../components/NeedsAttention';
+import { RecentEvents } from '../components/RecentEvents';
+import { SidebarFooter } from '../components/SidebarFooter';
+import { StatTiles } from '../components/StatTiles';
+import { fetchDashboard } from '../lib/api';
+import { greeting, longDate, roleLabel } from '../lib/format';
 
 export default function Dashboard() {
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: fetchDashboard,
-  })
-  const today = new Date()
+  });
+  const today = new Date();
 
   if (isPending) {
     return (
@@ -23,7 +23,7 @@ export default function Dashboard() {
           Loading the fleet…
         </div>
       </AppShell>
-    )
+    );
   }
 
   if (isError) {
@@ -32,15 +32,15 @@ export default function Dashboard() {
         <div className="rounded-2xl bg-overdue/15 p-8">
           <p className="font-semibold text-overdue">The fleet could not be loaded.</p>
           <p className="mt-1.5 text-body text-overdue/70">
-            {error instanceof Error ? error.message : 'Unknown error'} — check that the API
-            is running and the database has been seeded.
+            {error instanceof Error ? error.message : 'Unknown error'} — check that the
+            API is running and the database has been seeded.
           </p>
         </div>
       </AppShell>
-    )
+    );
   }
 
-  const { user, counts, attention, recentEvents, fleet } = data
+  const { user, counts, attention, recentEvents, fleet } = data;
 
   return (
     <AppShell
@@ -57,5 +57,5 @@ export default function Dashboard() {
         <FleetTable rows={fleet} />
       </div>
     </AppShell>
-  )
+  );
 }

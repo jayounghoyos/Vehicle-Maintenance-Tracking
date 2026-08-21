@@ -1,9 +1,9 @@
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react';
 
-import type { DashboardResponse } from '../lib/api'
-import { relativeDay } from '../lib/format'
-import { taskIcon } from '../lib/taskIcon'
-import { Panel } from './Panel'
+import type { DashboardResponse } from '../lib/api';
+import { relativeDay } from '../lib/format';
+import { taskIcon } from '../lib/taskIcon';
+import { Panel } from './Panel';
 
 export function RecentEvents({ events }: { events: DashboardResponse['recentEvents'] }) {
   return (
@@ -15,14 +15,14 @@ export function RecentEvents({ events }: { events: DashboardResponse['recentEven
       ) : (
         <ul className="flex-1 border-t border-white/5 px-5 py-5">
           {events.map(({ id, task, plate, recorder, performedAt, type }, index) => {
-            const Icon = taskIcon(task)
-            const last = index === events.length - 1
+            const Icon = taskIcon(task);
+            const last = index === events.length - 1;
             // corrective work was unplanned, and that is the one thing
             // worth telling apart here
             const tone =
               type === 'corrective'
                 ? 'bg-overdue/15 text-overdue'
-                : 'bg-on-track/15 text-on-track'
+                : 'bg-on-track/15 text-on-track';
 
             return (
               <li key={id} className="flex gap-3.5">
@@ -49,7 +49,7 @@ export function RecentEvents({ events }: { events: DashboardResponse['recentEven
                   </p>
                 </div>
               </li>
-            )
+            );
           })}
         </ul>
       )}
@@ -61,5 +61,5 @@ export function RecentEvents({ events }: { events: DashboardResponse['recentEven
         Open service log <ArrowUpRight className="size-3.5" />
       </button>
     </Panel>
-  )
+  );
 }

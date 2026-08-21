@@ -61,10 +61,7 @@ export class AdminService {
    *  and the decision can be undone. */
   async setDeleted(id: number, deleted: boolean): Promise<AdminOrganization> {
     await this.mustExist(id);
-    await this.organizations.update(
-      { id },
-      { deletedAt: deleted ? new Date() : null },
-    );
+    await this.organizations.update({ id }, { deletedAt: deleted ? new Date() : null });
     return this.one(id);
   }
 

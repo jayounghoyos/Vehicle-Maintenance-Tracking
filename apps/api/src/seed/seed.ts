@@ -60,8 +60,20 @@ async function seed(): Promise<void> {
   const passwordHash = await hashPassword(DEV_PASSWORD);
 
   const [ana, carlos] = await db.save(User, [
-    { organizationId: org.id, fullName: 'Ana Restrepo', email: 'ana@citylogistics.co', passwordHash, role: UserRole.FLEET_COORDINATOR },
-    { organizationId: org.id, fullName: 'Carlos Mejia', email: 'carlos@citylogistics.co', passwordHash, role: UserRole.MECHANIC },
+    {
+      organizationId: org.id,
+      fullName: 'Ana Restrepo',
+      email: 'ana@citylogistics.co',
+      passwordHash,
+      role: UserRole.FLEET_COORDINATOR,
+    },
+    {
+      organizationId: org.id,
+      fullName: 'Carlos Mejia',
+      email: 'carlos@citylogistics.co',
+      passwordHash,
+      role: UserRole.MECHANIC,
+    },
   ]);
 
   // whoever runs the service, in no organization at all
@@ -83,12 +95,54 @@ async function seed(): Promise<void> {
   ]);
 
   const vehicles = await db.save(Vehicle, [
-    { organizationId: org.id, plate: 'ABC123', modelId: models[0].id, year: 2019, odometerKm: 128_450, status: VehicleStatus.ACTIVE },
-    { organizationId: org.id, plate: 'GHI789', modelId: models[1].id, year: 2020, odometerKm: 143_980, status: VehicleStatus.ACTIVE },
-    { organizationId: org.id, plate: 'DEF456', modelId: models[2].id, year: 2021, odometerKm: 96_210, status: VehicleStatus.ACTIVE },
-    { organizationId: org.id, plate: 'JKL012', modelId: models[3].id, year: 2018, odometerKm: 187_320, status: VehicleStatus.IN_SHOP },
-    { organizationId: org.id, plate: 'MNO345', modelId: models[4].id, year: 2022, odometerKm: 54_600, status: VehicleStatus.ACTIVE },
-    { organizationId: org.id, plate: 'STU901', modelId: models[5].id, year: 2020, odometerKm: 77_940, status: VehicleStatus.IN_SHOP },
+    {
+      organizationId: org.id,
+      plate: 'ABC123',
+      modelId: models[0].id,
+      year: 2019,
+      odometerKm: 128_450,
+      status: VehicleStatus.ACTIVE,
+    },
+    {
+      organizationId: org.id,
+      plate: 'GHI789',
+      modelId: models[1].id,
+      year: 2020,
+      odometerKm: 143_980,
+      status: VehicleStatus.ACTIVE,
+    },
+    {
+      organizationId: org.id,
+      plate: 'DEF456',
+      modelId: models[2].id,
+      year: 2021,
+      odometerKm: 96_210,
+      status: VehicleStatus.ACTIVE,
+    },
+    {
+      organizationId: org.id,
+      plate: 'JKL012',
+      modelId: models[3].id,
+      year: 2018,
+      odometerKm: 187_320,
+      status: VehicleStatus.IN_SHOP,
+    },
+    {
+      organizationId: org.id,
+      plate: 'MNO345',
+      modelId: models[4].id,
+      year: 2022,
+      odometerKm: 54_600,
+      status: VehicleStatus.ACTIVE,
+    },
+    {
+      organizationId: org.id,
+      plate: 'STU901',
+      modelId: models[5].id,
+      year: 2020,
+      odometerKm: 77_940,
+      status: VehicleStatus.IN_SHOP,
+    },
   ]);
 
   const tasks = await db.save(MaintenanceTask, [
@@ -99,20 +153,108 @@ async function seed(): Promise<void> {
   ]);
 
   const schedules = await db.save(MaintenanceSchedule, [
-    { organizationId: org.id, vehicleId: vehicles[0].id, taskId: tasks[0].id, intervalDays: 180, intervalKm: null, nextDueDate: isoDaysFromToday(-12), nextDueKm: null },
-    { organizationId: org.id, vehicleId: vehicles[1].id, taskId: tasks[1].id, intervalDays: 365, intervalKm: null, nextDueDate: isoDaysFromToday(3), nextDueKm: null },
-    { organizationId: org.id, vehicleId: vehicles[2].id, taskId: tasks[2].id, intervalDays: 120, intervalKm: null, nextDueDate: isoDaysFromToday(9), nextDueKm: null },
-    { organizationId: org.id, vehicleId: vehicles[3].id, taskId: tasks[0].id, intervalDays: 180, intervalKm: null, nextDueDate: isoDaysFromToday(-4), nextDueKm: null },
-    { organizationId: org.id, vehicleId: vehicles[4].id, taskId: tasks[3].id, intervalDays: 365, intervalKm: null, nextDueDate: isoDaysFromToday(32), nextDueKm: null },
-    { organizationId: org.id, vehicleId: vehicles[5].id, taskId: tasks[0].id, intervalDays: 180, intervalKm: null, nextDueDate: isoDaysFromToday(43), nextDueKm: null },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[0].id,
+      taskId: tasks[0].id,
+      intervalDays: 180,
+      intervalKm: null,
+      nextDueDate: isoDaysFromToday(-12),
+      nextDueKm: null,
+    },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[1].id,
+      taskId: tasks[1].id,
+      intervalDays: 365,
+      intervalKm: null,
+      nextDueDate: isoDaysFromToday(3),
+      nextDueKm: null,
+    },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[2].id,
+      taskId: tasks[2].id,
+      intervalDays: 120,
+      intervalKm: null,
+      nextDueDate: isoDaysFromToday(9),
+      nextDueKm: null,
+    },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[3].id,
+      taskId: tasks[0].id,
+      intervalDays: 180,
+      intervalKm: null,
+      nextDueDate: isoDaysFromToday(-4),
+      nextDueKm: null,
+    },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[4].id,
+      taskId: tasks[3].id,
+      intervalDays: 365,
+      intervalKm: null,
+      nextDueDate: isoDaysFromToday(32),
+      nextDueKm: null,
+    },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[5].id,
+      taskId: tasks[0].id,
+      intervalDays: 180,
+      intervalKm: null,
+      nextDueDate: isoDaysFromToday(43),
+      nextDueKm: null,
+    },
   ]);
 
   await db.save(ServiceEvent, [
-    { organizationId: org.id, vehicleId: vehicles[2].id, scheduleId: schedules[2].id, taskId: tasks[0].id, recordedBy: carlos.id, type: ServiceType.PREVENTIVE, performedAt: isoDaysFromToday(-2), odometerKm: 96_210, notes: 'Oil and filter changed, full synthetic' },
-    { organizationId: org.id, vehicleId: vehicles[1].id, scheduleId: schedules[1].id, taskId: tasks[1].id, recordedBy: carlos.id, type: ServiceType.PREVENTIVE, performedAt: isoDaysFromToday(-5), odometerKm: 143_980, notes: 'Pads at 40 percent, replace next service' },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[2].id,
+      scheduleId: schedules[2].id,
+      taskId: tasks[0].id,
+      recordedBy: carlos.id,
+      type: ServiceType.PREVENTIVE,
+      performedAt: isoDaysFromToday(-2),
+      odometerKm: 96_210,
+      notes: 'Oil and filter changed, full synthetic',
+    },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[1].id,
+      scheduleId: schedules[1].id,
+      taskId: tasks[1].id,
+      recordedBy: carlos.id,
+      type: ServiceType.PREVENTIVE,
+      performedAt: isoDaysFromToday(-5),
+      odometerKm: 143_980,
+      notes: 'Pads at 40 percent, replace next service',
+    },
     // schedule_id null: the breakdown nobody planned
-    { organizationId: org.id, vehicleId: vehicles[4].id, scheduleId: null, taskId: tasks[3].id, recordedBy: carlos.id, type: ServiceType.CORRECTIVE, performedAt: isoDaysFromToday(-7), odometerKm: 54_600, notes: 'Clutch failure on route, vehicle towed in' },
-    { organizationId: org.id, vehicleId: vehicles[3].id, scheduleId: schedules[3].id, taskId: tasks[2].id, recordedBy: ana.id, type: ServiceType.PREVENTIVE, performedAt: isoDaysFromToday(-23), odometerKm: 187_320, notes: 'Rotated, front tires worn unevenly' },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[4].id,
+      scheduleId: null,
+      taskId: tasks[3].id,
+      recordedBy: carlos.id,
+      type: ServiceType.CORRECTIVE,
+      performedAt: isoDaysFromToday(-7),
+      odometerKm: 54_600,
+      notes: 'Clutch failure on route, vehicle towed in',
+    },
+    {
+      organizationId: org.id,
+      vehicleId: vehicles[3].id,
+      scheduleId: schedules[3].id,
+      taskId: tasks[2].id,
+      recordedBy: ana.id,
+      type: ServiceType.PREVENTIVE,
+      performedAt: isoDaysFromToday(-23),
+      odometerKm: 187_320,
+      notes: 'Rotated, front tires worn unevenly',
+    },
   ]);
 
   console.log(

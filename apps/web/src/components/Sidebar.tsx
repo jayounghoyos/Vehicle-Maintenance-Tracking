@@ -6,12 +6,12 @@ import {
   Users,
   Wrench,
   type LucideIcon,
-} from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+} from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
-import { Logo } from './Logo'
+import { Logo } from './Logo';
 
-type NavItem = { to: string; label: string; icon: LucideIcon; ready: boolean }
+type NavItem = { to: string; label: string; icon: LucideIcon; ready: boolean };
 
 // Only the dashboard is built. The rest stay visible so the workspace
 // reads as it does in the mockup, but they do not pretend to navigate.
@@ -24,7 +24,7 @@ const NAV: NavItem[] = [
   // the mockup's Settings slot, spent on the team: accounts are the only
   // thing there is anything to configure yet
   { to: '/team', label: 'Team', icon: Users, ready: true },
-]
+];
 
 export function Sidebar({ footer }: { footer?: React.ReactNode }) {
   return (
@@ -79,5 +79,5 @@ export function Sidebar({ footer }: { footer?: React.ReactNode }) {
 
       {footer}
     </aside>
-  )
+  );
 }

@@ -1,18 +1,18 @@
-import { AlertTriangle, LogOut } from 'lucide-react'
-import { useState } from 'react'
+import { AlertTriangle, LogOut } from 'lucide-react';
+import { useState } from 'react';
 
-import { useAuth } from '../auth/AuthContext'
-import { initials, roleLabel } from '../lib/format'
+import { useAuth } from '../auth/context';
+import { initials, roleLabel } from '../lib/format';
 
 export function SidebarFooter({
   user,
   overdueCount,
 }: {
-  user: { fullName: string; role?: string }
-  overdueCount?: number
+  user: { fullName: string; role?: string };
+  overdueCount?: number;
 }) {
-  const { signOut } = useAuth()
-  const [open, setOpen] = useState(false)
+  const { signOut } = useAuth();
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="space-y-4">
@@ -62,5 +62,5 @@ export function SidebarFooter({
         </button>
       </div>
     </div>
-  )
+  );
 }

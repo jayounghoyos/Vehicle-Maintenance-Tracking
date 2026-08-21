@@ -1,23 +1,23 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-import { AuthProvider } from './auth/AuthContext.tsx'
-import { RequireAuth } from './auth/RequireAuth.tsx'
-import Admin from './routes/Admin.tsx'
-import Dashboard from './routes/Dashboard.tsx'
-import Login from './routes/Login.tsx'
-import Register from './routes/Register.tsx'
-import Team from './routes/Team.tsx'
-import './index.css'
+import { AuthProvider } from './auth/AuthContext.tsx';
+import { RequireAuth } from './auth/RequireAuth.tsx';
+import Admin from './routes/Admin.tsx';
+import Dashboard from './routes/Dashboard.tsx';
+import Login from './routes/Login.tsx';
+import Register from './routes/Register.tsx';
+import Team from './routes/Team.tsx';
+import './index.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     // a 401 is not worth retrying: the token is either good or it is not
     queries: { retry: false },
   },
-})
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -59,4 +59,4 @@ createRoot(document.getElementById('root')!).render(
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,
-)
+);
