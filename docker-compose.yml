@@ -34,6 +34,8 @@ services:
       DB_NAME: ${DB_NAME:-mts}
       PORT: 3000
       WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:5173}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-43200}
     ports:
       - "${PORT:-3000}:3000"
     volumes:
