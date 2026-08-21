@@ -11,7 +11,7 @@ import {
   Wind,
   Wrench,
   type LucideIcon,
-} from 'lucide-react'
+} from 'lucide-react';
 
 /* maintenance_tasks holds a name and nothing else — no icon column — and
  * the list is edited per organization, so the name is all there is to go
@@ -32,8 +32,8 @@ const KEYWORDS: [RegExp, LucideIcon][] = [
   [/air|aire|a\/c|clima/i, Wind],
   [/inspect|revis|check|chequeo/i, ClipboardCheck],
   [/aline|align|suspens|odomet|km/i, Gauge],
-]
+];
 
 export function taskIcon(taskName: string): LucideIcon {
-  return KEYWORDS.find(([pattern]) => pattern.test(taskName))?.[1] ?? Wrench
+  return KEYWORDS.find(([pattern]) => pattern.test(taskName))?.[1] ?? Wrench;
 }

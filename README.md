@@ -10,7 +10,6 @@ The fleet currently tracks service dates in spreadsheets and calendar reminders,
 
 MTS brings the vehicles, their maintenance schedules and the record of the services performed into one place. From those it works out on its own what is overdue or coming up, by comparing the schedule against the log, so nobody has to open a spreadsheet to find out.
 
-
 ## Running it
 
 Requires Node (the version in `.nvmrc`), pnpm and Docker.
@@ -25,13 +24,13 @@ pnpm dev                # api on :3002, web on :5173
 
 Then open http://localhost:5173. The page reports whether the API and the database are reachable.
 
-| | |
-|---|---|
-| Web | http://localhost:5173 |
-| API | http://localhost:3002/api |
-| Health | http://localhost:3002/api/health |
-| API docs | http://localhost:3002/docs |
-| Postgres | `localhost:5433` |
+|          |                                  |
+| -------- | -------------------------------- |
+| Web      | http://localhost:5173            |
+| API      | http://localhost:3002/api        |
+| Health   | http://localhost:3002/api/health |
+| API docs | http://localhost:3002/docs       |
+| Postgres | `localhost:5433`                 |
 
 `pnpm up` runs the API in Docker too, instead of on the host.
 
@@ -45,10 +44,9 @@ apps/web    React + Vite + Tailwind
 docs        RFP, proposals, design
 ```
 
-
 ## Docs
 
-- [`docs/RFP-012_Vehicle_Maintenance_Tracking.pdf`](docs/RFP-012_Vehicle_Maintenance_Tracking.pdf)  Original RFP
+- [`docs/RFP-012_Vehicle_Maintenance_Tracking.pdf`](docs/RFP-012_Vehicle_Maintenance_Tracking.pdf) Original RFP
 - [`docs/proposals/RFP-012_statement_of_work.md`](docs/proposals/RFP-012_statement_of_work.md) Statement of Work
 - [`docs/proposals/RFP-012_software_project_proposal.md`](docs/proposals/RFP-012_software_project_proposal.md) Project proposal
 - [`docs/proposals/mvp_scope.md`](docs/proposals/mvp_scope.md) MVP scope

@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "@fontsource-variable/inter";
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
 
 /* Design tokens, transcribed from docs/design/mockups/brand_manual.png.
    Every colour is assigned to a role. No colour is used outside the role
@@ -23,7 +23,7 @@
   --color-ink: #ffffff;
   --color-ink-muted: #8a928e;
 
-  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif;
 
   /* Type scale: size / weight / tracking, straight from the manual */
   --text-page-title: 2rem; /* 32 / 700 / -0.8 */

@@ -15,6 +15,9 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm format:check && pnpm lint && pnpm build && pnpm test",
     "migration:generate": "pnpm --filter api migration:generate",
     "migration:run": "pnpm --filter api migration:run",
     "migration:revert": "pnpm --filter api migration:revert",
@@ -24,5 +27,8 @@
     "db:logs": "docker compose logs -f db",
     "up": "docker compose up -d",
     "down": "docker compose down"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6"
   }
 }

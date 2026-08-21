@@ -1,27 +1,27 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../auth/AuthContext'
-import { AuthLayout, Field, FormError, SubmitButton } from '../components/AuthLayout'
+import { useAuth } from '../auth/context';
+import { AuthLayout, Field, FormError, SubmitButton } from '../components/AuthLayout';
 
 export default function Register() {
-  const { register } = useAuth()
-  const navigate = useNavigate()
-  const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState(false)
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
-    setPending(true)
-    const form = new FormData(event.currentTarget)
+    event.preventDefault();
+    setError(null);
+    setPending(true);
+    const form = new FormData(event.currentTarget);
     try {
-      await register(Object.fromEntries(form) as Record<string, string>)
-      navigate('/', { replace: true })
+      await register(Object.fromEntries(form) as Record<string, string>);
+      navigate('/', { replace: true });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Could not register')
+      setError(err instanceof Error ? err.message : 'Could not register');
     } finally {
-      setPending(false)
+      setPending(false);
     }
   }
 
@@ -68,5 +68,5 @@ export default function Register() {
         <SubmitButton pending={pending}>Create organization</SubmitButton>
       </form>
     </AuthLayout>
-  )
+  );
 }

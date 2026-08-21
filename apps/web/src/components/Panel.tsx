@@ -1,10 +1,10 @@
 type Props = {
-  title: string
-  subtitle?: string
-  action?: React.ReactNode
-  children: React.ReactNode
-  className?: string
-}
+  title: string;
+  subtitle?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+};
 
 /** The card chrome shared by the dashboard panels. */
 export function Panel({ title, subtitle, action, children, className = '' }: Props) {
@@ -21,5 +21,5 @@ export function Panel({ title, subtitle, action, children, className = '' }: Pro
       </header>
       {children}
     </section>
-  )
+  );
 }

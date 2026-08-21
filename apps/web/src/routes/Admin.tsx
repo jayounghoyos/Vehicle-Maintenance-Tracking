@@ -1,9 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { LogOut, RotateCcw, ShieldCheck, Trash2 } from 'lucide-react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { LogOut, RotateCcw, ShieldCheck, Trash2 } from 'lucide-react';
 
-import { useAuth } from '../auth/AuthContext'
-import { Logo } from '../components/Logo'
-import { api, type AdminOrganization } from '../lib/api'
+import { useAuth } from '../auth/context';
+import { Logo } from '../components/Logo';
+import { api, type AdminOrganization } from '../lib/api';
 
 function Flag({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   return (
@@ -15,26 +15,33 @@ function Flag({ ok, children }: { ok: boolean; children: React.ReactNode }) {
       <span className={`size-1.5 rounded-full ${ok ? 'bg-on-track' : 'bg-overdue'}`} />
       {children}
     </span>
-  )
+  );
 }
 
 export default function Admin() {
-  const { principal, signOut } = useAuth()
-  const queryClient = useQueryClient()
+  const { principal, signOut } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: orgs, isPending } = useQuery({
     queryKey: ['admin', 'organizations'],
     queryFn: () => api.get<AdminOrganization[]>('/admin/organizations'),
-  })
+  });
 
   const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] })
+    queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
 
   const setFlag = useMutation({
-    mutationFn: ({ id, flag, value }: { id: number; flag: 'active' | 'deleted'; value: boolean }) =>
-      api.patch<AdminOrganization>(`/admin/organizations/${id}/${flag}`, { value }),
+    mutationFn: ({
+      id,
+      flag,
+      value,
+    }: {
+      id: number;
+      flag: 'active' | 'deleted';
+      value: boolean;
+    }) => api.patch<AdminOrganization>(`/admin/organizations/${id}/${flag}`, { value }),
     onSuccess: invalidate,
-  })
+  });
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -59,8 +66,8 @@ export default function Admin() {
       <main className="px-8 py-8">
         <h1 className="text-page-title font-bold">Organizations</h1>
         <p className="mt-1.5 text-body text-ink-muted">
-          Every fleet using the service. Suspending cuts off sign-in at once; deleting keeps
-          the rows so the service history stays readable.
+          Every fleet using the service. Suspending cuts off sign-in at once; deleting
+          keeps the rows so the service history stays readable.
         </p>
 
         <div className="mt-6 overflow-x-auto rounded-2xl border border-white/5 bg-panel">
@@ -70,19 +77,21 @@ export default function Admin() {
             <table className="w-full min-w-[860px] text-left">
               <thead>
                 <tr className="border-b border-white/5">
-                  {['Organization', 'Director', 'Contact', 'Members', 'State', ''].map((h) => (
-                    <th
-                      key={h}
-                      className="px-5 py-3 text-table-label font-semibold text-ink-muted uppercase"
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  {['Organization', 'Director', 'Contact', 'Members', 'State', ''].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-5 py-3 text-table-label font-semibold text-ink-muted uppercase"
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {orgs?.map((org) => {
-                  const deleted = org.deletedAt !== null
+                  const deleted = org.deletedAt !== null;
                   return (
                     <tr key={org.id} className={deleted ? 'opacity-50' : undefined}>
                       <td className="px-5 py-4">
@@ -99,7 +108,9 @@ export default function Admin() {
                         {deleted ? (
                           <Flag ok={false}>Deleted</Flag>
                         ) : (
-                          <Flag ok={org.isActive}>{org.isActive ? 'Active' : 'Suspended'}</Flag>
+                          <Flag ok={org.isActive}>
+                            {org.isActive ? 'Active' : 'Suspended'}
+                          </Flag>
                         )}
                       </td>
                       <td className="px-5 py-4">
@@ -122,7 +133,11 @@ export default function Admin() {
                           <button
                             type="button"
                             onClick={() =>
-                              setFlag.mutate({ id: org.id, flag: 'deleted', value: !deleted })
+                              setFlag.mutate({
+                                id: org.id,
+                                flag: 'deleted',
+                                value: !deleted,
+                              })
                             }
                             title={deleted ? 'Bring back' : 'Soft delete'}
                             className={`rounded-lg p-2 transition-colors ${
@@ -140,7 +155,7 @@ export default function Admin() {
                         </div>
                       </td>
                     </tr>
-                  )
+                  );
                 })}
               </tbody>
             </table>
@@ -148,5 +163,5 @@ export default function Admin() {
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,49 +1,49 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Trash2, UserPlus } from 'lucide-react'
-import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Trash2, UserPlus } from 'lucide-react';
+import { useState } from 'react';
 
-import { useAuth } from '../auth/AuthContext'
-import { AppShell } from '../components/AppShell'
-import { Field } from '../components/AuthLayout'
-import { Panel } from '../components/Panel'
-import { SidebarFooter } from '../components/SidebarFooter'
-import { api, type TeamMember } from '../lib/api'
-import { initials, roleLabel } from '../lib/format'
+import { useAuth } from '../auth/context';
+import { AppShell } from '../components/AppShell';
+import { Field } from '../components/AuthLayout';
+import { Panel } from '../components/Panel';
+import { SidebarFooter } from '../components/SidebarFooter';
+import { api, type TeamMember } from '../lib/api';
+import { initials, roleLabel } from '../lib/format';
 
-const ROLES = ['fleet_coordinator', 'mechanic', 'operations_manager'] as const
+const ROLES = ['fleet_coordinator', 'mechanic', 'operations_manager'] as const;
 
 export default function Team() {
-  const { principal } = useAuth()
-  const queryClient = useQueryClient()
-  const [error, setError] = useState<string | null>(null)
-  const [adding, setAdding] = useState(false)
+  const { principal } = useAuth();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
 
   const { data: members, isPending } = useQuery({
     queryKey: ['team'],
     queryFn: () => api.get<TeamMember[]>('/team'),
-  })
+  });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['team'] })
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['team'] });
 
   const create = useMutation({
     mutationFn: (body: Record<string, string>) => api.post<TeamMember>('/team', body),
     onSuccess: () => {
-      setAdding(false)
-      setError(null)
-      void invalidate()
+      setAdding(false);
+      setError(null);
+      void invalidate();
     },
     onError: (err: unknown) =>
       setError(err instanceof Error ? err.message : 'Could not create the account'),
-  })
+  });
 
   const remove = useMutation({
     mutationFn: (id: number) => api.del(`/team/${id}`),
     onSuccess: invalidate,
     onError: (err: unknown) =>
       setError(err instanceof Error ? err.message : 'Could not remove the account'),
-  })
+  });
 
-  const me = principal?.kind === 'user' ? principal : null
+  const me = principal?.kind === 'user' ? principal : null;
 
   return (
     <AppShell
@@ -53,7 +53,9 @@ export default function Team() {
     >
       <div className="max-w-3xl space-y-5">
         {error && (
-          <p className="rounded-xl bg-overdue/15 px-4 py-3 text-body text-overdue">{error}</p>
+          <p className="rounded-xl bg-overdue/15 px-4 py-3 text-body text-overdue">
+            {error}
+          </p>
         )}
 
         <Panel
@@ -74,14 +76,20 @@ export default function Team() {
             <form
               className="grid gap-4 border-t border-white/5 bg-white/[0.02] p-5 sm:grid-cols-2"
               onSubmit={(event) => {
-                event.preventDefault()
-                const form = new FormData(event.currentTarget)
-                create.mutate(Object.fromEntries(form) as Record<string, string>)
+                event.preventDefault();
+                const form = new FormData(event.currentTarget);
+                create.mutate(Object.fromEntries(form) as Record<string, string>);
               }}
             >
               <Field label="Full name" name="fullName" required />
               <Field label="Email" name="email" type="email" required />
-              <Field label="Password" name="password" type="password" required minLength={8} />
+              <Field
+                label="Password"
+                name="password"
+                type="password"
+                required
+                minLength={8}
+              />
               <label className="block">
                 <span className="mb-1.5 block text-body text-ink-muted">Role</span>
                 <select
@@ -126,7 +134,9 @@ export default function Team() {
                     </p>
                     <p className="truncate text-body text-ink-muted">{member.email}</p>
                   </div>
-                  <span className="text-body text-ink-muted">{roleLabel(member.role)}</span>
+                  <span className="text-body text-ink-muted">
+                    {roleLabel(member.role)}
+                  </span>
                   {/* removing yourself would lock the organization out of itself */}
                   {member.id !== me?.id && (
                     <button
@@ -145,5 +155,5 @@ export default function Team() {
         </Panel>
       </div>
     </AppShell>
-  )
+  );
 }

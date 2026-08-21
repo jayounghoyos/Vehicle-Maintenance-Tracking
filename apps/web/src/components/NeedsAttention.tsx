@@ -1,22 +1,22 @@
-import { ArrowRight, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronRight } from 'lucide-react';
 
-import { dueLabel } from '../domain/maintenance'
-import type { DashboardResponse } from '../lib/api'
-import { taskIcon } from '../lib/taskIcon'
-import { Panel } from './Panel'
-import { StatusChip } from './StatusChip'
+import { dueLabel } from '../domain/maintenance';
+import type { DashboardResponse } from '../lib/api';
+import { taskIcon } from '../lib/taskIcon';
+import { Panel } from './Panel';
+import { StatusChip } from './StatusChip';
 
 const TINT: Record<string, string> = {
   overdue: 'bg-overdue/15 text-overdue',
   due_soon: 'bg-due-soon/15 text-due-soon',
   on_track: 'bg-on-track/15 text-on-track',
-}
+};
 
 const DUE_TEXT: Record<string, string> = {
   overdue: 'text-overdue',
   due_soon: 'text-due-soon',
   on_track: 'text-ink-muted',
-}
+};
 
 export function NeedsAttention({ items }: { items: DashboardResponse['attention'] }) {
   return (
@@ -39,45 +39,45 @@ export function NeedsAttention({ items }: { items: DashboardResponse['attention'
       ) : (
         <ul className="divide-y divide-white/5 border-t border-white/5">
           {items.map(({ scheduleId, plate, make, model, task, nextDueDate, state }) => {
-            const Icon = taskIcon(task)
+            const Icon = taskIcon(task);
             return (
-            <li
-              key={scheduleId}
-              className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
-            >
-              {/* the square is tinted by state, so it reports status;
+              <li
+                key={scheduleId}
+                className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
+              >
+                {/* the square is tinted by state, so it reports status;
                   the glyph comes from the task name */}
-              <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${TINT[state]}`}>
-                <Icon className="size-4" strokeWidth={2} />
-              </span>
+                <span
+                  className={`grid size-10 shrink-0 place-items-center rounded-xl ${TINT[state]}`}
+                >
+                  <Icon className="size-4" strokeWidth={2} />
+                </span>
 
-              <div className="min-w-0 flex-1">
-                <p className="truncate">
-                  <span className="font-semibold">{plate}</span>{' '}
-                  <span className="text-ink-muted">
-                    {make} {model}
-                  </span>
-                </p>
-                <p className="mt-0.5 truncate text-body text-ink-muted">
-                  {task}
-                  {nextDueDate && (
-                    <>
-                      {' · '}
-                      <span className={DUE_TEXT[state]}>
-                        {dueLabel(nextDueDate)}
-                      </span>
-                    </>
-                  )}
-                </p>
-              </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate">
+                    <span className="font-semibold">{plate}</span>{' '}
+                    <span className="text-ink-muted">
+                      {make} {model}
+                    </span>
+                  </p>
+                  <p className="mt-0.5 truncate text-body text-ink-muted">
+                    {task}
+                    {nextDueDate && (
+                      <>
+                        {' · '}
+                        <span className={DUE_TEXT[state]}>{dueLabel(nextDueDate)}</span>
+                      </>
+                    )}
+                  </p>
+                </div>
 
-              <StatusChip state={state} />
-              <ChevronRight className="size-4 shrink-0 text-ink-muted" />
-            </li>
-            )
+                <StatusChip state={state} />
+                <ChevronRight className="size-4 shrink-0 text-ink-muted" />
+              </li>
+            );
           })}
         </ul>
       )}
     </Panel>
-  )
+  );
 }

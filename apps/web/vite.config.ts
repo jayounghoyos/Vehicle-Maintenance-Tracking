@@ -1,16 +1,16 @@
-import { fileURLToPath } from 'node:url'
-import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
-import { defineConfig, loadEnv } from 'vite'
+import { fileURLToPath } from 'node:url';
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig, loadEnv } from 'vite';
 
-const repoRoot = fileURLToPath(new URL('../..', import.meta.url))
+const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   // read the repo-root .env with no prefix filter, so the proxy target
   // follows the same PORT the API binds to instead of drifting from it
-  const env = loadEnv(mode, repoRoot, '')
-  const apiPort = env.PORT ?? '3002'
+  const env = loadEnv(mode, repoRoot, '');
+  const apiPort = env.PORT ?? '3002';
 
   return {
     plugins: [react(), tailwindcss()],
@@ -25,5 +25,5 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-  }
-})
+  };
+});

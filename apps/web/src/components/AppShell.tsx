@@ -1,15 +1,15 @@
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react';
 
-import { Sidebar } from './Sidebar'
+import { Sidebar } from './Sidebar';
 
 type Props = {
   /** page title and subtitle, left of the header */
-  title: React.ReactNode
-  subtitle?: React.ReactNode
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
   /** rendered at the bottom of the sidebar */
-  sidebarFooter?: React.ReactNode
-  children: React.ReactNode
-}
+  sidebarFooter?: React.ReactNode;
+  children: React.ReactNode;
+};
 
 export function AppShell({ title, subtitle, sidebarFooter, children }: Props) {
   return (
@@ -46,5 +46,5 @@ export function AppShell({ title, subtitle, sidebarFooter, children }: Props) {
         <main className="px-8 pb-10">{children}</main>
       </div>
     </div>
-  )
+  );
 }
