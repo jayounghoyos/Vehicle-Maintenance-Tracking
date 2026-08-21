@@ -54,6 +54,19 @@ Due date passed and nobody logged that service = overdue.
 
 `users.email` is unique across the whole table and a deleted organization keeps its rows, so that address stays taken. Fine while there is one company. Worth revisiting before the second.
 
+## Signing in
+
+Everyone signs in with an email and a password, so `users.email` doubles as
+the login identifier and stays unique across the whole table.
+
+`platform_admins` is the one table that stands outside the fleets. Whoever
+runs the service is not a member of any of them, and `users.organization_id`
+cannot be empty — that rule is what stops a query escaping from one client
+into another, so it is worth more than the convenience of one table.
+
+An organization is unreachable when `deleted_at` is set or `is_active` is
+false, and sign-in is where that is enforced.
+
 ## Reading the diagram
 
 Every line is named with what it does, so the diagram explains itself. An organization `employs` users and `owns` vehicles; a vehicle `is_scheduled_for` maintenance; a user `records` a service event, and a photo `documents` one.

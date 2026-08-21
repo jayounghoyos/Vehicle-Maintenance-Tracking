@@ -49,6 +49,24 @@ Table organizations {
   '''
 }
 
+Table platform_admins {
+  id integer [primary key]
+  full_name varchar [not null]
+  email varchar [not null, unique]
+  password_hash varchar [not null]
+  created_at timestamp [default: `now()`]
+
+  Note: '''
+  Whoever runs the service, not a member of any fleet. Separate from users
+  on purpose: users.organization_id is not null, and that is the rule that
+  stops a query escaping from one client into another. An admin belongs to
+  no organization, so putting them in users would mean dropping that rule
+  for every row to accommodate a handful.
+
+  There is no organization_id here and there never should be.
+  '''
+}
+
 Table users {
   id integer [primary key]
   organization_id integer [not null]
