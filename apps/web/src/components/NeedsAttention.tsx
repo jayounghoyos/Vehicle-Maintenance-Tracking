@@ -1,7 +1,8 @@
-import { ArrowRight, ChevronRight, Wrench } from 'lucide-react'
+import { ArrowRight, ChevronRight } from 'lucide-react'
 
 import { dueLabel } from '../domain/maintenance'
 import type { DashboardResponse } from '../lib/api'
+import { taskIcon } from '../lib/taskIcon'
 import { Panel } from './Panel'
 import { StatusChip } from './StatusChip'
 
@@ -37,16 +38,17 @@ export function NeedsAttention({ items }: { items: DashboardResponse['attention'
         </p>
       ) : (
         <ul className="divide-y divide-white/5 border-t border-white/5">
-          {items.map(({ scheduleId, plate, make, model, task, nextDueDate, state }) => (
+          {items.map(({ scheduleId, plate, make, model, task, nextDueDate, state }) => {
+            const Icon = taskIcon(task)
+            return (
             <li
               key={scheduleId}
               className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
             >
-              {/* the square is tinted by state, so it reports status.
-                  the glyph is the same for every task: maintenance_tasks
-                  has a name and nothing else to draw from */}
+              {/* the square is tinted by state, so it reports status;
+                  the glyph comes from the task name */}
               <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${TINT[state]}`}>
-                <Wrench className="size-4" strokeWidth={2} />
+                <Icon className="size-4" strokeWidth={2} />
               </span>
 
               <div className="min-w-0 flex-1">
@@ -72,7 +74,8 @@ export function NeedsAttention({ items }: { items: DashboardResponse['attention'
               <StatusChip state={state} />
               <ChevronRight className="size-4 shrink-0 text-ink-muted" />
             </li>
-          ))}
+            )
+          })}
         </ul>
       )}
     </Panel>
