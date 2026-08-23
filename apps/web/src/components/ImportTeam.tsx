@@ -91,9 +91,9 @@ function Instructions() {
 
       <ol className="space-y-2.5">
         {[
-          'Open the spreadsheet with your people in it.',
-          'Select the rows and copy them, with Ctrl and C.',
-          'Click the box below and paste, with Ctrl and V.',
+          'In Excel or Google Sheets, write one person per line: the name in the first column, the email in the second.',
+          'Select those lines and copy them. Ctrl and C on Windows, Command and C on a Mac.',
+          'Click the box below and paste. Everyone shows up here first, so you can check the list before any account exists.',
         ].map((step, index) => (
           <li key={step} className="flex gap-3 text-body">
             <span className="grid size-5 shrink-0 place-items-center rounded-full bg-white/10 text-[11px] font-semibold">
@@ -106,7 +106,7 @@ function Instructions() {
 
       <div>
         <div className="mb-2 flex items-center justify-between gap-3">
-          <p className="text-body font-medium">The columns, in this order</p>
+          <p className="text-body font-medium">The order of the columns</p>
           <button
             type="button"
             onClick={() => copy(asRows([HEADINGS, ...EXAMPLE]))}
@@ -147,11 +147,19 @@ function Instructions() {
           </table>
         </div>
 
-        <ul className="mt-2.5 space-y-1 text-[12px] text-ink-muted">
-          <li>Only the name and the email are required.</li>
-          <li>No role means mechanic.</li>
-          <li>No password means we make one for you and show it once.</li>
-          <li>A first row naming the columns is fine, it gets skipped.</li>
+        <p className="mt-2.5 text-[12px] text-ink-muted">
+          No spreadsheet? Press Copy example, paste it in the box below, and change the
+          names.
+        </p>
+
+        <ul className="mt-2.5 space-y-1.5 text-[12px] text-ink-muted">
+          <li>The name and the email are the only two we need from you.</li>
+          <li>Leave the role empty and that person becomes a mechanic.</li>
+          <li>
+            Leave the password empty and we invent one. It appears on the next screen and
+            only there, so copy it before you close it.
+          </li>
+          <li>If your first line is the column titles, we notice it and skip it.</li>
         </ul>
       </div>
     </div>
