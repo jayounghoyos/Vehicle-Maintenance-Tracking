@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -7,6 +7,7 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -51,6 +52,14 @@ export class ImportMemberDto {
   @ApiProperty({ enum: UserRole, example: UserRole.MECHANIC })
   @IsEnum(UserRole)
   role: UserRole;
+
+  /** Absent means the API picks one and hands it back to be passed on. */
+  @ApiPropertyOptional({ minLength: 8 })
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(200)
+  password?: string;
 }
 
 /**

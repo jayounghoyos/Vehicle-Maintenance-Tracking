@@ -15,9 +15,10 @@ export type TeamMember = {
   createdAt: Date;
 };
 
-/** An account the import created, with the password to hand its owner.
- *  This is the only time the password exists in readable form. */
-export type ImportedMember = TeamMember & { temporaryPassword: string };
+/** An account the import created. temporaryPassword is null when the
+ *  list carried one, since the caller already knows what they chose;
+ *  when it is set, this is the only time it exists in readable form. */
+export type ImportedMember = TeamMember & { temporaryPassword: string | null };
 
 export type ImportResult = {
   created: ImportedMember[];
@@ -108,9 +109,12 @@ export class TeamService {
     }
 
     const pending = [...wanted.values()].sort((a, b) => a.row - b.row);
+    // a row that carried a password keeps it; a row that left the column
+    // empty gets one generated, to be changed by whoever receives it
+    const chosen = pending.map(({ member }) => member.password ?? null);
+    const passwords = chosen.map((given) => given ?? temporaryPassword());
     // argon2 is slow by design and the binding runs off the main thread,
     // so hashing the batch together beats hashing it one at a time
-    const passwords = pending.map(() => temporaryPassword());
     const hashes = await Promise.all(passwords.map((plain) => hashPassword(plain)));
 
     const saved = await this.users.save(
@@ -132,7 +136,8 @@ export class TeamService {
         email: user.email,
         role: user.role,
         createdAt: user.createdAt,
-        temporaryPassword: passwords[index],
+        // nothing to hand back for a password the caller already chose
+        temporaryPassword: chosen[index] === null ? passwords[index] : null,
       })),
       skipped: skipped.sort((a, b) => a.row - b.row),
     };
