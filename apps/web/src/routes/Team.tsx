@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2, UserPlus } from 'lucide-react';
+import { Trash2, Upload, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
 import { AppShell } from '../components/AppShell';
 import { Field } from '../components/AuthLayout';
+import { ImportTeam } from '../components/ImportTeam';
 import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { WorkspaceTabs } from '../components/WorkspaceTabs';
@@ -19,6 +20,7 @@ export default function Team() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [importing, setImporting] = useState(false);
   // the mechanic and the operations manager see their colleagues; who
   // holds an account is not a secret from them, it is just not theirs
   // to change
@@ -75,17 +77,37 @@ export default function Team() {
           }
           action={
             canManage ? (
-              <button
-                type="button"
-                onClick={() => setAdding((v) => !v)}
-                className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-page transition-opacity hover:opacity-90"
-              >
-                <UserPlus className="size-4" strokeWidth={2.5} />
-                Add member
-              </button>
+              <div className="flex items-center gap-2">
+                {/* next to Add member rather than hidden behind it: the
+                    coordinator staffing a fleet reaches for this first */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImporting((v) => !v);
+                    setAdding(false);
+                  }}
+                  className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink"
+                >
+                  <Upload className="size-4" strokeWidth={1.75} />
+                  Import many
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAdding((v) => !v);
+                    setImporting(false);
+                  }}
+                  className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-page transition-opacity hover:opacity-90"
+                >
+                  <UserPlus className="size-4" strokeWidth={2.5} />
+                  Add member
+                </button>
+              </div>
             ) : undefined
           }
         >
+          {importing && canManage && <ImportTeam onImported={invalidate} />}
+
           {adding && canManage && (
             <form
               className="grid gap-4 border-t border-white/5 bg-white/[0.02] p-5 sm:grid-cols-2"
