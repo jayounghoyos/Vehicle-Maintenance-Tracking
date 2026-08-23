@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
 
-import { AppShell } from '../components/AppShell';
+import { useAuth } from '../auth/context';
+import { can } from '../auth/permissions';
+import { AppShell, PrimaryAction } from '../components/AppShell';
 import { FleetTable } from '../components/FleetTable';
 import { NeedsAttention } from '../components/NeedsAttention';
 import { RecentEvents } from '../components/RecentEvents';
@@ -10,15 +13,26 @@ import { fetchDashboard } from '../lib/api';
 import { greeting, longDate, roleLabel } from '../lib/format';
 
 export default function Dashboard() {
+  const { principal } = useAuth();
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: fetchDashboard,
   });
   const today = new Date();
 
+  // the operations manager reads the fleet and decides on it; recording
+  // the work belongs to whoever did it
+  const action = can(principal, 'logService') ? (
+    <PrimaryAction icon={Plus}>Log service</PrimaryAction>
+  ) : undefined;
+
   if (isPending) {
     return (
-      <AppShell title="Dashboard" subtitle={longDate(today.toISOString())}>
+      <AppShell
+        title="Dashboard"
+        subtitle={longDate(today.toISOString())}
+        action={action}
+      >
         <div className="rounded-2xl border border-white/5 bg-panel p-8 text-body text-ink-muted">
           Loading the fleet…
         </div>
@@ -28,7 +42,11 @@ export default function Dashboard() {
 
   if (isError) {
     return (
-      <AppShell title="Dashboard" subtitle={longDate(today.toISOString())}>
+      <AppShell
+        title="Dashboard"
+        subtitle={longDate(today.toISOString())}
+        action={action}
+      >
         <div className="rounded-2xl bg-overdue/15 p-8">
           <p className="font-semibold text-overdue">The fleet could not be loaded.</p>
           <p className="mt-1.5 text-body text-overdue/70">
@@ -46,6 +64,7 @@ export default function Dashboard() {
     <AppShell
       title={`${greeting(today)}, ${user.fullName.split(' ')[0]}`}
       subtitle={`${roleLabel(user.role)} · ${longDate(today.toISOString())}`}
+      action={action}
       sidebarFooter={<SidebarFooter user={user} overdueCount={counts.overdue} />}
     >
       <div className="space-y-5">
