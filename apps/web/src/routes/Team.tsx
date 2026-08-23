@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2, Upload, UserPlus } from 'lucide-react';
+import { Upload, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
@@ -7,21 +7,28 @@ import { can } from '../auth/permissions';
 import { AppShell } from '../components/AppShell';
 import { Field } from '../components/AuthLayout';
 import { ImportTeam } from '../components/ImportTeam';
+import { MemberTable } from '../components/MemberTable';
 import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { PANEL_LAYOUT } from '../components/panelLayout';
 import { SidePanel } from '../components/SidePanel';
 import { WorkspaceTabs } from '../components/WorkspaceTabs';
+import { useToast } from '../toast/context';
 import { api, type TeamMember } from '../lib/api';
-import { initials, roleLabel, shortDate } from '../lib/format';
+import { roleLabel } from '../lib/format';
 
 const ROLES = ['fleet_coordinator', 'mechanic', 'operations_manager'] as const;
 
 export default function Team() {
   const { principal } = useAuth();
   const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
   const [panel, setPanel] = useState<'add' | 'import' | null>(null);
+  // the account whose form is open on the right, if any
+  const [editing, setEditing] = useState<TeamMember | null>(null);
+  // which row is waiting on the API, so its own controls go quiet
+  // instead of the whole table
+  const [busyId, setBusyId] = useState<number | null>(null);
   // the mechanic and the operations manager see their colleagues; who
   // holds an account is not a secret from them, it is just not theirs
   // to change
@@ -33,26 +40,70 @@ export default function Team() {
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['team'] });
+  const failed = (err: unknown, fallback: string) =>
+    toast.show(err instanceof Error ? err.message : fallback, 'failed');
   const close = () => {
     setPanel(null);
-    setError(null);
+    setEditing(null);
   };
 
   const create = useMutation({
     mutationFn: (body: Record<string, string>) => api.post<TeamMember>('/team', body),
-    onSuccess: () => {
+    onSuccess: (member) => {
       close();
+      toast.show(`${member.fullName} can now sign in`);
       void invalidate();
     },
-    onError: (err: unknown) =>
-      setError(err instanceof Error ? err.message : 'Could not create the account'),
+    onError: (err: unknown) => failed(err, 'Could not create the account'),
+  });
+
+  const change = useMutation({
+    mutationFn: ({
+      member,
+      patch,
+    }: {
+      member: TeamMember;
+      patch: {
+        fullName?: string;
+        email?: string;
+        password?: string;
+        role?: string;
+        active?: boolean;
+      };
+    }) => {
+      setBusyId(member.id);
+      return api.patch<TeamMember>(`/team/${member.id}`, patch);
+    },
+    onSuccess: (updated, { patch }) => {
+      close();
+      toast.show(
+        patch.role !== undefined
+          ? `${updated.fullName} is now ${roleLabel(updated.role).toLowerCase()}`
+          : patch.active !== undefined
+            ? patch.active
+              ? `${updated.fullName} can sign in again`
+              : `${updated.fullName} can no longer sign in`
+            : patch.password
+              ? `${updated.fullName} has a new password`
+              : `${updated.fullName} was updated`,
+      );
+      void invalidate();
+    },
+    onError: (err: unknown) => failed(err, 'Could not change the account'),
+    onSettled: () => setBusyId(null),
   });
 
   const remove = useMutation({
-    mutationFn: (id: number) => api.del(`/team/${id}`),
-    onSuccess: invalidate,
-    onError: (err: unknown) =>
-      setError(err instanceof Error ? err.message : 'Could not remove the account'),
+    mutationFn: (member: TeamMember) => {
+      setBusyId(member.id);
+      return api.del(`/team/${member.id}`);
+    },
+    onSuccess: (_result, member) => {
+      toast.show(`${member.fullName} was deleted`);
+      void invalidate();
+    },
+    onError: (err: unknown) => failed(err, 'Could not remove the account'),
+    onSettled: () => setBusyId(null),
   });
 
   const me = principal?.kind === 'user' ? principal : null;
@@ -66,13 +117,7 @@ export default function Team() {
       <div className="space-y-5">
         <WorkspaceTabs />
 
-        {error && (
-          <p className="rounded-xl bg-overdue/15 px-4 py-3 text-body text-overdue">
-            {error}
-          </p>
-        )}
-
-        <div className={panel ? PANEL_LAYOUT.open : PANEL_LAYOUT.closed}>
+        <div className={panel || editing ? PANEL_LAYOUT.open : PANEL_LAYOUT.closed}>
           <Panel
             title="Members"
             subtitle={
@@ -87,7 +132,10 @@ export default function Team() {
                       coordinator staffing a fleet reaches for this first */}
                   <button
                     type="button"
-                    onClick={() => setPanel(panel === 'import' ? null : 'import')}
+                    onClick={() => {
+                      setEditing(null);
+                      setPanel(panel === 'import' ? null : 'import');
+                    }}
                     className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink"
                   >
                     <Upload className="size-4" strokeWidth={1.75} />
@@ -95,7 +143,10 @@ export default function Team() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setPanel(panel === 'add' ? null : 'add')}
+                    onClick={() => {
+                      setEditing(null);
+                      setPanel(panel === 'add' ? null : 'add');
+                    }}
                     className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-page transition-opacity hover:opacity-90"
                   >
                     <UserPlus className="size-4" strokeWidth={2.5} />
@@ -108,68 +159,93 @@ export default function Team() {
             {isPending ? (
               <p className="px-5 pb-6 text-body text-ink-muted">Loading the team…</p>
             ) : (
-              <div className="overflow-x-auto border-t border-white/5">
-                <table className="w-full min-w-[560px] text-left">
-                  <thead>
-                    <tr className="border-b border-white/5">
-                      {['Person', 'Email', 'Role', 'Added', ''].map((heading) => (
-                        <th
-                          key={heading}
-                          className="px-5 py-3 text-table-label font-semibold text-ink-muted uppercase"
-                        >
-                          {heading}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {members?.map((member) => (
-                      <tr key={member.id}>
-                        <td className="px-5 py-3.5">
-                          <div className="flex items-center gap-3">
-                            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/10 text-[12px] font-semibold">
-                              {initials(member.fullName)}
-                            </span>
-                            <span className="font-medium whitespace-nowrap">
-                              {member.fullName}
-                              {member.id === me?.id && (
-                                <span className="ml-2 text-[12px] text-ink-muted">
-                                  you
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3.5 text-body text-ink-muted">
-                          {member.email}
-                        </td>
-                        <td className="px-5 py-3.5 text-body whitespace-nowrap text-ink-muted">
-                          {roleLabel(member.role)}
-                        </td>
-                        <td className="px-5 py-3.5 text-body whitespace-nowrap text-ink-muted">
-                          {shortDate(member.createdAt)}
-                        </td>
-                        <td className="px-5 py-3.5">
-                          {/* removing yourself would lock the organization
-                              out of itself */}
-                          {canManage && member.id !== me?.id && (
-                            <button
-                              type="button"
-                              onClick={() => remove.mutate(member.id)}
-                              title={`Remove ${member.fullName}`}
-                              className="ml-auto flex rounded-lg p-2 text-ink-muted transition-colors hover:bg-overdue/15 hover:text-overdue"
-                            >
-                              <Trash2 className="size-4" strokeWidth={1.75} />
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <MemberTable
+                members={members ?? []}
+                canManage={canManage}
+                meId={me?.id ?? null}
+                busyId={busyId}
+                onRoleChange={(member, role) =>
+                  change.mutate({ member, patch: { role } })
+                }
+                onSetActive={(member, active) =>
+                  change.mutate({ member, patch: { active } })
+                }
+                onEdit={(member) => {
+                  setEditing(member);
+                  setPanel(null);
+                }}
+                onRemove={(member) => remove.mutate(member)}
+              />
             )}
           </Panel>
+
+          {editing && canManage && (
+            <SidePanel
+              title="Edit account"
+              subtitle={`How ${editing.fullName.split(' ')[0]} signs in`}
+              onClose={close}
+            >
+              <form
+                className="grid gap-4 p-5"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const form = new FormData(event.currentTarget);
+                  const password = String(form.get('password') ?? '');
+                  change.mutate({
+                    member: editing,
+                    patch: {
+                      fullName: String(form.get('fullName')),
+                      email: String(form.get('email')),
+                      // an empty box means leave it alone, not blank it
+                      ...(password ? { password } : {}),
+                    },
+                  });
+                }}
+              >
+                <Field
+                  label="Full name"
+                  name="fullName"
+                  defaultValue={editing.fullName}
+                  required
+                />
+                <Field
+                  label="Email"
+                  name="email"
+                  type="email"
+                  defaultValue={editing.email}
+                  required
+                />
+                <Field
+                  label="New password"
+                  name="password"
+                  type="password"
+                  minLength={8}
+                  placeholder="Leave empty to keep the current one"
+                  autoComplete="new-password"
+                />
+                <p className="-mt-1 text-[12px] text-ink-muted">
+                  A password cannot be read back, only replaced. Whatever you type here is
+                  what you have to pass on.
+                </p>
+                <div className="mt-1 flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={change.isPending}
+                    className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page disabled:opacity-50"
+                  >
+                    {change.isPending ? 'Saving…' : 'Save changes'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="rounded-xl border border-white/10 px-4 py-2.5 text-body text-ink-muted transition-colors hover:text-ink"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </SidePanel>
+          )}
 
           {panel === 'add' && canManage && (
             <SidePanel

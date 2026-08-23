@@ -10,6 +10,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { entities } from './entities';
 import { OrganizationModule } from './organization/organization.module';
 import { TeamModule } from './team/team.module';
+import { TenantModule } from './tenant/tenant.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -34,6 +35,7 @@ import { HealthModule } from './health/health.module';
         synchronize: false,
       }),
     }),
+    TenantModule,
     HealthModule,
     AuthModule,
     DashboardModule,

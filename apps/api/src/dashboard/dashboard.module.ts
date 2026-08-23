@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { MaintenanceSchedule, ServiceEvent, User, Vehicle } from '../entities';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
 
+/* No forFeature: every table this reads belongs to a client, so it goes
+   through the tenant repositories rather than injecting its own. */
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Vehicle, MaintenanceSchedule, ServiceEvent])],
   controllers: [DashboardController],
   providers: [DashboardService],
 })

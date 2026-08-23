@@ -4,6 +4,7 @@ import {
   ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -79,4 +80,43 @@ export class ImportTeamDto {
   @ValidateNested({ each: true })
   @Type(() => ImportMemberDto)
   members: ImportMemberDto[];
+}
+
+/**
+ * A partial change to an account: what it is called, how it signs in,
+ * what it may do, and whether it still works here. Everything is
+ * optional and any of it may arrive together.
+ */
+export class UpdateMemberDto {
+  @ApiPropertyOptional({ example: 'Carlos Mejia' })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(120)
+  fullName?: string;
+
+  @ApiPropertyOptional({ example: 'carlos@citylogistics.co' })
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(200)
+  email?: string;
+
+  /** absent leaves the current one alone; nobody can read it back */
+  @ApiPropertyOptional({ minLength: 8 })
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(200)
+  password?: string;
+
+  @ApiPropertyOptional({ enum: UserRole })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  /** false retires the account, true brings it back */
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 }
