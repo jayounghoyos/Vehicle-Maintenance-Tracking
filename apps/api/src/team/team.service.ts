@@ -1,10 +1,15 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 
 import { hashPassword } from '../auth/password';
 import { ServiceEvent, User, UserRole } from '../entities';
-import type { CreateWorkerDto, ImportTeamDto } from './dto';
+import type { CreateWorkerDto, ImportTeamDto, UpdateMemberDto } from './dto';
 import { temporaryPassword } from './password-generator';
 
 export type TeamMember = {
@@ -12,6 +17,11 @@ export type TeamMember = {
   fullName: string;
   email: string;
   role: UserRole;
+  /** false once the person has left: the row stays, the login does not */
+  active: boolean;
+  /** how much history is attached to them, which is what decides
+   *  whether the account can be removed rather than only retired */
+  recordedEvents: number;
   createdAt: Date;
 };
 
@@ -39,14 +49,33 @@ export class TeamService {
       where: { organizationId },
       order: { createdAt: 'ASC' },
     });
+    const counts = await this.eventCounts(organizationId);
     // password_hash is never in the shape this returns
-    return rows.map(({ id, fullName, email, role, createdAt }) => ({
-      id,
-      fullName,
-      email,
-      role,
-      createdAt,
-    }));
+    return rows.map((user) => this.asMember(user, counts.get(user.id) ?? 0));
+  }
+
+  /** One grouped query rather than one per member. */
+  private async eventCounts(organizationId: number): Promise<Map<number, number>> {
+    const rows = await this.events
+      .createQueryBuilder('event')
+      .select('event.recorded_by', 'userId')
+      .addSelect('count(*)', 'count')
+      .where('event.organization_id = :organizationId', { organizationId })
+      .groupBy('event.recorded_by')
+      .getRawMany<{ userId: number; count: string }>();
+    return new Map(rows.map((row) => [Number(row.userId), Number(row.count)]));
+  }
+
+  private asMember(user: User, recordedEvents: number): TeamMember {
+    return {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      active: user.deletedAt === null,
+      recordedEvents,
+      createdAt: user.createdAt,
+    };
   }
 
   async create(organizationId: number, dto: CreateWorkerDto): Promise<TeamMember> {
@@ -62,8 +91,8 @@ export class TeamService {
         role: dto.role,
       }),
     );
-    const { id, fullName, email, role, createdAt } = user;
-    return { id, fullName, email, role, createdAt };
+    // brand new, so nothing is attached to them yet
+    return this.asMember(user, 0);
   }
 
   /**
@@ -131,11 +160,7 @@ export class TeamService {
 
     return {
       created: saved.map((user, index) => ({
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt,
+        ...this.asMember(user, 0),
         // nothing to hand back for a password the caller already chose
         temporaryPassword: chosen[index] === null ? passwords[index] : null,
       })),
@@ -143,13 +168,67 @@ export class TeamService {
     };
   }
 
+  /**
+   * Change a role, or retire somebody and bring them back.
+   *
+   * Never on yourself. A coordinator demoting or retiring their own
+   * account could leave an organization nobody can administer, and the
+   * rule is simpler to hold than the states it prevents.
+   */
+  async update(
+    organizationId: number,
+    actingUserId: number,
+    id: number,
+    dto: UpdateMemberDto,
+  ): Promise<TeamMember> {
+    if (id === actingUserId) {
+      throw new BadRequestException('You cannot change your own account here');
+    }
+    const member = await this.users.findOne({ where: { id, organizationId } });
+    if (!member) throw new NotFoundException('No such team member');
+
+    const losesCoordinator =
+      member.role === UserRole.FLEET_COORDINATOR &&
+      ((dto.role !== undefined && dto.role !== UserRole.FLEET_COORDINATOR) ||
+        dto.active === false);
+
+    if (losesCoordinator && (await this.otherCoordinators(organizationId, id)) === 0) {
+      throw new ConflictException(
+        'The organization would be left with no fleet coordinator',
+      );
+    }
+
+    if (dto.role !== undefined) member.role = dto.role;
+    if (dto.active !== undefined) member.deletedAt = dto.active ? null : new Date();
+
+    const saved = await this.users.save(member);
+    const counts = await this.eventCounts(organizationId);
+    return this.asMember(saved, counts.get(saved.id) ?? 0);
+  }
+
+  private otherCoordinators(organizationId: number, exceptId: number): Promise<number> {
+    return this.users.count({
+      where: {
+        organizationId,
+        role: UserRole.FLEET_COORDINATOR,
+        deletedAt: IsNull(),
+        id: Not(exceptId),
+      },
+    });
+  }
+
+  /**
+   * Permanent, and only for an account nothing is attached to yet: the
+   * mistyped address that was never used. Anybody who has recorded work
+   * is retired instead, so the events keep saying who did them.
+   */
   async remove(organizationId: number, actingUserId: number, id: number): Promise<void> {
     if (id === actingUserId) {
       throw new BadRequestException('You cannot remove your own account');
     }
     // scoped by organization, so an id from another client matches nothing
     const member = await this.users.findOne({ where: { id, organizationId } });
-    if (!member) throw new ConflictException('No such team member');
+    if (!member) throw new NotFoundException('No such team member');
 
     // service_events.recorded_by cannot be null, so the events cannot
     // outlive the account. Refusing is better than erasing who did the
@@ -159,7 +238,7 @@ export class TeamService {
       throw new ConflictException(
         `${member.fullName} has recorded ${recorded} service ${
           recorded === 1 ? 'event' : 'events'
-        }, so the account cannot be removed`,
+        }, so the account can only be retired`,
       );
     }
 

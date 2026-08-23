@@ -4,6 +4,7 @@ import {
   ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -79,4 +80,21 @@ export class ImportTeamDto {
   @ValidateNested({ each: true })
   @Type(() => ImportMemberDto)
   members: ImportMemberDto[];
+}
+
+/**
+ * A partial change to somebody else's account: their role, or whether
+ * they still work here. Both are optional and both may arrive together.
+ */
+export class UpdateMemberDto {
+  @ApiPropertyOptional({ enum: UserRole })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  /** false retires the account, true brings it back */
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 }
