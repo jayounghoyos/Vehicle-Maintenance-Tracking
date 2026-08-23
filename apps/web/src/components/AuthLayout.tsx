@@ -40,6 +40,33 @@ export function Field({
   );
 }
 
+/** Field's sibling for a fixed set of answers. Team.tsx wrote this by
+ *  hand and the vehicle form needs two of them. */
+export function Select({
+  label,
+  options,
+  ...props
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+} & React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-body text-ink-muted">{label}</span>
+      <select
+        {...props}
+        className="w-full rounded-xl border border-white/10 bg-panel px-3.5 py-2.5 text-body focus:border-lime/40 focus:outline-none"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value} className="bg-panel">
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 export function SubmitButton({
   pending,
   children,

@@ -11,6 +11,7 @@ import { entities } from './entities';
 import { OrganizationModule } from './organization/organization.module';
 import { TeamModule } from './team/team.module';
 import { TenantModule } from './tenant/tenant.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -39,6 +40,7 @@ import { HealthModule } from './health/health.module';
     HealthModule,
     AuthModule,
     DashboardModule,
+    VehiclesModule,
     TeamModule,
     OrganizationModule,
     AdminModule,

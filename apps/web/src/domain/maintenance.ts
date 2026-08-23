@@ -1,6 +1,6 @@
 /** The three states the brand manual defines. There is no fourth.
  *  Which one applies is decided by the API — see
- *  apps/api/src/dashboard/maintenance.ts. This file only labels them. */
+ *  apps/api/src/maintenance/maintenance.ts. This file only labels them. */
 export type MaintenanceState = 'overdue' | 'due_soon' | 'on_track';
 
 function atMidnight(date: Date): number {

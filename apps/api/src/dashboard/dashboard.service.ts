@@ -14,12 +14,8 @@ import type {
   FleetRowItem,
   RecentEventItem,
 } from './dashboard.types';
-import {
-  STATE_ORDER,
-  scheduleState,
-  worstState,
-  type MaintenanceState,
-} from './maintenance';
+import { maintenanceByVehicle, stateSchedules } from '../maintenance/fleet-state';
+import { STATE_ORDER } from '../maintenance/maintenance';
 
 const RECENT_EVENT_LIMIT = 3;
 
@@ -54,24 +50,8 @@ export class DashboardService {
       take: RECENT_EVENT_LIMIT,
     });
 
-    const stated = schedules
-      .map((s) => ({ schedule: s, state: scheduleState(s.nextDueDate, today) }))
-      .sort((a, b) => {
-        const byState = STATE_ORDER.indexOf(a.state) - STATE_ORDER.indexOf(b.state);
-        if (byState !== 0) return byState;
-        return (a.schedule.nextDueDate ?? '').localeCompare(b.schedule.nextDueDate ?? '');
-      });
-
-    const perVehicle = new Map<number, MaintenanceState[]>();
-    for (const { schedule, state } of stated) {
-      perVehicle.set(schedule.vehicleId, [
-        ...(perVehicle.get(schedule.vehicleId) ?? []),
-        state,
-      ]);
-    }
-    const vehicleState = new Map<number, MaintenanceState>(
-      [...perVehicle].map(([id, states]) => [id, worstState(states)]),
-    );
+    const stated = stateSchedules(schedules, today);
+    const byVehicle = maintenanceByVehicle(stated);
 
     const attention: AttentionItem[] = stated
       .filter(({ state }) => state !== 'on_track')
@@ -87,9 +67,7 @@ export class DashboardService {
 
     const fleet: FleetRowItem[] = vehicles
       .map((vehicle) => {
-        // stated is already worst-first, so the first hit is the schedule
-        // this vehicle is judged by
-        const next = stated.find((s) => s.schedule.vehicleId === vehicle.id);
+        const next = byVehicle.get(vehicle.id);
         return {
           vehicleId: vehicle.id,
           plate: vehicle.plate,
@@ -97,9 +75,10 @@ export class DashboardService {
           model: vehicle.model.name,
           year: vehicle.year,
           odometerKm: vehicle.odometerKm,
-          nextTask: next?.schedule.task.name ?? null,
-          nextDueDate: next?.schedule.nextDueDate ?? null,
-          state: vehicleState.get(vehicle.id) ?? 'on_track',
+          nextTask: next?.nextTask ?? null,
+          nextDueDate: next?.nextDueDate ?? null,
+          // a vehicle nobody scheduled anything for is not overdue
+          state: next?.state ?? 'on_track',
         };
       })
       .sort((a, b) => STATE_ORDER.indexOf(a.state) - STATE_ORDER.indexOf(b.state));
@@ -113,7 +92,7 @@ export class DashboardService {
       type: event.type,
     }));
 
-    const states = [...vehicleState.values()];
+    const states = [...byVehicle.values()].map((one) => one.state);
     return {
       user: { id: user.id, fullName: user.fullName, role: user.role },
       counts: {

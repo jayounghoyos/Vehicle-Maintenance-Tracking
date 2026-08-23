@@ -1,4 +1,4 @@
-import type { MaintenanceState } from './maintenance';
+import type { MaintenanceState } from '../maintenance/maintenance';
 
 export type DashboardUser = {
   id: number;
