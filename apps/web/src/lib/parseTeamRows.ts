@@ -8,8 +8,12 @@ export type ParsedRow = {
   fullName: string;
   email: string;
   role: Role;
+  /** empty means the account gets a generated one to hand over */
+  password: string;
   error: string | null;
 };
+
+export const MIN_PASSWORD = 8;
 
 export const MAX_ROWS = 200;
 
@@ -74,7 +78,7 @@ export function parseTeamRows(text: string): ParsedRow[] {
       return;
     }
 
-    const [fullName = '', email = '', roleCell] = cells;
+    const [fullName = '', email = '', roleCell, password = ''] = cells;
     const role = readRole(roleCell);
     const key = email.toLowerCase();
 
@@ -83,6 +87,8 @@ export function parseTeamRows(text: string): ParsedRow[] {
     else if (!email) error = 'Missing email';
     else if (!LOOKS_LIKE_EMAIL.test(email)) error = 'Not an email address';
     else if (role === null) error = `Unknown role "${roleCell ?? ''}"`;
+    else if (password && password.length < MIN_PASSWORD)
+      error = `Password needs ${MIN_PASSWORD} characters or more`;
     else if (seen.has(key)) error = 'Repeated in this list';
 
     if (!error) seen.add(key);
@@ -91,6 +97,7 @@ export function parseTeamRows(text: string): ParsedRow[] {
       fullName,
       email,
       role: role ?? 'mechanic',
+      password,
       error,
     });
   });
