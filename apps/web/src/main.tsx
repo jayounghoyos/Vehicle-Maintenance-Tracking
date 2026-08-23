@@ -11,6 +11,7 @@ import Login from './routes/Login.tsx';
 import Organization from './routes/Organization.tsx';
 import Register from './routes/Register.tsx';
 import Team from './routes/Team.tsx';
+import { ToastProvider } from './toast/ToastProvider.tsx';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -25,45 +26,47 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+          <ToastProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-            <Route
-              path="/"
-              element={
-                <RequireAuth kind="user">
-                  <Dashboard />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/team"
-              element={
-                <RequireAuth kind="user">
-                  <Team />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/team/organization"
-              element={
-                <RequireAuth kind="user">
-                  <Organization />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <RequireAuth kind="admin">
-                  <Admin />
-                </RequireAuth>
-              }
-            />
+              <Route
+                path="/"
+                element={
+                  <RequireAuth kind="user">
+                    <Dashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/team"
+                element={
+                  <RequireAuth kind="user">
+                    <Team />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/team/organization"
+                element={
+                  <RequireAuth kind="user">
+                    <Organization />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <RequireAuth kind="admin">
+                    <Admin />
+                  </RequireAuth>
+                }
+              />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
