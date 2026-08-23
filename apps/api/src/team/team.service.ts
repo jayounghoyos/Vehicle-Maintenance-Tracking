@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { hashPassword } from '../auth/password';
-import { User, UserRole } from '../entities';
+import { ServiceEvent, User, UserRole } from '../entities';
 import type { CreateWorkerDto } from './dto';
 
 export type TeamMember = {
@@ -16,7 +16,11 @@ export type TeamMember = {
 
 @Injectable()
 export class TeamService {
-  constructor(@InjectRepository(User) private readonly users: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(ServiceEvent)
+    private readonly events: Repository<ServiceEvent>,
+  ) {}
 
   async list(organizationId: number): Promise<TeamMember[]> {
     const rows = await this.users.find({
@@ -55,7 +59,21 @@ export class TeamService {
       throw new BadRequestException('You cannot remove your own account');
     }
     // scoped by organization, so an id from another client matches nothing
-    const result = await this.users.delete({ id, organizationId });
-    if (!result.affected) throw new ConflictException('No such team member');
+    const member = await this.users.findOne({ where: { id, organizationId } });
+    if (!member) throw new ConflictException('No such team member');
+
+    // service_events.recorded_by cannot be null, so the events cannot
+    // outlive the account. Refusing is better than erasing who did the
+    // work, and better than the foreign key failing as a 500.
+    const recorded = await this.events.count({ where: { recordedBy: id } });
+    if (recorded > 0) {
+      throw new ConflictException(
+        `${member.fullName} has recorded ${recorded} service ${
+          recorded === 1 ? 'event' : 'events'
+        }, so the account cannot be removed`,
+      );
+    }
+
+    await this.users.delete({ id, organizationId });
   }
 }
