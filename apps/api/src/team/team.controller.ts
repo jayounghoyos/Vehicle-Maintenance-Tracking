@@ -15,8 +15,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Principal } from '../auth/auth.types';
 import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../auth/guards';
 import { UserRole } from '../entities';
-import { CreateWorkerDto } from './dto';
-import { TeamService, type TeamMember } from './team.service';
+import { CreateWorkerDto, ImportTeamDto } from './dto';
+import { TeamService, type ImportResult, type TeamMember } from './team.service';
 
 /**
  * Everyone in the organization may see who their colleagues are. Only the
@@ -52,6 +52,16 @@ export class TeamController {
     @Body() dto: CreateWorkerDto,
   ): Promise<TeamMember> {
     return this.team.create(this.asUser(principal).organizationId, dto);
+  }
+
+  @Post('bulk')
+  @Roles(UserRole.FLEET_COORDINATOR)
+  @ApiOperation({ summary: 'Create many accounts from a pasted list' })
+  importMany(
+    @CurrentUser() principal: Principal,
+    @Body() dto: ImportTeamDto,
+  ): Promise<ImportResult> {
+    return this.team.importMany(this.asUser(principal).organizationId, dto);
   }
 
   @Delete(':id')
