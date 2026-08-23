@@ -4,11 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { hashPassword } from '../auth/password';
 import { ServiceEvent, User, UserRole } from '../entities';
+import { TenantRepositories, type TenantRepository } from '../tenant/tenant-repository';
 import type { CreateWorkerDto, ImportTeamDto, UpdateMemberDto } from './dto';
 import { temporaryPassword } from './password-generator';
 
@@ -39,14 +40,24 @@ export type ImportResult = {
 @Injectable()
 export class TeamService {
   constructor(
-    @InjectRepository(User) private readonly users: Repository<User>,
-    @InjectRepository(ServiceEvent)
-    private readonly events: Repository<ServiceEvent>,
+    private readonly tenants: TenantRepositories,
+    /** the whole users table, only ever read to find out whether an
+     *  address is taken somewhere else on the platform */
+    @InjectRepository(User) private readonly everyUser: Repository<User>,
   ) {}
 
+  private scoped(organizationId: number): {
+    users: TenantRepository<User>;
+    events: TenantRepository<ServiceEvent>;
+  } {
+    return {
+      users: this.tenants.for(User, organizationId),
+      events: this.tenants.for(ServiceEvent, organizationId),
+    };
+  }
+
   async list(organizationId: number): Promise<TeamMember[]> {
-    const rows = await this.users.find({
-      where: { organizationId },
+    const rows = await this.scoped(organizationId).users.find({
       order: { createdAt: 'ASC' },
     });
     const counts = await this.eventCounts(organizationId);
@@ -56,11 +67,10 @@ export class TeamService {
 
   /** One grouped query rather than one per member. */
   private async eventCounts(organizationId: number): Promise<Map<number, number>> {
-    const rows = await this.events
-      .createQueryBuilder('event')
+    const rows = await this.scoped(organizationId)
+      .events.builder('event')
       .select('event.recorded_by', 'userId')
       .addSelect('count(*)', 'count')
-      .where('event.organization_id = :organizationId', { organizationId })
       .groupBy('event.recorded_by')
       .getRawMany<{ userId: number; count: string }>();
     return new Map(rows.map((row) => [Number(row.userId), Number(row.count)]));
@@ -79,12 +89,14 @@ export class TeamService {
   }
 
   async create(organizationId: number, dto: CreateWorkerDto): Promise<TeamMember> {
-    const taken = await this.users.findOne({ where: { email: dto.email } });
+    // across the platform, not this organization: the login namespace is
+    // shared, so an address taken anywhere is taken here
+    const taken = await this.everyUser.findOne({ where: { email: dto.email } });
     if (taken) throw new ConflictException('That email is already registered');
 
-    const user = await this.users.save(
-      this.users.create({
-        organizationId,
+    const users = this.scoped(organizationId).users;
+    const user = await users.save(
+      users.create({
         fullName: dto.fullName,
         email: dto.email,
         passwordHash: await hashPassword(dto.password),
@@ -123,8 +135,9 @@ export class TeamService {
       wanted.set(email, { row: index, member });
     });
 
-    // one query for every address rather than one query each
-    const taken = await this.users.find({
+    // one query for every address rather than one query each, and over
+    // the whole platform, since the login namespace is shared
+    const taken = await this.everyUser.find({
       where: [...wanted.keys()].map((email) => ({ email })),
       select: { email: true },
     });
@@ -146,10 +159,10 @@ export class TeamService {
     // so hashing the batch together beats hashing it one at a time
     const hashes = await Promise.all(passwords.map((plain) => hashPassword(plain)));
 
-    const saved = await this.users.save(
+    const users = this.scoped(organizationId).users;
+    const saved = await users.save(
       pending.map(({ member }, index) =>
-        this.users.create({
-          organizationId,
+        users.create({
           fullName: member.fullName,
           email: member.email,
           passwordHash: hashes[index],
@@ -184,7 +197,8 @@ export class TeamService {
     if (id === actingUserId) {
       throw new BadRequestException('You cannot change your own account here');
     }
-    const member = await this.users.findOne({ where: { id, organizationId } });
+    const users = this.scoped(organizationId).users;
+    const member = await users.findOne({ where: { id } });
     if (!member) throw new NotFoundException('No such team member');
 
     const losesCoordinator =
@@ -201,15 +215,14 @@ export class TeamService {
     if (dto.role !== undefined) member.role = dto.role;
     if (dto.active !== undefined) member.deletedAt = dto.active ? null : new Date();
 
-    const saved = await this.users.save(member);
+    const saved = await users.save(member);
     const counts = await this.eventCounts(organizationId);
     return this.asMember(saved, counts.get(saved.id) ?? 0);
   }
 
   private otherCoordinators(organizationId: number, exceptId: number): Promise<number> {
-    return this.users.count({
+    return this.scoped(organizationId).users.count({
       where: {
-        organizationId,
         role: UserRole.FLEET_COORDINATOR,
         deletedAt: IsNull(),
         id: Not(exceptId),
@@ -226,14 +239,15 @@ export class TeamService {
     if (id === actingUserId) {
       throw new BadRequestException('You cannot remove your own account');
     }
-    // scoped by organization, so an id from another client matches nothing
-    const member = await this.users.findOne({ where: { id, organizationId } });
+    const { users, events } = this.scoped(organizationId);
+    // an id from another client matches nothing here, by construction
+    const member = await users.findOne({ where: { id } });
     if (!member) throw new NotFoundException('No such team member');
 
     // service_events.recorded_by cannot be null, so the events cannot
     // outlive the account. Refusing is better than erasing who did the
     // work, and better than the foreign key failing as a 500.
-    const recorded = await this.events.count({ where: { recordedBy: id } });
+    const recorded = await events.count({ where: { recordedBy: id } });
     if (recorded > 0) {
       throw new ConflictException(
         `${member.fullName} has recorded ${recorded} service ${
@@ -242,6 +256,6 @@ export class TeamService {
       );
     }
 
-    await this.users.delete({ id, organizationId });
+    await users.delete({ id });
   }
 }

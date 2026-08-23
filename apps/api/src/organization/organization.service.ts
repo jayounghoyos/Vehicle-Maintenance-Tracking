@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 
 import { Organization, User } from '../entities';
+import { TenantRepositories } from '../tenant/tenant-repository';
 import type { UpdateOrganizationDto } from './dto';
 
 /** What the organization tab shows. No is_active or deleted_at: either
@@ -26,14 +27,14 @@ export class OrganizationService {
   constructor(
     @InjectRepository(Organization)
     private readonly organizations: Repository<Organization>,
-    @InjectRepository(User) private readonly users: Repository<User>,
+    private readonly tenants: TenantRepositories,
   ) {}
 
   async get(organizationId: number): Promise<OrganizationProfile> {
     const org = await this.organizations.findOne({ where: { id: organizationId } });
     if (!org) throw new NotFoundException('No such organization');
 
-    const memberCount = await this.users.count({ where: { organizationId } });
+    const memberCount = await this.tenants.for(User, organizationId).count();
     return {
       id: org.id,
       name: org.name,
