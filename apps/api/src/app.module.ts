@@ -8,6 +8,7 @@ import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { entities } from './entities';
+import { OrganizationModule } from './organization/organization.module';
 import { TeamModule } from './team/team.module';
 import { HealthModule } from './health/health.module';
 
@@ -37,6 +38,7 @@ import { HealthModule } from './health/health.module';
     AuthModule,
     DashboardModule,
     TeamModule,
+    OrganizationModule,
     AdminModule,
   ],
   controllers: [AppController],
