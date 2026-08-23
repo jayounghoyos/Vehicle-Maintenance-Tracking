@@ -9,21 +9,13 @@ import { Field } from '../components/AuthLayout';
 import { ImportTeam } from '../components/ImportTeam';
 import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
+import { PANEL_LAYOUT } from '../components/panelLayout';
 import { SidePanel } from '../components/SidePanel';
 import { WorkspaceTabs } from '../components/WorkspaceTabs';
 import { api, type TeamMember } from '../lib/api';
 import { initials, roleLabel, shortDate } from '../lib/format';
 
 const ROLES = ['fleet_coordinator', 'mechanic', 'operations_manager'] as const;
-
-/* Written out rather than assembled from a variable: Tailwind reads the
- * source for class names, so an interpolated width would never be
- * generated. The import takes the wider one, for its example table. */
-const LAYOUT = {
-  none: '',
-  add: 'grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]',
-  import: 'grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_34rem]',
-};
 
 export default function Team() {
   const { principal } = useAuth();
@@ -80,7 +72,7 @@ export default function Team() {
           </p>
         )}
 
-        <div className={LAYOUT[panel ?? 'none']}>
+        <div className={panel ? PANEL_LAYOUT.open : PANEL_LAYOUT.closed}>
           <Panel
             title="Members"
             subtitle={

@@ -8,6 +8,7 @@ import { AppShell } from '../components/AppShell';
 import { Field } from '../components/AuthLayout';
 import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
+import { NARROW_PANEL_LAYOUT } from '../components/panelLayout';
 import { SidePanel } from '../components/SidePanel';
 import { WorkspaceTabs } from '../components/WorkspaceTabs';
 import { api, type OrganizationProfile } from '../lib/api';
@@ -75,11 +76,9 @@ export default function Organization() {
 
         {/* the same shape as the team screen: what you are reading
             stays put, and what you are filling in opens beside it */}
-        <div
-          className={
-            editing ? 'grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]' : ''
-          }
-        >
+        {/* the details are a short list of facts, so the reading column
+            is capped rather than run across a wide screen */}
+        <div className={editing ? NARROW_PANEL_LAYOUT.open : NARROW_PANEL_LAYOUT.closed}>
           <Panel
             title="Details"
             subtitle={
@@ -166,7 +165,7 @@ export default function Organization() {
           )}
         </div>
 
-        <p className="text-body text-ink-muted">
+        <p className="max-w-[44rem] text-body text-ink-muted">
           The contact email is not a login. People sign in with their own address, which
           is why suspending the organization is the platform admin's decision and not one
           that can be made from here.

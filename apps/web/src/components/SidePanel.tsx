@@ -20,7 +20,7 @@ export function SidePanel({
   children: React.ReactNode;
 }) {
   return (
-    <aside className="overflow-hidden rounded-2xl border border-white/5 bg-panel xl:sticky xl:top-6">
+    <aside className="min-w-0 overflow-hidden rounded-2xl border border-white/5 bg-panel xl:sticky xl:top-6">
       <header className="flex items-start justify-between gap-4 border-b border-white/5 px-5 py-4">
         <div>
           <h2 className="text-section font-semibold">{title}</h2>
