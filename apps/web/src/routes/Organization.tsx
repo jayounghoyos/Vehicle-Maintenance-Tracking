@@ -22,7 +22,7 @@ const FIELDS = [
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-4 px-5 py-3.5">
+    <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-white/5 px-5 py-3.5 lg:px-0">
       <dt className="text-body text-ink-muted">{label}</dt>
       <dd className="font-medium">{value}</dd>
     </div>
@@ -63,7 +63,9 @@ export default function Organization() {
       subtitle="The details this account is registered with"
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
-      <div className="max-w-3xl space-y-5">
+      {/* the tabs sit either side of the same width, so switching
+          between them does not resize the page under the cursor */}
+      <div className="space-y-5">
         <WorkspaceTabs />
 
         {error && (
@@ -98,7 +100,7 @@ export default function Organization() {
             </p>
           ) : editing ? (
             <form
-              className="grid gap-4 border-t border-white/5 bg-white/[0.02] p-5 sm:grid-cols-2"
+              className="grid gap-4 border-t border-white/5 bg-white/[0.02] p-5 sm:grid-cols-2 xl:grid-cols-3"
               onSubmit={(event) => {
                 event.preventDefault();
                 const form = new FormData(event.currentTarget);
@@ -110,7 +112,9 @@ export default function Organization() {
                 // own class, so a className here would be swallowed
                 <div
                   key={name}
-                  className={name === 'address' ? 'sm:col-span-2' : undefined}
+                  className={
+                    name === 'address' ? 'sm:col-span-2 xl:col-span-1' : undefined
+                  }
                 >
                   <Field
                     label={label}
@@ -121,7 +125,7 @@ export default function Organization() {
                   />
                 </div>
               ))}
-              <div className="flex gap-3 sm:col-span-2">
+              <div className="flex gap-3 sm:col-span-2 xl:col-span-3">
                 <button
                   type="submit"
                   disabled={save.isPending}
@@ -142,7 +146,7 @@ export default function Organization() {
               </div>
             </form>
           ) : (
-            <dl className="divide-y divide-white/5 border-t border-white/5">
+            <dl className="grid border-t border-white/5 lg:grid-cols-2 lg:gap-x-8 lg:px-5">
               {FIELDS.map(({ name, label }) => (
                 <Row key={name} label={label} value={org[name]} />
               ))}

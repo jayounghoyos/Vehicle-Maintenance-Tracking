@@ -11,7 +11,7 @@ import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { WorkspaceTabs } from '../components/WorkspaceTabs';
 import { api, type TeamMember } from '../lib/api';
-import { initials, roleLabel } from '../lib/format';
+import { initials, roleLabel, shortDate } from '../lib/format';
 
 const ROLES = ['fleet_coordinator', 'mechanic', 'operations_manager'] as const;
 
@@ -59,7 +59,10 @@ export default function Team() {
       subtitle="Who can sign in to this organization"
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
-      <div className="max-w-3xl space-y-5">
+      {/* full width: the members list, the add form and the import all
+          have columns worth spreading out, and a narrow column left two
+          thirds of the screen doing nothing */}
+      <div className="space-y-5">
         <WorkspaceTabs />
 
         {error && (
@@ -110,7 +113,7 @@ export default function Team() {
 
           {adding && canManage && (
             <form
-              className="grid gap-4 border-t border-white/5 bg-white/[0.02] p-5 sm:grid-cols-2"
+              className="grid gap-4 border-t border-white/5 bg-white/[0.02] p-5 sm:grid-cols-2 xl:grid-cols-4"
               onSubmit={(event) => {
                 event.preventDefault();
                 const form = new FormData(event.currentTarget);
@@ -140,7 +143,7 @@ export default function Team() {
                   ))}
                 </select>
               </label>
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-2 xl:col-span-4">
                 <button
                   type="submit"
                   disabled={create.isPending}
@@ -155,38 +158,64 @@ export default function Team() {
           {isPending ? (
             <p className="px-5 pb-6 text-body text-ink-muted">Loading the team…</p>
           ) : (
-            <ul className="divide-y divide-white/5 border-t border-white/5">
-              {members?.map((member) => (
-                <li key={member.id} className="flex items-center gap-4 px-5 py-3.5">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/10 text-[12px] font-semibold">
-                    {initials(member.fullName)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">
-                      {member.fullName}
-                      {member.id === me?.id && (
-                        <span className="ml-2 text-[12px] text-ink-muted">you</span>
-                      )}
-                    </p>
-                    <p className="truncate text-body text-ink-muted">{member.email}</p>
-                  </div>
-                  <span className="text-body text-ink-muted">
-                    {roleLabel(member.role)}
-                  </span>
-                  {/* removing yourself would lock the organization out of itself */}
-                  {canManage && member.id !== me?.id && (
-                    <button
-                      type="button"
-                      onClick={() => remove.mutate(member.id)}
-                      title={`Remove ${member.fullName}`}
-                      className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-overdue/15 hover:text-overdue"
-                    >
-                      <Trash2 className="size-4" strokeWidth={1.75} />
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
+            <div className="overflow-x-auto border-t border-white/5">
+              <table className="w-full min-w-[640px] text-left">
+                <thead>
+                  <tr className="border-b border-white/5">
+                    {['Person', 'Email', 'Role', 'Added', ''].map((heading) => (
+                      <th
+                        key={heading}
+                        className="px-5 py-3 text-table-label font-semibold text-ink-muted uppercase"
+                      >
+                        {heading}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {members?.map((member) => (
+                    <tr key={member.id}>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/10 text-[12px] font-semibold">
+                            {initials(member.fullName)}
+                          </span>
+                          <span className="font-medium">
+                            {member.fullName}
+                            {member.id === me?.id && (
+                              <span className="ml-2 text-[12px] text-ink-muted">you</span>
+                            )}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 text-body text-ink-muted">
+                        {member.email}
+                      </td>
+                      <td className="px-5 py-3.5 text-body text-ink-muted">
+                        {roleLabel(member.role)}
+                      </td>
+                      <td className="px-5 py-3.5 text-body text-ink-muted">
+                        {shortDate(member.createdAt)}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        {/* removing yourself would lock the organization
+                            out of itself */}
+                        {canManage && member.id !== me?.id && (
+                          <button
+                            type="button"
+                            onClick={() => remove.mutate(member.id)}
+                            title={`Remove ${member.fullName}`}
+                            className="ml-auto flex rounded-lg p-2 text-ink-muted transition-colors hover:bg-overdue/15 hover:text-overdue"
+                          >
+                            <Trash2 className="size-4" strokeWidth={1.75} />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Panel>
       </div>
