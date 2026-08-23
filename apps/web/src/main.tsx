@@ -11,6 +11,7 @@ import Login from './routes/Login.tsx';
 import Organization from './routes/Organization.tsx';
 import Register from './routes/Register.tsx';
 import Team from './routes/Team.tsx';
+import Vehicles from './routes/Vehicles.tsx';
 import { ToastProvider } from './toast/ToastProvider.tsx';
 import './index.css';
 
@@ -36,6 +37,14 @@ createRoot(document.getElementById('root')!).render(
                 element={
                   <RequireAuth kind="user">
                     <Dashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/vehicles"
+                element={
+                  <RequireAuth kind="user">
+                    <Vehicles />
                   </RequireAuth>
                 }
               />

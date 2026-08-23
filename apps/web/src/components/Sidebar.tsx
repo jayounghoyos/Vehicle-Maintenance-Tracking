@@ -13,11 +13,11 @@ import { Logo } from './Logo';
 
 type NavItem = { to: string; label: string; icon: LucideIcon; ready: boolean };
 
-// Only the dashboard is built. The rest stay visible so the workspace
-// reads as it does in the mockup, but they do not pretend to navigate.
+// What is not built yet stays visible so the workspace reads as it does
+// in the mockup, but it does not pretend to navigate.
 const NAV: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: LayoutGrid, ready: true },
-  { to: '/vehicles', label: 'Vehicles', icon: Truck, ready: false },
+  { to: '/vehicles', label: 'Vehicles', icon: Truck, ready: true },
   { to: '/schedules', label: 'Schedules', icon: CalendarClock, ready: false },
   { to: '/service-log', label: 'Service Log', icon: Wrench, ready: false },
   { to: '/reports', label: 'Reports', icon: BarChart3, ready: false },

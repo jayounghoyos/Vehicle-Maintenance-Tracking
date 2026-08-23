@@ -1,6 +1,7 @@
 import type { Principal } from '../auth/session';
 import { tokenStore } from '../auth/session';
 import type { MaintenanceState } from '../domain/maintenance';
+import type { VehicleStatus } from '../domain/vehicleStatus';
 
 export class ApiError extends Error {
   // declared and assigned rather than a parameter property: the tsconfig
@@ -91,6 +92,57 @@ export type OrganizationProfile = {
 export type ImportResult = {
   created: (TeamMember & { temporaryPassword: string })[];
   skipped: { row: number; email: string; reason: string }[];
+};
+
+export type VehicleRow = {
+  id: number;
+  plate: string;
+  make: string;
+  model: string;
+  year: number | null;
+  odometerKm: number;
+  /** where the vehicle is */
+  status: VehicleStatus;
+  /** whether its maintenance is behind, which is a different question */
+  state: MaintenanceState;
+  nextTask: string | null;
+  nextDueDate: string | null;
+  scheduleCount: number;
+  serviceEventCount: number;
+  createdAt: string;
+};
+
+export type ScheduleItem = {
+  id: number;
+  task: string;
+  intervalDays: number | null;
+  intervalKm: number | null;
+  nextDueDate: string | null;
+  nextDueKm: number | null;
+  state: MaintenanceState;
+};
+
+export type ServiceEventItem = {
+  id: number;
+  task: string;
+  type: 'preventive' | 'corrective';
+  performedAt: string;
+  odometerKm: number | null;
+  notes: string | null;
+  recorder: string;
+};
+
+export type VehicleDetail = VehicleRow & {
+  schedules: ScheduleItem[];
+  recentEvents: ServiceEventItem[];
+};
+
+export type VehicleImportResult = {
+  created: VehicleRow[];
+  skipped: { row: number; plate: string; reason: string }[];
+  /** vehicle_models is shared by every organization, so a typo here is
+   *  a typo everybody sees. Naming them lets it be caught. */
+  createdModels: string[];
 };
 
 export type TeamMember = {
