@@ -55,3 +55,89 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/* The import demonstration. One 9 second loop, three beats: the rows in
+   the spreadsheet are selected, they travel, they land in the box. Kept
+   in CSS rather than driven from React so it costs no renders. */
+@keyframes mts-select {
+  0%,
+  4% {
+    opacity: 0;
+    transform: scaleY(0.2);
+  }
+  12%,
+  38% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  46%,
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes mts-travel {
+  0%,
+  38% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.9);
+  }
+  44% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  62% {
+    opacity: 1;
+    transform: translate(var(--mts-travel-x), var(--mts-travel-y)) scale(1);
+  }
+  68%,
+  100% {
+    opacity: 0;
+    transform: translate(var(--mts-travel-x), var(--mts-travel-y)) scale(0.96);
+  }
+}
+
+@keyframes mts-land {
+  0%,
+  62% {
+    opacity: 0;
+  }
+  70%,
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.mts-demo-select {
+  animation: mts-select 9s ease-in-out infinite;
+  transform-origin: top;
+}
+
+.mts-demo-travel {
+  animation: mts-travel 9s ease-in-out infinite;
+}
+
+.mts-demo-land {
+  animation: mts-land 9s ease-in-out infinite;
+}
+
+/* somebody who asked the system to calm down gets the end state, which
+   is the one that explains the most */
+@media (prefers-reduced-motion: reduce) {
+  .mts-demo-select,
+  .mts-demo-travel,
+  .mts-demo-land {
+    animation: none;
+  }
+  .mts-demo-travel {
+    display: none;
+  }
+  .mts-demo-select,
+  .mts-demo-land {
+    opacity: 1;
+  }
+}
