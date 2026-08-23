@@ -8,6 +8,7 @@ import { AppShell } from '../components/AppShell';
 import { Field } from '../components/AuthLayout';
 import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
+import { WorkspaceTabs } from '../components/WorkspaceTabs';
 import { api, type TeamMember } from '../lib/api';
 import { initials, roleLabel } from '../lib/format';
 
@@ -57,6 +58,8 @@ export default function Team() {
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
       <div className="max-w-3xl space-y-5">
+        <WorkspaceTabs />
+
         {error && (
           <p className="rounded-xl bg-overdue/15 px-4 py-3 text-body text-overdue">
             {error}
