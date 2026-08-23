@@ -1,10 +1,20 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { MaintenanceTask } from './maintenance-task.entity';
 import { Organization } from './organization.entity';
 import { Vehicle } from './vehicle.entity';
 
 /** The rule: every N days or N kilometres. At least one interval is set. */
+@Index('maintenance_schedules_organization_idx', ['organizationId'])
+@Index('maintenance_schedules_vehicle_idx', ['vehicleId'])
+@Index('maintenance_schedules_task_idx', ['taskId'])
 @Entity('maintenance_schedules')
 export class MaintenanceSchedule {
   @PrimaryGeneratedColumn()

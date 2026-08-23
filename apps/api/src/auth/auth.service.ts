@@ -89,6 +89,11 @@ export class AuthService {
       throw new UnauthorizedException('Wrong email or password');
     }
 
+    // checked after the password, so this cannot be used to find out
+    // which addresses belong to somebody who left
+    if (user.deletedAt !== null) {
+      throw new ForbiddenException('This account is no longer active');
+    }
     if (user.organization.deletedAt !== null) {
       throw new ForbiddenException('This organization no longer exists');
     }
@@ -141,7 +146,7 @@ export class AuthService {
       where: { id: payload.sub },
       relations: { organization: true },
     });
-    if (!user) throw new UnauthorizedException();
+    if (!user || user.deletedAt !== null) throw new UnauthorizedException();
     if (user.organization.deletedAt !== null || !user.organization.isActive) {
       throw new ForbiddenException('This organization is not available');
     }

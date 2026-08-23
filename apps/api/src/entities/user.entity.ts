@@ -1,8 +1,16 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { UserRole } from './enums';
 import { Organization } from './organization.entity';
 
+@Index('users_organization_idx', ['organizationId'])
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
@@ -31,6 +39,12 @@ export class User {
 
   @Column({ type: 'enum', enum: UserRole, enumName: 'user_role' })
   role: UserRole;
+
+  /** set when the person leaves: the row stays so the service events
+   *  they recorded still say who did the work, and the account stops
+   *  working at once */
+  @Column({ type: 'timestamp', name: 'deleted_at', nullable: true })
+  deletedAt: Date | null;
 
   @Column({ type: 'timestamp', name: 'created_at', default: () => 'now()' })
   createdAt: Date;

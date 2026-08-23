@@ -1,10 +1,16 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { IsNull, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 import { hashPassword } from '../auth/password';
 import { ServiceEvent, User, UserRole } from '../entities';
-import type { CreateWorkerDto, ImportTeamDto } from './dto';
+import { TenantRepositories, type TenantRepository } from '../tenant/tenant-repository';
+import type { CreateWorkerDto, ImportTeamDto, UpdateMemberDto } from './dto';
 import { temporaryPassword } from './password-generator';
 
 export type TeamMember = {
@@ -12,6 +18,11 @@ export type TeamMember = {
   fullName: string;
   email: string;
   role: UserRole;
+  /** false once the person has left: the row stays, the login does not */
+  active: boolean;
+  /** how much history is attached to them, which is what decides
+   *  whether the account can be removed rather than only retired */
+  recordedEvents: number;
   createdAt: Date;
 };
 
@@ -29,41 +40,73 @@ export type ImportResult = {
 @Injectable()
 export class TeamService {
   constructor(
-    @InjectRepository(User) private readonly users: Repository<User>,
-    @InjectRepository(ServiceEvent)
-    private readonly events: Repository<ServiceEvent>,
+    private readonly tenants: TenantRepositories,
+    /** the whole users table, only ever read to find out whether an
+     *  address is taken somewhere else on the platform */
+    @InjectRepository(User) private readonly everyUser: Repository<User>,
   ) {}
 
+  private scoped(organizationId: number): {
+    users: TenantRepository<User>;
+    events: TenantRepository<ServiceEvent>;
+  } {
+    return {
+      users: this.tenants.for(User, organizationId),
+      events: this.tenants.for(ServiceEvent, organizationId),
+    };
+  }
+
   async list(organizationId: number): Promise<TeamMember[]> {
-    const rows = await this.users.find({
-      where: { organizationId },
-      order: { createdAt: 'ASC' },
+    const rows = await this.scoped(organizationId).users.find({
+      // id breaks the tie: a whole import shares one timestamp, and
+      // without it an updated row wanders to wherever postgres put it
+      order: { createdAt: 'ASC', id: 'ASC' },
     });
+    const counts = await this.eventCounts(organizationId);
     // password_hash is never in the shape this returns
-    return rows.map(({ id, fullName, email, role, createdAt }) => ({
-      id,
-      fullName,
-      email,
-      role,
-      createdAt,
-    }));
+    return rows.map((user) => this.asMember(user, counts.get(user.id) ?? 0));
+  }
+
+  /** One grouped query rather than one per member. */
+  private async eventCounts(organizationId: number): Promise<Map<number, number>> {
+    const rows = await this.scoped(organizationId)
+      .events.builder('event')
+      .select('event.recorded_by', 'userId')
+      .addSelect('count(*)', 'count')
+      .groupBy('event.recorded_by')
+      .getRawMany<{ userId: number; count: string }>();
+    return new Map(rows.map((row) => [Number(row.userId), Number(row.count)]));
+  }
+
+  private asMember(user: User, recordedEvents: number): TeamMember {
+    return {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      active: user.deletedAt === null,
+      recordedEvents,
+      createdAt: user.createdAt,
+    };
   }
 
   async create(organizationId: number, dto: CreateWorkerDto): Promise<TeamMember> {
-    const taken = await this.users.findOne({ where: { email: dto.email } });
+    // across the platform, not this organization: the login namespace is
+    // shared, so an address taken anywhere is taken here
+    const taken = await this.everyUser.findOne({ where: { email: dto.email } });
     if (taken) throw new ConflictException('That email is already registered');
 
-    const user = await this.users.save(
-      this.users.create({
-        organizationId,
+    const users = this.scoped(organizationId).users;
+    const user = await users.save(
+      users.create({
         fullName: dto.fullName,
         email: dto.email,
         passwordHash: await hashPassword(dto.password),
         role: dto.role,
       }),
     );
-    const { id, fullName, email, role, createdAt } = user;
-    return { id, fullName, email, role, createdAt };
+    // brand new, so nothing is attached to them yet
+    return this.asMember(user, 0);
   }
 
   /**
@@ -94,8 +137,9 @@ export class TeamService {
       wanted.set(email, { row: index, member });
     });
 
-    // one query for every address rather than one query each
-    const taken = await this.users.find({
+    // one query for every address rather than one query each, and over
+    // the whole platform, since the login namespace is shared
+    const taken = await this.everyUser.find({
       where: [...wanted.keys()].map((email) => ({ email })),
       select: { email: true },
     });
@@ -117,10 +161,10 @@ export class TeamService {
     // so hashing the batch together beats hashing it one at a time
     const hashes = await Promise.all(passwords.map((plain) => hashPassword(plain)));
 
-    const saved = await this.users.save(
+    const users = this.scoped(organizationId).users;
+    const saved = await users.save(
       pending.map(({ member }, index) =>
-        this.users.create({
-          organizationId,
+        users.create({
           fullName: member.fullName,
           email: member.email,
           passwordHash: hashes[index],
@@ -131,11 +175,7 @@ export class TeamService {
 
     return {
       created: saved.map((user, index) => ({
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt,
+        ...this.asMember(user, 0),
         // nothing to hand back for a password the caller already chose
         temporaryPassword: chosen[index] === null ? passwords[index] : null,
       })),
@@ -143,26 +183,97 @@ export class TeamService {
     };
   }
 
+  /**
+   * Change what an account is called, how it signs in, what it may do,
+   * or whether it still works here.
+   *
+   * The last two are never done to your own account: a coordinator who
+   * demoted or retired themselves could leave an organization nobody can
+   * administer. Name, email and password are your own to change, and
+   * refusing those would mean nobody could ever change their password.
+   */
+  async update(
+    organizationId: number,
+    actingUserId: number,
+    id: number,
+    dto: UpdateMemberDto,
+  ): Promise<TeamMember> {
+    if (id === actingUserId && (dto.role !== undefined || dto.active !== undefined)) {
+      throw new BadRequestException(
+        'You cannot change your own role or retire your own account',
+      );
+    }
+    const users = this.scoped(organizationId).users;
+    const member = await users.findOne({ where: { id } });
+    if (!member) throw new NotFoundException('No such team member');
+
+    if (dto.email !== undefined && dto.email !== member.email) {
+      // across the platform, since the login namespace is shared
+      const taken = await this.everyUser.findOne({ where: { email: dto.email } });
+      if (taken) throw new ConflictException('That email is already registered');
+      member.email = dto.email;
+    }
+    if (dto.fullName !== undefined) member.fullName = dto.fullName;
+    // hashed here and never read back: the only copy that exists after
+    // this is the one the coordinator just typed
+    if (dto.password !== undefined)
+      member.passwordHash = await hashPassword(dto.password);
+
+    const losesCoordinator =
+      member.role === UserRole.FLEET_COORDINATOR &&
+      ((dto.role !== undefined && dto.role !== UserRole.FLEET_COORDINATOR) ||
+        dto.active === false);
+
+    if (losesCoordinator && (await this.otherCoordinators(organizationId, id)) === 0) {
+      throw new ConflictException(
+        'The organization would be left with no fleet coordinator',
+      );
+    }
+
+    if (dto.role !== undefined) member.role = dto.role;
+    if (dto.active !== undefined) member.deletedAt = dto.active ? null : new Date();
+
+    const saved = await users.save(member);
+    const counts = await this.eventCounts(organizationId);
+    return this.asMember(saved, counts.get(saved.id) ?? 0);
+  }
+
+  private otherCoordinators(organizationId: number, exceptId: number): Promise<number> {
+    return this.scoped(organizationId).users.count({
+      where: {
+        role: UserRole.FLEET_COORDINATOR,
+        deletedAt: IsNull(),
+        id: Not(exceptId),
+      },
+    });
+  }
+
+  /**
+   * Permanent, and only for an account nothing is attached to yet: the
+   * mistyped address that was never used. Anybody who has recorded work
+   * is retired instead, so the events keep saying who did them.
+   */
   async remove(organizationId: number, actingUserId: number, id: number): Promise<void> {
     if (id === actingUserId) {
       throw new BadRequestException('You cannot remove your own account');
     }
-    // scoped by organization, so an id from another client matches nothing
-    const member = await this.users.findOne({ where: { id, organizationId } });
-    if (!member) throw new ConflictException('No such team member');
+    const { users, events } = this.scoped(organizationId);
+    // an id from another client matches nothing here, by construction
+    const member = await users.findOne({ where: { id } });
+    if (!member) throw new NotFoundException('No such team member');
 
     // service_events.recorded_by cannot be null, so the events cannot
     // outlive the account. Refusing is better than erasing who did the
     // work, and better than the foreign key failing as a 500.
-    const recorded = await this.events.count({ where: { recordedBy: id } });
+    const recorded = await events.count({ where: { recordedBy: id } });
     if (recorded > 0) {
       throw new ConflictException(
         `${member.fullName} has recorded ${recorded} service ${
           recorded === 1 ? 'event' : 'events'
-        }, so the account cannot be removed`,
+        }, so the account can only be retired`,
       );
     }
 
-    await this.users.delete({ id, organizationId });
+    await users.delete({ id });
   }
 }

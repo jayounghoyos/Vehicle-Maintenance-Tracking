@@ -141,3 +141,26 @@
     opacity: 1;
   }
 }
+
+/* A toast arrives from below and settles. Short, because it confirms
+   something that already happened rather than asking for attention. */
+@keyframes mts-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mts-toast {
+  animation: mts-toast-in 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mts-toast {
+    animation: none;
+  }
+}

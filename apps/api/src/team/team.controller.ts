@@ -7,6 +7,7 @@ import {
   HttpCode,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -15,7 +16,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Principal } from '../auth/auth.types';
 import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../auth/guards';
 import { UserRole } from '../entities';
-import { CreateWorkerDto, ImportTeamDto } from './dto';
+import { CreateWorkerDto, ImportTeamDto, UpdateMemberDto } from './dto';
 import { TeamService, type ImportResult, type TeamMember } from './team.service';
 
 /**
@@ -64,10 +65,22 @@ export class TeamController {
     return this.team.importMany(this.asUser(principal).organizationId, dto);
   }
 
+  @Patch(':id')
+  @Roles(UserRole.FLEET_COORDINATOR)
+  @ApiOperation({ summary: 'Change a role, or retire an account and bring it back' })
+  update(
+    @CurrentUser() principal: Principal,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateMemberDto,
+  ): Promise<TeamMember> {
+    const user = this.asUser(principal);
+    return this.team.update(user.organizationId, user.id, id, dto);
+  }
+
   @Delete(':id')
   @Roles(UserRole.FLEET_COORDINATOR)
   @HttpCode(204)
-  @ApiOperation({ summary: 'Remove a worker account' })
+  @ApiOperation({ summary: 'Permanently remove an account with no history' })
   remove(
     @CurrentUser() principal: Principal,
     @Param('id', ParseIntPipe) id: number,
