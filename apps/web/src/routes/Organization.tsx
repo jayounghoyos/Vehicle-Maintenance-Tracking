@@ -8,6 +8,8 @@ import { AppShell } from '../components/AppShell';
 import { Field } from '../components/AuthLayout';
 import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
+import { NARROW_PANEL_LAYOUT } from '../components/panelLayout';
+import { SidePanel } from '../components/SidePanel';
 import { WorkspaceTabs } from '../components/WorkspaceTabs';
 import { api, type OrganizationProfile } from '../lib/api';
 import { shortDate } from '../lib/format';
@@ -22,7 +24,7 @@ const FIELDS = [
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-4 px-5 py-3.5">
+    <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-white/5 px-5 py-3.5 lg:px-0">
       <dt className="text-body text-ink-muted">{label}</dt>
       <dd className="font-medium">{value}</dd>
     </div>
@@ -63,7 +65,7 @@ export default function Organization() {
       subtitle="The details this account is registered with"
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
-      <div className="max-w-3xl space-y-5">
+      <div className="space-y-5">
         <WorkspaceTabs />
 
         {error && (
@@ -72,87 +74,98 @@ export default function Organization() {
           </p>
         )}
 
-        <Panel
-          title="Details"
-          subtitle={
-            canEdit
-              ? 'Who the platform calls about this account'
-              : 'Only the fleet coordinator can change these'
-          }
-          action={
-            canEdit && !editing ? (
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink"
-              >
-                <Pencil className="size-4" strokeWidth={1.75} />
-                Edit
-              </button>
-            ) : undefined
-          }
-        >
-          {isPending || !org ? (
-            <p className="px-5 pb-6 text-body text-ink-muted">
-              Loading the organization…
-            </p>
-          ) : editing ? (
-            <form
-              className="grid gap-4 border-t border-white/5 bg-white/[0.02] p-5 sm:grid-cols-2"
-              onSubmit={(event) => {
-                event.preventDefault();
-                const form = new FormData(event.currentTarget);
-                save.mutate(Object.fromEntries(form) as Record<string, string>);
+        {/* the same shape as the team screen: what you are reading
+            stays put, and what you are filling in opens beside it */}
+        {/* the details are a short list of facts, so the reading column
+            is capped rather than run across a wide screen */}
+        <div className={editing ? NARROW_PANEL_LAYOUT.open : NARROW_PANEL_LAYOUT.closed}>
+          <Panel
+            title="Details"
+            subtitle={
+              canEdit
+                ? 'Who the platform calls about this account'
+                : 'Only the fleet coordinator can change these'
+            }
+            action={
+              canEdit && !editing ? (
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink"
+                >
+                  <Pencil className="size-4" strokeWidth={1.75} />
+                  Edit
+                </button>
+              ) : undefined
+            }
+          >
+            {isPending || !org ? (
+              <p className="px-5 pb-6 text-body text-ink-muted">
+                Loading the organization…
+              </p>
+            ) : (
+              <dl className="grid border-t border-white/5 lg:grid-cols-2 lg:gap-x-8 lg:px-5">
+                {FIELDS.map(({ name, label }) => (
+                  <Row key={name} label={label} value={org[name]} />
+                ))}
+                <Row label="Members" value={org.memberCount} />
+                <Row label="Client since" value={shortDate(org.createdAt)} />
+              </dl>
+            )}
+          </Panel>
+
+          {editing && org && (
+            <SidePanel
+              title="Edit details"
+              subtitle="Saved when you confirm"
+              onClose={() => {
+                setEditing(false);
+                setError(null);
               }}
             >
-              {FIELDS.map(({ name, label, type }) => (
-                // the wrapper carries the span: Field owns the input's
-                // own class, so a className here would be swallowed
-                <div
-                  key={name}
-                  className={name === 'address' ? 'sm:col-span-2' : undefined}
-                >
+              <form
+                className="grid gap-4 p-5"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const form = new FormData(event.currentTarget);
+                  save.mutate(Object.fromEntries(form) as Record<string, string>);
+                }}
+              >
+                {FIELDS.map(({ name, label, type }) => (
                   <Field
+                    key={name}
                     label={label}
                     name={name}
                     type={type}
                     defaultValue={org[name]}
                     required
                   />
+                ))}
+                <div className="mt-1 flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={save.isPending}
+                    className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page disabled:opacity-50"
+                  >
+                    {save.isPending ? 'Saving…' : 'Save changes'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditing(false);
+                      setError(null);
+                    }}
+                    className="rounded-xl border border-white/10 px-4 py-2.5 text-body text-ink-muted transition-colors hover:text-ink"
+                  >
+                    Cancel
+                  </button>
                 </div>
-              ))}
-              <div className="flex gap-3 sm:col-span-2">
-                <button
-                  type="submit"
-                  disabled={save.isPending}
-                  className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page disabled:opacity-50"
-                >
-                  {save.isPending ? 'Saving…' : 'Save changes'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditing(false);
-                    setError(null);
-                  }}
-                  className="rounded-xl border border-white/10 px-4 py-2.5 text-body text-ink-muted transition-colors hover:text-ink"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          ) : (
-            <dl className="divide-y divide-white/5 border-t border-white/5">
-              {FIELDS.map(({ name, label }) => (
-                <Row key={name} label={label} value={org[name]} />
-              ))}
-              <Row label="Members" value={org.memberCount} />
-              <Row label="Client since" value={shortDate(org.createdAt)} />
-            </dl>
+              </form>
+            </SidePanel>
           )}
-        </Panel>
+        </div>
 
-        <p className="text-body text-ink-muted">
+        <p className="max-w-[44rem] text-body text-ink-muted">
           The contact email is not a login. People sign in with their own address, which
           is why suspending the organization is the platform admin's decision and not one
           that can be made from here.

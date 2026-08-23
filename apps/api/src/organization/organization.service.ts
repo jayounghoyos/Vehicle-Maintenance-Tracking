@@ -57,7 +57,7 @@ export class OrganizationService {
       } catch (err: unknown) {
         // the name is unique among the organizations that are not
         // deleted, and a taken name is the caller's mistake, not ours
-        if (err instanceof QueryFailedError && this.isUniqueViolation(err)) {
+        if (this.isUniqueViolation(err)) {
           throw new ConflictException('Another organization already uses that name');
         }
         throw err;
@@ -66,7 +66,8 @@ export class OrganizationService {
     return this.get(organizationId);
   }
 
-  private isUniqueViolation(err: QueryFailedError): boolean {
+  private isUniqueViolation(err: unknown): boolean {
+    if (!(err instanceof QueryFailedError)) return false;
     return (err.driverError as { code?: string } | undefined)?.code === UNIQUE_VIOLATION;
   }
 }

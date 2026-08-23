@@ -86,6 +86,13 @@ export type OrganizationProfile = {
   createdAt: string;
 };
 
+/** The answer to a bulk import. `row` indexes the list that was sent,
+ *  not the pasted text, so the screen maps it back to a line number. */
+export type ImportResult = {
+  created: (TeamMember & { temporaryPassword: string })[];
+  skipped: { row: number; email: string; reason: string }[];
+};
+
 export type TeamMember = {
   id: number;
   fullName: string;
