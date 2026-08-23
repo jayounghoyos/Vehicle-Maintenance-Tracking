@@ -75,6 +75,17 @@ export type DashboardResponse = {
   }[];
 };
 
+export type OrganizationProfile = {
+  id: number;
+  name: string;
+  ownerName: string;
+  address: string;
+  phone: string;
+  email: string;
+  memberCount: number;
+  createdAt: string;
+};
+
 export type TeamMember = {
   id: number;
   fullName: string;

@@ -2,6 +2,7 @@ import { AlertTriangle, LogOut } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
+import { isReadOnly } from '../auth/permissions';
 import { initials, roleLabel } from '../lib/format';
 
 export function SidebarFooter({
@@ -11,8 +12,11 @@ export function SidebarFooter({
   user: { fullName: string; role?: string };
   overdueCount?: number;
 }) {
-  const { signOut } = useAuth();
+  const { principal, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  // said once, here, so a role that can change nothing is not left to
+  // work it out from buttons that never appear
+  const readOnly = isReadOnly(principal);
 
   return (
     <div className="space-y-4">
@@ -51,8 +55,17 @@ export function SidebarFooter({
           </span>
           <span className="min-w-0 flex-1 leading-tight">
             <span className="block truncate font-medium">{user.fullName}</span>
-            <span className="block truncate text-[12px] text-ink-muted">
-              {user.role ? roleLabel(user.role) : 'Platform admin'}
+            <span className="flex items-center gap-1.5 text-[12px] text-ink-muted">
+              <span className="truncate">
+                {user.role ? roleLabel(user.role) : 'Platform admin'}
+              </span>
+              {readOnly && (
+                // neutral on purpose: the manual keeps orange, amber and
+                // green for maintenance state and nothing else
+                <span className="shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
+                  Read only
+                </span>
+              )}
             </span>
           </span>
           <LogOut

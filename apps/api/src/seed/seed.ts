@@ -59,6 +59,8 @@ async function seed(): Promise<void> {
 
   const passwordHash = await hashPassword(DEV_PASSWORD);
 
+  // one of each role, so the difference between them can be seen by
+  // signing in rather than by reading the guards
   const [ana, carlos] = await db.save(User, [
     {
       organizationId: org.id,
@@ -73,6 +75,13 @@ async function seed(): Promise<void> {
       email: 'carlos@citylogistics.co',
       passwordHash,
       role: UserRole.MECHANIC,
+    },
+    {
+      organizationId: org.id,
+      fullName: 'Laura Gomez',
+      email: 'laura@citylogistics.co',
+      passwordHash,
+      role: UserRole.OPERATIONS_MANAGER,
     },
   ]);
 
@@ -258,12 +267,13 @@ async function seed(): Promise<void> {
   ]);
 
   console.log(
-    `seeded: 1 organization, 2 users, 1 platform admin, ${models.length} models, ${vehicles.length} vehicles, ${tasks.length} tasks, ${schedules.length} schedules, 4 service events`,
+    `seeded: 1 organization, 3 users, 1 platform admin, ${models.length} models, ${vehicles.length} vehicles, ${tasks.length} tasks, ${schedules.length} schedules, 4 service events`,
   );
   console.log('');
   console.log('  sign in with            password');
   console.log(`  ana@citylogistics.co    ${DEV_PASSWORD}   (fleet coordinator)`);
   console.log(`  carlos@citylogistics.co ${DEV_PASSWORD}   (mechanic)`);
+  console.log(`  laura@citylogistics.co  ${DEV_PASSWORD}   (operations manager)`);
   console.log(`  admin@mts.local         ${DEV_PASSWORD}   (platform admin)`);
   console.log('');
   await dataSource.destroy();

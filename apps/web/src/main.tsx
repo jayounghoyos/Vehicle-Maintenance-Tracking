@@ -8,6 +8,7 @@ import { RequireAuth } from './auth/RequireAuth.tsx';
 import Admin from './routes/Admin.tsx';
 import Dashboard from './routes/Dashboard.tsx';
 import Login from './routes/Login.tsx';
+import Organization from './routes/Organization.tsx';
 import Register from './routes/Register.tsx';
 import Team from './routes/Team.tsx';
 import './index.css';
@@ -41,6 +42,14 @@ createRoot(document.getElementById('root')!).render(
               element={
                 <RequireAuth kind="user">
                   <Team />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/team/organization"
+              element={
+                <RequireAuth kind="user">
+                  <Organization />
                 </RequireAuth>
               }
             />

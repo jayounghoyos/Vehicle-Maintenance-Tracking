@@ -1,4 +1,4 @@
-import { Plus, Search } from 'lucide-react';
+import { Search, type LucideIcon } from 'lucide-react';
 
 import { Sidebar } from './Sidebar';
 
@@ -6,12 +6,14 @@ type Props = {
   /** page title and subtitle, left of the header */
   title: React.ReactNode;
   subtitle?: React.ReactNode;
+  /** the one lime action for this screen, if the role has one */
+  action?: React.ReactNode;
   /** rendered at the bottom of the sidebar */
   sidebarFooter?: React.ReactNode;
   children: React.ReactNode;
 };
 
-export function AppShell({ title, subtitle, sidebarFooter, children }: Props) {
+export function AppShell({ title, subtitle, action, sidebarFooter, children }: Props) {
   return (
     <div className="flex min-h-screen bg-page text-ink">
       <Sidebar footer={sidebarFooter} />
@@ -32,19 +34,36 @@ export function AppShell({ title, subtitle, sidebarFooter, children }: Props) {
                 className="w-80 rounded-xl border border-white/10 bg-panel py-2.5 pr-4 pl-10 text-body placeholder:text-ink-muted focus:border-lime/40 focus:outline-none"
               />
             </div>
-            {/* lime is spent here: the one action that matters on screen */}
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page transition-opacity hover:opacity-90"
-            >
-              <Plus className="size-4" strokeWidth={2.5} />
-              Log service
-            </button>
+            {action}
           </div>
         </header>
 
         <main className="px-8 pb-10">{children}</main>
       </div>
     </div>
+  );
+}
+
+/** The one lime action a screen is allowed. A role that may not perform
+ *  it gets no disabled button: an action you can never take is noise, so
+ *  the screen simply does not offer it. */
+export function PrimaryAction({
+  icon: Icon,
+  children,
+  onClick,
+}: {
+  icon: LucideIcon;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-2 rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page transition-opacity hover:opacity-90"
+    >
+      <Icon className="size-4" strokeWidth={2.5} />
+      {children}
+    </button>
   );
 }

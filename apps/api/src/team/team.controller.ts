@@ -18,11 +18,17 @@ import { UserRole } from '../entities';
 import { CreateWorkerDto } from './dto';
 import { TeamService, type TeamMember } from './team.service';
 
-/** The coordinator runs the fleet, so the coordinator staffs it. */
+/**
+ * Everyone in the organization may see who their colleagues are. Only the
+ * coordinator staffs the fleet, so only the coordinator writes here.
+ *
+ * The split is per method rather than per controller on purpose: hiding
+ * the list from a mechanic would say the roles differ in what they know,
+ * when what they really differ in is what they may change.
+ */
 @ApiTags('team')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.FLEET_COORDINATOR)
 @Controller('team')
 export class TeamController {
   constructor(private readonly team: TeamService) {}
@@ -39,6 +45,7 @@ export class TeamController {
   }
 
   @Post()
+  @Roles(UserRole.FLEET_COORDINATOR)
   @ApiOperation({ summary: 'Create a worker account' })
   create(
     @CurrentUser() principal: Principal,
@@ -48,6 +55,7 @@ export class TeamController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.FLEET_COORDINATOR)
   @HttpCode(204)
   @ApiOperation({ summary: 'Remove a worker account' })
   remove(
