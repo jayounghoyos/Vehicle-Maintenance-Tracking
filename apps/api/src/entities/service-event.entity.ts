@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { ServiceType } from './enums';
 import { MaintenanceSchedule } from './maintenance-schedule.entity';
@@ -7,6 +14,10 @@ import { Organization } from './organization.entity';
 import { User } from './user.entity';
 import { Vehicle } from './vehicle.entity';
 
+@Index('service_events_organization_performed_idx', ['organizationId', 'performedAt'])
+@Index('service_events_vehicle_idx', ['vehicleId'])
+@Index('service_events_schedule_idx', ['scheduleId'])
+@Index('service_events_recorded_by_idx', ['recordedBy'])
 @Entity('service_events')
 export class ServiceEvent {
   @PrimaryGeneratedColumn()

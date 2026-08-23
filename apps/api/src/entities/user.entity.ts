@@ -1,8 +1,16 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { UserRole } from './enums';
 import { Organization } from './organization.entity';
 
+@Index('users_organization_idx', ['organizationId'])
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()

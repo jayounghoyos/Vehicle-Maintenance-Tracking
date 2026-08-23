@@ -18,6 +18,7 @@ import { VehicleModel } from './vehicle-model.entity';
 @Index('vehicles_organization_plate_unique', ['organizationId', 'plate'], {
   unique: true,
 })
+@Index('vehicles_model_idx', ['modelId'])
 @Entity('vehicles')
 export class Vehicle {
   @PrimaryGeneratedColumn()
