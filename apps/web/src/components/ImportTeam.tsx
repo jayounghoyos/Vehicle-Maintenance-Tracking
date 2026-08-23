@@ -93,7 +93,7 @@ function Instructions() {
         {[
           'Open the spreadsheet with your people in it.',
           'Select the rows and copy them, with Ctrl and C.',
-          'Click the box on the right and paste, with Ctrl and V.',
+          'Click the box below and paste, with Ctrl and V.',
         ].map((step, index) => (
           <li key={step} className="flex gap-3 text-body">
             <span className="grid size-5 shrink-0 place-items-center rounded-full bg-white/10 text-[11px] font-semibold">
@@ -296,7 +296,7 @@ export function ImportTeam({ onImported }: { onImported: () => void }) {
 
   if (result) {
     return (
-      <div className="border-t border-white/5 bg-white/[0.02] p-5">
+      <div className="p-5">
         <Result
           result={result}
           rows={sent}
@@ -310,7 +310,7 @@ export function ImportTeam({ onImported }: { onImported: () => void }) {
   }
 
   return (
-    <div className="grid gap-6 border-t border-white/5 bg-white/[0.02] p-5 lg:grid-cols-2">
+    <div className="space-y-5 p-5">
       <Instructions />
 
       <div className="flex min-w-0 flex-col gap-3">
