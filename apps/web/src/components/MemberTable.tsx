@@ -30,6 +30,13 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: 'added', label: 'Added' },
 ];
 
+/* Dates read newest first, everything else reads forwards. */
+const startsAscending = (key: SortKey) => key !== 'added';
+
+/** How the list arrives: after an import, the rows worth looking at are
+ *  the ones that were just created. */
+const DEFAULT_SORT: Sort = { key: 'added', ascending: false };
+
 function compare(a: TeamMember, b: TeamMember, key: SortKey): number {
   switch (key) {
     case 'person':
@@ -45,33 +52,47 @@ function compare(a: TeamMember, b: TeamMember, key: SortKey): number {
 
 function SortHeader({
   label,
-  active,
-  ascending,
+  sort,
+  rank,
+  showRank,
   onClick,
 }: {
   label: string;
-  active: boolean;
-  ascending: boolean;
+  sort: Sort | undefined;
+  /** where this column sits in the order, once more than one is on */
+  rank: number;
+  showRank: boolean;
   onClick: () => void;
 }) {
-  const Icon = active ? (ascending ? ArrowUp : ArrowDown) : ChevronsUpDown;
+  const Icon = sort ? (sort.ascending ? ArrowUp : ArrowDown) : ChevronsUpDown;
   return (
     <th className="px-5 py-3 text-left">
       <button
         type="button"
         onClick={onClick}
-        aria-sort={active ? (ascending ? 'ascending' : 'descending') : 'none'}
-        className={`group flex items-center gap-1.5 text-table-label font-semibold uppercase transition-colors ${
-          active ? 'text-ink' : 'text-ink-muted hover:text-ink'
+        aria-sort={sort ? (sort.ascending ? 'ascending' : 'descending') : 'none'}
+        title={
+          sort
+            ? `Sorted ${sort.ascending ? 'A to Z' : 'Z to A'}. Click to flip, once more to stop sorting by ${label.toLowerCase()}`
+            : `Sort by ${label.toLowerCase()}`
+        }
+        className={`flex items-center gap-1.5 text-table-label font-semibold uppercase transition-colors ${
+          sort ? 'text-ink' : 'text-ink-muted hover:text-ink'
         }`}
       >
         {label}
+        {/* always drawn, never only on hover: an arrow that appears when
+            the cursor arrives is an arrow nobody knows is there, and the
+            heading reads as plain text instead of a control */}
         <Icon
-          className={`size-3.5 transition-opacity ${
-            active ? 'text-lime' : 'opacity-0 group-hover:opacity-60'
-          }`}
+          className={`size-3.5 ${sort ? 'text-lime' : 'text-ink-muted/50'}`}
           strokeWidth={2.25}
         />
+        {sort && showRank && (
+          <span className="text-[10px] leading-none font-bold text-lime tabular-nums">
+            {rank}
+          </span>
+        )}
       </button>
     </th>
   );
@@ -96,9 +117,14 @@ export function MemberTable({
   onRemove: (member: TeamMember) => void;
 }) {
   const [query, setQuery] = useState('');
-  // newest first: after an import, the people you just added are the
-  // ones you want to look at
-  const [sort, setSort] = useState<Sort>({ key: 'added', ascending: false });
+  // a list, not one key: pressing a second heading adds to the order
+  // rather than replacing it, so Role then Person reads as everyone
+  // grouped by role and alphabetical inside each group
+  const [sorts, setSorts] = useState<Sort[]>([DEFAULT_SORT]);
+  // the starting order is ours, not theirs. Without this the first
+  // heading anybody presses queues behind Added and appears to do
+  // nothing at all
+  const [chosen, setChosen] = useState(false);
 
   const shown = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -110,17 +136,41 @@ export function MemberTable({
             .includes(needle),
         )
       : members;
-    return [...matched].sort(
-      (a, b) => compare(a, b, sort.key) * (sort.ascending ? 1 : -1),
-    );
-  }, [members, query, sort]);
+    // the fallback keeps the order stable once every heading is off
+    const order = sorts.length > 0 ? sorts : [DEFAULT_SORT];
+    return [...matched].sort((a, b) => {
+      for (const { key, ascending } of order) {
+        const decided = compare(a, b, key) * (ascending ? 1 : -1);
+        if (decided !== 0) return decided;
+      }
+      return 0;
+    });
+  }, [members, query, sorts]);
 
-  const toggle = (key: SortKey) =>
-    setSort((current) =>
-      current.key === key
-        ? { key, ascending: !current.ascending }
-        : { key, ascending: key !== 'added' },
-    );
+  /* Off, then the natural direction, then the other one, then off
+     again. Three states, so a heading pressed by mistake can be undone
+     with the same finger. */
+  const toggle = (key: SortKey) => {
+    if (!chosen) {
+      setChosen(true);
+      setSorts((current) =>
+        key === DEFAULT_SORT.key
+          ? [{ key, ascending: !current[0].ascending }]
+          : [{ key, ascending: startsAscending(key) }],
+      );
+      return;
+    }
+    setSorts((current) => {
+      const existing = current.find((sort) => sort.key === key);
+      if (!existing) return [...current, { key, ascending: startsAscending(key) }];
+      if (existing.ascending === startsAscending(key)) {
+        return current.map((sort) =>
+          sort.key === key ? { key, ascending: !sort.ascending } : sort,
+        );
+      }
+      return current.filter((sort) => sort.key !== key);
+    });
+  };
 
   const exportAll = () =>
     downloadCsv(
@@ -170,8 +220,9 @@ export function MemberTable({
                 <SortHeader
                   key={key}
                   label={label}
-                  active={sort.key === key}
-                  ascending={sort.ascending}
+                  sort={sorts.find((sort) => sort.key === key)}
+                  rank={sorts.findIndex((sort) => sort.key === key) + 1}
+                  showRank={sorts.length > 1}
                   onClick={() => toggle(key)}
                 />
               ))}
