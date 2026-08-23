@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
 import { AppShell } from '../components/AppShell';
-import { Field } from '../components/AuthLayout';
+import { Field, Select } from '../components/AuthLayout';
 import { ImportTeam } from '../components/ImportTeam';
 import { MemberTable } from '../components/MemberTable';
 import { Panel } from '../components/Panel';
@@ -270,20 +270,12 @@ export default function Team() {
                   required
                   minLength={8}
                 />
-                <label className="block">
-                  <span className="mb-1.5 block text-body text-ink-muted">Role</span>
-                  <select
-                    name="role"
-                    defaultValue="mechanic"
-                    className="w-full rounded-xl border border-white/10 bg-panel px-3.5 py-2.5 text-body focus:border-lime/40 focus:outline-none"
-                  >
-                    {ROLES.map((r) => (
-                      <option key={r} value={r} className="bg-panel">
-                        {roleLabel(r)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <Select
+                  label="Role"
+                  name="role"
+                  defaultValue="mechanic"
+                  options={ROLES.map((role) => ({ value: role, label: roleLabel(role) }))}
+                />
                 <button
                   type="submit"
                   disabled={create.isPending}

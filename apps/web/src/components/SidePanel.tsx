@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 /**
  * The column that opens on the right when something is being filled in.
@@ -19,8 +20,30 @@ export function SidePanel({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const panel = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    // whatever was focused when the panel opened gets the focus back
+    // when it closes, so the keyboard does not land at the top of the
+    // page every time
+    const opener = document.activeElement as HTMLElement | null;
+    panel.current?.querySelector<HTMLElement>('input, select, textarea, button')?.focus();
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      opener?.focus?.();
+    };
+  }, [onClose]);
+
   return (
-    <aside className="min-w-0 overflow-hidden rounded-2xl border border-white/5 bg-panel xl:sticky xl:top-6">
+    <aside
+      ref={panel}
+      className="min-w-0 overflow-hidden rounded-2xl border border-white/5 bg-panel xl:sticky xl:top-6"
+    >
       <header className="flex items-start justify-between gap-4 border-b border-white/5 px-5 py-4">
         <div>
           <h2 className="text-section font-semibold">{title}</h2>
