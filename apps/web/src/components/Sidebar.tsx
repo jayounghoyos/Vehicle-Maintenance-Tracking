@@ -41,6 +41,10 @@ export function Sidebar({ footer }: { footer?: React.ReactNode }) {
               {ready ? (
                 <NavLink
                   to={to}
+                  // every path starts with "/", so without this the
+                  // dashboard reads as active on every screen. Team is
+                  // left prefix-matching so it stays lit on its own tabs
+                  end={to === '/'}
                   className={({ isActive }) =>
                     [
                       'flex items-center gap-3 rounded-lg px-3 py-2.5 text-body transition-colors',
