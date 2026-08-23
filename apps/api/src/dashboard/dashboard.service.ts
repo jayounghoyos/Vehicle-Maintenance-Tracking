@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
+import { TenantRepositories } from '../tenant/tenant-repository';
 import {
   MaintenanceSchedule,
   ServiceEvent,
@@ -26,40 +25,30 @@ const RECENT_EVENT_LIMIT = 3;
 
 @Injectable()
 export class DashboardService {
-  constructor(
-    @InjectRepository(User) private readonly users: Repository<User>,
-    @InjectRepository(Vehicle) private readonly vehicles: Repository<Vehicle>,
-    @InjectRepository(MaintenanceSchedule)
-    private readonly schedules: Repository<MaintenanceSchedule>,
-    @InjectRepository(ServiceEvent)
-    private readonly events: Repository<ServiceEvent>,
-  ) {}
+  constructor(private readonly tenants: TenantRepositories) {}
 
   async build(
     userId: number,
     organizationId: number,
     today = new Date(),
   ): Promise<DashboardResponse> {
-    const user = await this.users.findOne({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User not found');
-
-    // every query below is filtered by the organization on the token, so
-    // one client's dashboard can never be assembled from another's rows
-    const org = { id: organizationId };
-
-    const vehicles = await this.vehicles.find({
-      where: { organizationId: org.id },
+    // every repository here is bound to the organization on the token,
+    // so one client's dashboard cannot be assembled from another's rows
+    // even if a where clause below forgot to say so
+    const users = this.tenants.for(User, organizationId);
+    const vehicles = await this.tenants.for(Vehicle, organizationId).find({
       relations: { model: true },
       order: { plate: 'ASC' },
     });
 
-    const schedules = await this.schedules.find({
-      where: { organizationId: org.id },
+    const user = await users.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const schedules = await this.tenants.for(MaintenanceSchedule, organizationId).find({
       relations: { vehicle: { model: true }, task: true },
     });
 
-    const events = await this.events.find({
-      where: { organizationId: org.id },
+    const events = await this.tenants.for(ServiceEvent, organizationId).find({
       relations: { vehicle: true, task: true, recorder: true },
       order: { performedAt: 'DESC' },
       take: RECENT_EVENT_LIMIT,

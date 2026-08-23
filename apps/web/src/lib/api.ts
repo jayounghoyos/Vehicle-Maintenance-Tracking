@@ -98,6 +98,10 @@ export type TeamMember = {
   fullName: string;
   email: string;
   role: string;
+  /** false once the person has left: the row stays, the login does not */
+  active: boolean;
+  /** what decides whether an account can be removed or only retired */
+  recordedEvents: number;
   createdAt: string;
 };
 

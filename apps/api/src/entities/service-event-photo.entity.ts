@@ -14,6 +14,8 @@ import { User } from './user.entity';
 /** Metadata only. The file itself lives in the object store and
  *  storage_key points at it. */
 @Index('service_event_photos_service_event_idx', ['serviceEventId'])
+@Index('service_event_photos_organization_idx', ['organizationId'])
+@Index('service_event_photos_uploaded_by_idx', ['uploadedBy'])
 @Entity('service_event_photos')
 export class ServiceEventPhoto {
   @PrimaryGeneratedColumn()
