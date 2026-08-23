@@ -3,6 +3,7 @@ import {
   ArrowUp,
   ChevronsUpDown,
   Download,
+  Pencil,
   RotateCcw,
   Search,
   Trash2,
@@ -103,6 +104,7 @@ export function MemberTable({
   canManage,
   meId,
   busyId,
+  onEdit,
   onRoleChange,
   onSetActive,
   onRemove,
@@ -112,6 +114,7 @@ export function MemberTable({
   meId: number | null;
   /** the row waiting on the API, so its controls stop accepting clicks */
   busyId: number | null;
+  onEdit: (member: TeamMember) => void;
   onRoleChange: (member: TeamMember, role: string) => void;
   onSetActive: (member: TeamMember, active: boolean) => void;
   onRemove: (member: TeamMember) => void;
@@ -143,7 +146,9 @@ export function MemberTable({
         const decided = compare(a, b, key) * (ascending ? 1 : -1);
         if (decided !== 0) return decided;
       }
-      return 0;
+      // a whole import shares one timestamp, so without this the rows
+      // that tie shuffle every time the list is fetched
+      return a.id - b.id;
     });
   }, [members, query, sorts]);
 
@@ -283,31 +288,42 @@ export function MemberTable({
                     {shortDate(member.createdAt)}
                   </td>
                   <td className="px-5 py-3.5">
-                    {/* nothing may be done to your own account: a
-                        coordinator who retires or demotes themselves
-                        could leave an organization nobody administers */}
-                    {canManage && !isMe && (
+                    {canManage && (
                       <div className="flex justify-end gap-1">
+                        {/* your own name, email and password are yours to
+                            change; your role and whether you still work
+                            here are not */}
                         <button
                           type="button"
                           disabled={busy}
-                          onClick={() => onSetActive(member, !member.active)}
-                          title={
-                            member.active
-                              ? `Retire ${member.fullName}`
-                              : `Bring ${member.fullName} back`
-                          }
+                          onClick={() => onEdit(member)}
+                          title={`Edit ${member.fullName}`}
                           className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-white/5 hover:text-ink disabled:opacity-40"
                         >
-                          {member.active ? (
-                            <UserMinus className="size-4" strokeWidth={1.75} />
-                          ) : (
-                            <RotateCcw className="size-4" strokeWidth={1.75} />
-                          )}
+                          <Pencil className="size-4" strokeWidth={1.75} />
                         </button>
+                        {!isMe && (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => onSetActive(member, !member.active)}
+                            title={
+                              member.active
+                                ? `Retire ${member.fullName}`
+                                : `Bring ${member.fullName} back`
+                            }
+                            className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-white/5 hover:text-ink disabled:opacity-40"
+                          >
+                            {member.active ? (
+                              <UserMinus className="size-4" strokeWidth={1.75} />
+                            ) : (
+                              <RotateCcw className="size-4" strokeWidth={1.75} />
+                            )}
+                          </button>
+                        )}
                         {/* permanent, so only for an account nothing is
                             attached to yet */}
-                        {member.recordedEvents === 0 && (
+                        {!isMe && member.recordedEvents === 0 && (
                           <button
                             type="button"
                             disabled={busy}
