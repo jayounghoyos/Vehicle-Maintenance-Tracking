@@ -32,5 +32,7 @@ jobs:
 
       - run: pnpm format:check
       - run: pnpm lint
+      # not the tests yet: the only suite is the scaffolder's placeholder,
+      # so a green tick would promise something nobody has written. build
+      # stays because tsc catches type errors the linter does not.
       - run: pnpm build
-      - run: pnpm test
