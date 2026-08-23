@@ -58,7 +58,9 @@ export class TeamService {
 
   async list(organizationId: number): Promise<TeamMember[]> {
     const rows = await this.scoped(organizationId).users.find({
-      order: { createdAt: 'ASC' },
+      // id breaks the tie: a whole import shares one timestamp, and
+      // without it an updated row wanders to wherever postgres put it
+      order: { createdAt: 'ASC', id: 'ASC' },
     });
     const counts = await this.eventCounts(organizationId);
     // password_hash is never in the shape this returns
@@ -182,11 +184,13 @@ export class TeamService {
   }
 
   /**
-   * Change a role, or retire somebody and bring them back.
+   * Change what an account is called, how it signs in, what it may do,
+   * or whether it still works here.
    *
-   * Never on yourself. A coordinator demoting or retiring their own
-   * account could leave an organization nobody can administer, and the
-   * rule is simpler to hold than the states it prevents.
+   * The last two are never done to your own account: a coordinator who
+   * demoted or retired themselves could leave an organization nobody can
+   * administer. Name, email and password are your own to change, and
+   * refusing those would mean nobody could ever change their password.
    */
   async update(
     organizationId: number,
@@ -194,12 +198,26 @@ export class TeamService {
     id: number,
     dto: UpdateMemberDto,
   ): Promise<TeamMember> {
-    if (id === actingUserId) {
-      throw new BadRequestException('You cannot change your own account here');
+    if (id === actingUserId && (dto.role !== undefined || dto.active !== undefined)) {
+      throw new BadRequestException(
+        'You cannot change your own role or retire your own account',
+      );
     }
     const users = this.scoped(organizationId).users;
     const member = await users.findOne({ where: { id } });
     if (!member) throw new NotFoundException('No such team member');
+
+    if (dto.email !== undefined && dto.email !== member.email) {
+      // across the platform, since the login namespace is shared
+      const taken = await this.everyUser.findOne({ where: { email: dto.email } });
+      if (taken) throw new ConflictException('That email is already registered');
+      member.email = dto.email;
+    }
+    if (dto.fullName !== undefined) member.fullName = dto.fullName;
+    // hashed here and never read back: the only copy that exists after
+    // this is the one the coordinator just typed
+    if (dto.password !== undefined)
+      member.passwordHash = await hashPassword(dto.password);
 
     const losesCoordinator =
       member.role === UserRole.FLEET_COORDINATOR &&
