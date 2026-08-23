@@ -9,6 +9,7 @@ import { Panel } from '../components/Panel';
 import { PANEL_LAYOUT } from '../components/panelLayout';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { SidePanel } from '../components/SidePanel';
+import { ImportVehicles } from '../components/ImportVehicles';
 import { VehicleDetail } from '../components/VehicleDetail';
 import { VehicleForm, type VehiclePatch } from '../components/VehicleForm';
 import { VehicleTable } from '../components/VehicleTable';
@@ -149,6 +150,16 @@ export default function Vehicles() {
             onClose={close}
           >
             <VehicleDetail id={panel.vehicle.id} />
+          </SidePanel>
+        )}
+
+        {panel?.kind === 'import' && canManage && (
+          <SidePanel
+            title="Import many"
+            subtitle="Straight from your spreadsheet"
+            onClose={close}
+          >
+            <ImportVehicles onImported={invalidate} />
           </SidePanel>
         )}
 
