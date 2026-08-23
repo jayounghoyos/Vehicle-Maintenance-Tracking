@@ -1,33 +1,26 @@
+import { readPastedRows, type SpreadsheetRow } from './spreadsheet';
+
 export const ROLES = ['fleet_coordinator', 'mechanic', 'operations_manager'] as const;
 export type Role = (typeof ROLES)[number];
 
-export type ParsedRow = {
-  /** 1-based, counting the lines that were actually pasted, so the
-   *  preview can say "line 12" and mean what the spreadsheet shows */
-  line: number;
+export type ParsedRow = SpreadsheetRow & {
   fullName: string;
   email: string;
   role: Role;
   /** empty means the account gets a generated one to hand over */
   password: string;
-  error: string | null;
 };
 
 export const MIN_PASSWORD = 8;
 
-export const MAX_ROWS = 200;
-
-/* Copying cells out of Excel or Sheets gives tab separated text. A file
- * saved as CSV gives commas, and a Spanish Windows Excel gives
- * semicolons. All three are the same paste to whoever is doing it. */
-function splitCells(line: string): string[] {
-  const delimiter = line.includes('\t') ? '\t' : line.includes(';') ? ';' : ',';
-  return line.split(delimiter).map((cell) => cell.trim().replace(/^"|"$/g, ''));
-}
+export { MAX_ROWS } from './spreadsheet';
 
 /* Deliberately loose. The API validates properly; this only has to catch
  * the cell that clearly is not an address before it wastes a request. */
 const LOOKS_LIKE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** What a first line saying "these are the columns" looks like here. */
+const HEADER_WORDS = ['name', 'full name', 'nombre', 'email', 'correo'];
 
 function readRole(cell: string | undefined): Role | null {
   // the mechanic is the common case, so an absent column means mechanic
@@ -44,18 +37,6 @@ function readRole(cell: string | undefined): Role | null {
   return null;
 }
 
-/** A first line naming the columns instead of holding a person. */
-function isHeader(cells: string[]): boolean {
-  const [first, second] = cells.map((cell) => cell.toLowerCase());
-  return (
-    second === 'email' ||
-    second === 'correo' ||
-    first === 'name' ||
-    first === 'full name' ||
-    first === 'nombre'
-  );
-}
-
 /**
  * Turns whatever was pasted into rows the import screen can show.
  *
@@ -64,20 +45,9 @@ function isHeader(cells: string[]): boolean {
  * and a row that silently vanished would be the worst outcome of all.
  */
 export function parseTeamRows(text: string): ParsedRow[] {
-  const lines = text.split(/\r?\n/);
-  const rows: ParsedRow[] = [];
   const seen = new Set<string>();
-  let skippedHeader = false;
 
-  lines.forEach((raw, index) => {
-    if (!raw.trim()) return;
-    const cells = splitCells(raw);
-
-    if (!skippedHeader && rows.length === 0 && isHeader(cells)) {
-      skippedHeader = true;
-      return;
-    }
-
+  return readPastedRows<ParsedRow>(text, HEADER_WORDS, (cells, line) => {
     const [fullName = '', email = '', roleCell, password = ''] = cells;
     const role = readRole(roleCell);
     const key = email.toLowerCase();
@@ -92,15 +62,6 @@ export function parseTeamRows(text: string): ParsedRow[] {
     else if (seen.has(key)) error = 'Repeated in this list';
 
     if (!error) seen.add(key);
-    rows.push({
-      line: index + 1,
-      fullName,
-      email,
-      role: role ?? 'mechanic',
-      password,
-      error,
-    });
+    return { line, fullName, email, role: role ?? 'mechanic', password, error };
   });
-
-  return rows;
 }
