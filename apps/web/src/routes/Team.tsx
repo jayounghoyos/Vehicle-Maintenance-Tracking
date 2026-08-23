@@ -3,6 +3,7 @@ import { Trash2, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
+import { can } from '../auth/permissions';
 import { AppShell } from '../components/AppShell';
 import { Field } from '../components/AuthLayout';
 import { Panel } from '../components/Panel';
@@ -17,6 +18,10 @@ export default function Team() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  // the mechanic and the operations manager see their colleagues; who
+  // holds an account is not a secret from them, it is just not theirs
+  // to change
+  const canManage = can(principal, 'manageTeam');
 
   const { data: members, isPending } = useQuery({
     queryKey: ['team'],
@@ -60,19 +65,25 @@ export default function Team() {
 
         <Panel
           title="Members"
-          subtitle="Everyone with an account in this organization"
+          subtitle={
+            canManage
+              ? 'Everyone with an account in this organization'
+              : 'Only the fleet coordinator can add or remove accounts'
+          }
           action={
-            <button
-              type="button"
-              onClick={() => setAdding((v) => !v)}
-              className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-page transition-opacity hover:opacity-90"
-            >
-              <UserPlus className="size-4" strokeWidth={2.5} />
-              Add member
-            </button>
+            canManage ? (
+              <button
+                type="button"
+                onClick={() => setAdding((v) => !v)}
+                className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-page transition-opacity hover:opacity-90"
+              >
+                <UserPlus className="size-4" strokeWidth={2.5} />
+                Add member
+              </button>
+            ) : undefined
           }
         >
-          {adding && (
+          {adding && canManage && (
             <form
               className="grid gap-4 border-t border-white/5 bg-white/[0.02] p-5 sm:grid-cols-2"
               onSubmit={(event) => {
@@ -138,7 +149,7 @@ export default function Team() {
                     {roleLabel(member.role)}
                   </span>
                   {/* removing yourself would lock the organization out of itself */}
-                  {member.id !== me?.id && (
+                  {canManage && member.id !== me?.id && (
                     <button
                       type="button"
                       onClick={() => remove.mutate(member.id)}
