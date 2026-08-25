@@ -109,6 +109,7 @@ export default function Vehicles() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  data-tour="vehicle-import"
                   onClick={() =>
                     setPanel(panel?.kind === 'import' ? null : { kind: 'import' })
                   }
@@ -119,6 +120,7 @@ export default function Vehicles() {
                 </button>
                 <button
                   type="button"
+                  data-tour="vehicle-add"
                   onClick={() => setPanel(panel?.kind === 'add' ? null : { kind: 'add' })}
                   className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-page transition-opacity hover:opacity-90"
                 >

@@ -10,7 +10,10 @@ const TABS = [
 
 export function WorkspaceTabs() {
   return (
-    <nav className="flex w-fit gap-1 rounded-xl border border-white/5 bg-panel p-1">
+    <nav
+      data-tour="workspace-tabs"
+      className="flex w-fit gap-1 rounded-xl border border-white/5 bg-panel p-1"
+    >
       {TABS.map(({ to, label, end }) => (
         <NavLink
           key={to}

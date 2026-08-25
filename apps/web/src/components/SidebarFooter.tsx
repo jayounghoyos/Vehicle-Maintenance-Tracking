@@ -32,7 +32,7 @@ export function SidebarFooter({
         </div>
       )}
 
-      <div className="border-t border-white/5 pt-4">
+      <div data-tour="account" className="border-t border-white/5 pt-4">
         {open && (
           <button
             type="button"

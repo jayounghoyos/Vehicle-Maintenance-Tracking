@@ -169,7 +169,10 @@ export function MemberTable({
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-body text-ink-muted">{member.email}</td>
-                  <td className="px-5 py-3.5 text-body whitespace-nowrap">
+                  <td
+                    data-tour={member.id === shown[0]?.id ? 'member-role' : undefined}
+                    className="px-5 py-3.5 text-body whitespace-nowrap"
+                  >
                     {canManage && !isMe && member.active ? (
                       <select
                         value={member.role}
@@ -192,7 +195,12 @@ export function MemberTable({
                   </td>
                   <td className="px-5 py-3.5">
                     {canManage && (
-                      <div className="flex justify-end gap-1">
+                      <div
+                        data-tour={
+                          member.id === shown[0]?.id ? 'member-actions' : undefined
+                        }
+                        className="flex justify-end gap-1"
+                      >
                         {/* your own name, email and password are yours to
                             change; your role and whether you still work
                             here are not */}
