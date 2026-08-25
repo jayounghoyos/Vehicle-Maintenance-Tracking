@@ -1,5 +1,6 @@
 import { type LucideIcon } from 'lucide-react';
 
+import { HelpButton } from './HelpButton';
 import { Sidebar } from './Sidebar';
 
 type Props = {
@@ -27,7 +28,10 @@ export function AppShell({ title, subtitle, action, sidebarFooter, children }: P
 
           {/* no search here: a box that searches nothing on every screen
               is worse than no box. Each list searches its own rows. */}
-          <div className="flex items-center gap-3">{action}</div>
+          <div className="flex items-center gap-3">
+            <HelpButton />
+            {action}
+          </div>
         </header>
 
         <main className="px-8 pb-10">{children}</main>

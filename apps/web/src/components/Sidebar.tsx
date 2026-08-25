@@ -28,7 +28,10 @@ const NAV: NavItem[] = [
 
 export function Sidebar({ footer }: { footer?: React.ReactNode }) {
   return (
-    <aside className="flex w-64 shrink-0 flex-col gap-8 border-r border-white/5 bg-sidebar p-5">
+    <aside
+      data-tour="sidebar"
+      className="flex w-64 shrink-0 flex-col gap-8 border-r border-white/5 bg-sidebar p-5"
+    >
       <Logo />
 
       <nav className="flex-1">

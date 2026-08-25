@@ -132,6 +132,7 @@ export default function Team() {
                       coordinator staffing a fleet reaches for this first */}
                   <button
                     type="button"
+                    data-tour="member-import"
                     onClick={() => {
                       setEditing(null);
                       setPanel(panel === 'import' ? null : 'import');
@@ -143,6 +144,7 @@ export default function Team() {
                   </button>
                   <button
                     type="button"
+                    data-tour="member-add"
                     onClick={() => {
                       setEditing(null);
                       setPanel(panel === 'add' ? null : 'add');

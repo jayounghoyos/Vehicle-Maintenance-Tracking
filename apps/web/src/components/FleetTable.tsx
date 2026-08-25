@@ -8,6 +8,7 @@ const TH = 'px-5 py-3 text-table-label font-semibold text-ink-muted uppercase';
 export function FleetTable({ rows }: { rows: DashboardResponse['fleet'] }) {
   return (
     <Panel
+      data-tour="fleet-table"
       title="Fleet"
       action={
         <span className="rounded-full bg-white/5 px-2.5 py-1 text-body text-ink-muted">

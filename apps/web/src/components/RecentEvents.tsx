@@ -7,7 +7,11 @@ import { Panel } from './Panel';
 
 export function RecentEvents({ events }: { events: DashboardResponse['recentEvents'] }) {
   return (
-    <Panel title="Recent service events" subtitle="Logged by the workshop">
+    <Panel
+      data-tour="recent-events"
+      title="Recent service events"
+      subtitle="Logged by the workshop"
+    >
       {events.length === 0 ? (
         <p className="flex-1 border-t border-white/5 px-5 py-6 text-body text-ink-muted">
           Nothing logged yet.

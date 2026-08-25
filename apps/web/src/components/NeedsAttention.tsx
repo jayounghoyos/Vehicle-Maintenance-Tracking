@@ -21,6 +21,7 @@ const DUE_TEXT: Record<string, string> = {
 export function NeedsAttention({ items }: { items: DashboardResponse['attention'] }) {
   return (
     <Panel
+      data-tour="needs-attention"
       title="Needs attention"
       subtitle="Maintenance overdue or coming up"
       action={

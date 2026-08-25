@@ -176,7 +176,7 @@ export function VehicleTable({
     <>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/5 px-5 py-3">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
-          <div className="relative min-w-0 flex-1 sm:max-w-xs">
+          <div data-tour="vehicle-search" className="relative min-w-0 flex-1 sm:max-w-xs">
             <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-muted" />
             <input
               type="search"
@@ -187,7 +187,10 @@ export function VehicleTable({
             />
           </div>
 
-          <div className="flex flex-wrap gap-1 rounded-xl border border-white/5 bg-page/60 p-1">
+          <div
+            data-tour="vehicle-filter"
+            className="flex flex-wrap gap-1 rounded-xl border border-white/5 bg-page/60 p-1"
+          >
             {filters.map((filter) => (
               <button
                 key={filter.value}
@@ -210,6 +213,7 @@ export function VehicleTable({
 
         <button
           type="button"
+          data-tour="vehicle-export"
           onClick={exportAll}
           className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink"
         >
@@ -221,7 +225,7 @@ export function VehicleTable({
       <div className="overflow-x-auto border-t border-white/5">
         <table className="w-full min-w-[760px] text-left">
           <thead>
-            <tr className="border-b border-white/5">
+            <tr data-tour="vehicle-headings" className="border-b border-white/5">
               {COLUMNS.map(({ key, label }) => (
                 <SortHeader
                   key={key}
@@ -255,6 +259,7 @@ export function VehicleTable({
               return (
                 <tr
                   key={vehicle.id}
+                  data-tour={vehicle.id === shown[0]?.id ? 'vehicle-row' : undefined}
                   onClick={() => onOpen(vehicle)}
                   className={`cursor-pointer transition-colors hover:bg-white/[0.03] ${
                     busy ? 'opacity-50' : ''

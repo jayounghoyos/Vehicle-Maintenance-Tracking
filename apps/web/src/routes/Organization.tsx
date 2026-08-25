@@ -90,6 +90,7 @@ export default function Organization() {
               canEdit && !editing ? (
                 <button
                   type="button"
+                  data-tour="organization-edit"
                   onClick={() => setEditing(true)}
                   className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink"
                 >
@@ -104,7 +105,10 @@ export default function Organization() {
                 Loading the organization…
               </p>
             ) : (
-              <dl className="grid border-t border-white/5 lg:grid-cols-2 lg:gap-x-8 lg:px-5">
+              <dl
+                data-tour="organization-details"
+                className="grid border-t border-white/5 lg:grid-cols-2 lg:gap-x-8 lg:px-5"
+              >
                 {FIELDS.map(({ name, label }) => (
                   <Row key={name} label={label} value={org[name]} />
                 ))}

@@ -32,7 +32,10 @@ export function StatTiles({ counts }: { counts: DashboardResponse['counts'] }) {
   ];
 
   return (
-    <section className="grid grid-cols-1 divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/5 bg-panel sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
+    <section
+      data-tour="stat-tiles"
+      className="grid grid-cols-1 divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/5 bg-panel sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x"
+    >
       {tiles.map(({ label, value, caption, icon: Icon, tone }) => {
         const hue =
           tone === 'overdue'
