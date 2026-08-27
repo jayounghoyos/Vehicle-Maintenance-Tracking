@@ -7,14 +7,40 @@ type Env = Record<string, string | undefined>;
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', 'db']);
 
-function isLocal(url: string): boolean {
+/**
+ * Says what to do about TLS in the connection string itself, so there is
+ * one source of truth rather than a query parameter and a driver option
+ * disagreeing.
+ *
+ * sslmode=require is the ambiguous one: node-postgres verifies the
+ * certificate today and warns that a future version will stop, to match
+ * libpq, where require means encrypt but do not check who you reached.
+ * Spelling out verify-full means the same thing before and after that
+ * change, so the day it lands nothing quietly weakens.
+ *
+ * A database on this machine has no certificate to offer, so the host
+ * decides rather than another switch to set.
+ */
+function withSslMode(raw: string, env: Env): string {
+  let url: URL;
   try {
-    return LOCAL_HOSTS.has(new URL(url).hostname);
+    url = new URL(raw);
   } catch {
-    // an unparseable url is somebody else's error to report, and it is
-    // not going to be a local one
-    return false;
+    // an unparseable url is somebody else's error to report
+    return raw;
   }
+
+  if (LOCAL_HOSTS.has(url.hostname)) {
+    url.searchParams.delete('sslmode');
+    url.searchParams.delete('channel_binding');
+    return url.toString();
+  }
+
+  // turning verification off has to be something somebody typed, never
+  // a default nobody noticed
+  const mode = env.DB_SSL_REJECT_UNAUTHORIZED === 'false' ? 'no-verify' : 'verify-full';
+  url.searchParams.set('sslmode', mode);
+  return url.toString();
 }
 
 /**
@@ -40,21 +66,7 @@ export function databaseOptions(env: Env = process.env): DataSourceOptions {
   };
 
   if (env.DATABASE_URL) {
-    return {
-      ...shared,
-      url: env.DATABASE_URL,
-      /* Managed Postgres refuses an unencrypted connection, and a
-       * database on this machine has no certificate to offer, so the
-       * host decides rather than another switch to set.
-       *
-       * Verification stays on: the certificate comes from a public
-       * authority node already trusts. The escape hatch is for a
-       * provider that signs its own, and turning it off has to be
-       * something somebody typed rather than a default nobody noticed. */
-      ssl: isLocal(env.DATABASE_URL)
-        ? false
-        : { rejectUnauthorized: env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' },
-    };
+    return { ...shared, url: withSslMode(env.DATABASE_URL, env) };
   }
 
   return {

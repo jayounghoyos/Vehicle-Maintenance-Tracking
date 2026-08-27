@@ -10,7 +10,9 @@ services:
     # the stage that ships dist and nothing else: no source, no compiler
     dockerTarget: prod
     plan: free
-    region: oregon
+    # the same side of the country as the Neon project, since every
+    # request here makes several round trips to the database
+    region: ohio
     healthCheckPath: /api/health
 
     # Migrations run here rather than as a pre-deploy step, which Render
