@@ -36,6 +36,38 @@ Then open http://localhost:5173. The page reports whether the API and the databa
 
 Ports are set in `.env`. The defaults avoid 5432 and 3000 because a system Postgres and most editors' preview servers already hold them.
 
+Set `DATABASE_URL` in `.env` to point at a database somewhere else instead, which
+is the shape a managed provider hands over. When it is set the five `DB_` values are
+ignored.
+
+## Deploying it
+
+Three free tiers: Vercel serves the client, Render runs the API, Neon holds the
+database. The browser only ever talks to Vercel, which forwards `/api` to Render,
+so no API host is baked into the client and there is no CORS to configure.
+
+**Neon.** Create a project and copy the connection string. The free plan does not
+expire and its limits are per project, so this one does not compete with anything
+else in the account.
+
+**Render.** Connect the repository; `render.yaml` configures the service. Two
+variables are not in the file and have to be pasted in the dashboard: `DATABASE_URL`
+from Neon, and `WEB_ORIGIN` once Vercel has given the client a domain. Migrations
+run on start rather than as a pre-deploy step, which Render offers only on paid
+plans; they are idempotent, so repeating them costs one query.
+
+**Vercel.** Import the repository. `vercel.json` sets the build and the forwarding;
+change the Render URL in it if the service is named something else.
+
+To put the demo data in the deployed database, run `pnpm seed:prod` from Render's
+shell, or point `DATABASE_URL` at Neon locally and run `pnpm seed`.
+
+Two things worth knowing before a live demo. A free Render service sleeps after
+fifteen minutes and takes about a minute to wake, so open the app before presenting.
+And service photos, once built, cannot live on Render's disk because it is
+ephemeral: they go to object storage, which is why the data model stores only a
+`storage_key`.
+
 ## Layout
 
 ```
