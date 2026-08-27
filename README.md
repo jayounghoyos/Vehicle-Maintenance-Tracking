@@ -57,8 +57,10 @@ run on start rather than as a pre-deploy step, which Render offers only on paid
 plans; they are idempotent, so repeating them costs one query.
 
 **Vercel.** Import the repository. `vercel.json` sets the build and the forwarding.
-Its destination is `https://<render service name>.onrender.com`, so renaming the
-service in `render.yaml` means changing it here too; JSON takes no comments, so
+Its destination has to be the hostname Render actually assigned, which is not
+always the service name: `onrender.com` subdomains are unique across every
+account, so a taken name gets a suffix. Check the URL on the service page after
+the first deploy and make `vercel.json` match. JSON takes no comments, so
 `render.yaml` carries the warning beside the name.
 
 The second rewrite is what makes `/vehicles` and `/team/organization` work when
