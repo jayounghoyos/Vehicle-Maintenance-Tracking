@@ -19,7 +19,7 @@ const NAV: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: LayoutGrid, ready: true },
   { to: '/vehicles', label: 'Vehicles', icon: Truck, ready: true },
   { to: '/schedules', label: 'Schedules', icon: CalendarClock, ready: false },
-  { to: '/service-log', label: 'Service Log', icon: Wrench, ready: false },
+  { to: '/service-log', label: 'Service Log', icon: Wrench, ready: true },
   { to: '/reports', label: 'Reports', icon: BarChart3, ready: false },
   // the mockup's Settings slot, spent on the team: accounts are the only
   // thing there is anything to configure yet
