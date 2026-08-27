@@ -14,9 +14,13 @@
 # learn it.
 services:
   - type: web
-    # vercel.json forwards /api to https://<this name>.onrender.com.
-    # JSON takes no comments, so the warning lives here: renaming the
-    # service breaks the client, and nothing else will say so.
+    # This is the service name, not the hostname. onrender.com
+    # subdomains are unique across every account, so Render appends a
+    # suffix when the name is taken: this one is served at
+    # mts-api-nhbe.onrender.com. vercel.json forwards /api there, and
+    # JSON takes no comments, so the warning lives here: whatever
+    # hostname Render actually assigns has to match what vercel.json
+    # says, and nothing else will tell you when it does not.
     name: mts-api
     runtime: docker
     dockerfilePath: ./apps/api/Dockerfile
