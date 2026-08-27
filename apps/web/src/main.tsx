@@ -10,6 +10,7 @@ import Dashboard from './routes/Dashboard.tsx';
 import Login from './routes/Login.tsx';
 import Organization from './routes/Organization.tsx';
 import Register from './routes/Register.tsx';
+import ServiceLog from './routes/ServiceLog.tsx';
 import Team from './routes/Team.tsx';
 import Vehicles from './routes/Vehicles.tsx';
 import { ToastProvider } from './toast/ToastProvider.tsx';
@@ -45,6 +46,14 @@ createRoot(document.getElementById('root')!).render(
                 element={
                   <RequireAuth kind="user">
                     <Vehicles />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/service-log"
+                element={
+                  <RequireAuth kind="user">
+                    <ServiceLog />
                   </RequireAuth>
                 }
               />
