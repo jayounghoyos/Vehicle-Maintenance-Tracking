@@ -1,0 +1,35 @@
+# Render reads this when the repository is connected, so the service is
+# configured here where it can be reviewed rather than in a form nobody
+# can look at afterwards.
+services:
+  - type: web
+    name: mts-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    # the stage that ships dist and nothing else: no source, no compiler
+    dockerTarget: prod
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+
+    # Migrations run here rather than as a pre-deploy step, which Render
+    # only offers on paid plans. They are idempotent, so repeating them
+    # on every restart costs a query against the migrations table and
+    # guarantees the schema is there before anything asks for a table.
+    dockerCommand: sh -c "pnpm migration:run:prod && node dist/main"
+
+    envVars:
+      # pasted once in the dashboard: a connection string does not belong
+      # in a repository
+      - key: DATABASE_URL
+        sync: false
+      # the Vercel domain, which is not known until its first deploy
+      - key: WEB_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: '43200'
+      - key: PORT
+        value: '3000'

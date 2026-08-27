@@ -22,6 +22,8 @@
     "migration:run": "pnpm --filter api migration:run",
     "migration:revert": "pnpm --filter api migration:revert",
     "seed": "pnpm --filter api seed",
+    "seed:prod": "pnpm --filter api seed:prod",
+    "migration:run:prod": "pnpm --filter api migration:run:prod",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f db",
