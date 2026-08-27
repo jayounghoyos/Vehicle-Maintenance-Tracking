@@ -157,6 +157,21 @@ export type TeamMember = {
   createdAt: string;
 };
 
+/** One row of the fleet-wide service log. */
+export type ServiceLogItem = {
+  id: number;
+  performedAt: string;
+  vehicleId: number;
+  plate: string;
+  make: string;
+  model: string;
+  task: string;
+  type: 'preventive' | 'corrective';
+  odometerKm: number | null;
+  notes: string | null;
+  recorder: string;
+};
+
 export type AdminOrganization = {
   id: number;
   name: string;
@@ -171,3 +186,10 @@ export type AdminOrganization = {
 };
 
 export const fetchDashboard = () => api.get<DashboardResponse>('/dashboard');
+
+export const fetchServiceLog = (vehicleId?: number) =>
+  api.get<ServiceLogItem[]>(
+    vehicleId === undefined
+      ? '/service-events'
+      : `/service-events?vehicleId=${vehicleId}`,
+  );
