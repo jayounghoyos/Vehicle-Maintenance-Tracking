@@ -56,8 +56,10 @@ from Neon, and `WEB_ORIGIN` once Vercel has given the client a domain. Migration
 run on start rather than as a pre-deploy step, which Render offers only on paid
 plans; they are idempotent, so repeating them costs one query.
 
-**Vercel.** Import the repository. `vercel.json` sets the build and the forwarding;
-change the Render URL in it if the service is named something else.
+**Vercel.** Import the repository. `vercel.json` sets the build and the forwarding.
+Its destination is `https://<render service name>.onrender.com`, so renaming the
+service in `render.yaml` means changing it here too; JSON takes no comments, so
+`render.yaml` carries the warning.
 
 To put the demo data in the deployed database, run `pnpm seed:prod` from Render's
 shell, or point `DATABASE_URL` at Neon locally and run `pnpm seed`.
