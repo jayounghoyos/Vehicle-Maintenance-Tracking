@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+#
 # Render reads this when the repository is connected, so the service is
 # described here where it can be reviewed alongside the code, rather than
 # in a dashboard form nobody can look at afterwards.
@@ -5,6 +7,11 @@
 # Fields are those in the blueprint spec for a web service on the docker
 # runtime. Notably absent, because the spec has none: a way to choose a
 # Dockerfile stage, and a pre-deploy step on the free plan.
+#
+# The schema line above is what an editor reads to check this file while
+# it is being written. Worth keeping: Render accepts nothing it does not
+# declare, and finding that out from a failed connect is a slow way to
+# learn it.
 services:
   - type: web
     # vercel.json forwards /api to https://<this name>.onrender.com.
@@ -26,7 +33,7 @@ services:
 
     # A change to the web client is not a reason to rebuild the API.
     buildFilter:
-      includes:
+      paths:
         - apps/api/**
         # what the image is built from, beyond the api itself
         - .dockerignore
