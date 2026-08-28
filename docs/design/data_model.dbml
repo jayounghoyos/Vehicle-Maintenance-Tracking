@@ -138,10 +138,18 @@ Table vehicles {
   year integer
   odometer_km integer [not null, default: 0]
   status vehicle_status [not null, default: 'active']
+  photo_key varchar
   created_at timestamp [default: `now()`]
 
   Indexes { (organization_id, plate) [unique] }
-  Note: 'The plate was globally unique. Two client brands could not both own ABC123, so it becomes unique per organization.'
+  Note: '''
+  The plate was globally unique. Two client brands could not both own ABC123, so it
+  becomes unique per organization.
+
+  photo_key points at the picture in the object store, never the picture itself, the
+  same shape service_event_photos uses. Null until somebody edits the vehicle to add
+  one: registering a van and choosing a file are different kinds of work.
+  '''
 }
 
 Table maintenance_tasks {

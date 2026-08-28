@@ -61,6 +61,15 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: '43200'
+      # vehicle photos. sync: false for all three rather than putting the
+      # cloud name here: the three are pasted together, and splitting
+      # them across two places is how one of them ends up forgotten.
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
       - key: PORT
         value: '3000'
 # Deliberately not here: initialDeployHook running the seed. It is the
