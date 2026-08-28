@@ -282,9 +282,11 @@ export default function Team() {
                     label: role.name,
                   }))}
                 />
+                {/* an account has to be something, and until the roles
+                    arrive there is nothing to be */}
                 <button
                   type="submit"
-                  disabled={create.isPending}
+                  disabled={create.isPending || !roles?.length}
                   className="mt-1 rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page disabled:opacity-50"
                 >
                   {create.isPending ? 'Creating…' : 'Create account'}

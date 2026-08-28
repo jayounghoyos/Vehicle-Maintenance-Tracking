@@ -129,12 +129,23 @@ export class RolesService {
       .getCount();
   }
 
-  /** Replaced rather than merged: what was sent is what the role grants,
-   *  so dropping one is expressed by leaving it out. */
-  private async setPermissions(roleId: number, permissions: Permission[]): Promise<void> {
-    await this.grants.delete({ roleId });
-    if (permissions.length === 0) return;
-    await this.grants.insert(permissions.map((permission) => ({ roleId, permission })));
+  /**
+   * Replaced rather than merged: what was sent is what the role grants,
+   * so dropping one is expressed by leaving it out.
+   *
+   * In one transaction, because permissions are read fresh on every
+   * request: between a bare delete and its insert, somebody holding this
+   * role would be told they may do nothing.
+   */
+  private setPermissions(roleId: number, permissions: Permission[]): Promise<void> {
+    return this.grants.manager.transaction(async (manager) => {
+      await manager.delete(RolePermission, { roleId });
+      if (permissions.length === 0) return;
+      await manager.insert(
+        RolePermission,
+        permissions.map((permission) => ({ roleId, permission })),
+      );
+    });
   }
 
   /** One grouped query rather than one per role. */
