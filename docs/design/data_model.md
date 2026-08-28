@@ -67,6 +67,14 @@ One picture per vehicle, added by editing a van that already exists rather than 
 
 The API runs without the credentials, with upload switched off, so a teammate who has not set them up can still work on everything else.
 
+## A client's own brand
+
+`organizations.logo_key` and `organizations.accent_color` hold the two things a client may change about how the product looks. Both null means the brand manual, which is where every organization starts.
+
+Two, and no more. The manual assigns every colour a role, and three of them mean something: orange is overdue, amber is due soon, green is on track. A fleet screen has to read the same way in every organization, so those are not stored per client. The accent is the one colour that is only ever decoration and the one action on screen, which is exactly what a client wants to make theirs.
+
+What goes on top of the accent is derived from it, never chosen, so no client can pick a colour that makes their own buttons unreadable.
+
 ## Rules to know
 
 Due date passed and nobody logged that service = overdue.

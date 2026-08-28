@@ -92,6 +92,10 @@ export type OrganizationProfile = {
   address: string;
   phone: string;
   email: string;
+  /** their own mark, or null for the default one */
+  logoUrl: string | null;
+  /** #rrggbb, or null while they are still on the colour in the manual */
+  accentColor: string | null;
   memberCount: number;
   createdAt: string;
 };

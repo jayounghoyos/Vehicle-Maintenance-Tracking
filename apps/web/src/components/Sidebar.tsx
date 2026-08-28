@@ -41,7 +41,14 @@ const NAV: NavItem[] = [
   { to: '/team', label: 'Team', icon: Users, ready: true, need: 'view_team' },
 ];
 
-export function Sidebar({ footer }: { footer?: React.ReactNode }) {
+export function Sidebar({
+  footer,
+  brand,
+}: {
+  footer?: React.ReactNode;
+  /** the client's own mark, when they have set one */
+  brand?: { logoUrl: string | null; name: string | null };
+}) {
   const { principal } = useAuth();
   // hidden rather than disabled: a screen this role cannot open is not
   // something they are waiting on, it is not theirs
@@ -52,7 +59,7 @@ export function Sidebar({ footer }: { footer?: React.ReactNode }) {
       data-tour="sidebar"
       className="flex w-64 shrink-0 flex-col gap-8 border-r border-white/5 bg-sidebar p-5"
     >
-      <Logo />
+      <Logo logoUrl={brand?.logoUrl} name={brand?.name} />
 
       <nav className="flex-1">
         <p className="mb-3 px-3 text-nav-label font-semibold text-ink-muted uppercase">

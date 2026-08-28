@@ -150,7 +150,7 @@ export default function Team() {
                       setEditing(null);
                       setPanel(panel === 'add' ? null : 'add');
                     }}
-                    className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-page transition-opacity hover:opacity-90"
+                    className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-on-accent transition-opacity hover:opacity-90"
                   >
                     <UserPlus className="size-4" strokeWidth={2.5} />
                     Add member
@@ -235,7 +235,7 @@ export default function Team() {
                   <button
                     type="submit"
                     disabled={change.isPending}
-                    className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page disabled:opacity-50"
+                    className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-on-accent disabled:opacity-50"
                   >
                     {change.isPending ? 'Saving…' : 'Save changes'}
                   </button>
@@ -287,7 +287,7 @@ export default function Team() {
                 <button
                   type="submit"
                   disabled={create.isPending || !roles?.length}
-                  className="mt-1 rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page disabled:opacity-50"
+                  className="mt-1 rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-on-accent disabled:opacity-50"
                 >
                   {create.isPending ? 'Creating…' : 'Create account'}
                 </button>

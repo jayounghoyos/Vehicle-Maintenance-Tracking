@@ -122,7 +122,7 @@ export default function Vehicles() {
                   type="button"
                   data-tour="vehicle-add"
                   onClick={() => setPanel(panel?.kind === 'add' ? null : { kind: 'add' })}
-                  className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-page transition-opacity hover:opacity-90"
+                  className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-on-accent transition-opacity hover:opacity-90"
                 >
                   <Plus className="size-4" strokeWidth={2.5} />
                   Add vehicle
