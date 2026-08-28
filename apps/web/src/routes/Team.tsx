@@ -9,15 +9,14 @@ import { Field, Select } from '../components/AuthLayout';
 import { ImportTeam } from '../components/ImportTeam';
 import { MemberTable } from '../components/MemberTable';
 import { Panel } from '../components/Panel';
+import { RolesPanel } from '../components/RolesPanel';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { PANEL_LAYOUT } from '../components/panelLayout';
 import { SidePanel } from '../components/SidePanel';
 import { WorkspaceTabs } from '../components/WorkspaceTabs';
 import { useToast } from '../toast/context';
+import { useRoles } from '../hooks/useRoles';
 import { api, type TeamMember } from '../lib/api';
-import { roleLabel } from '../lib/format';
-
-const ROLES = ['fleet_coordinator', 'mechanic', 'operations_manager'] as const;
 
 export default function Team() {
   const { principal } = useAuth();
@@ -29,15 +28,15 @@ export default function Team() {
   // which row is waiting on the API, so its own controls go quiet
   // instead of the whole table
   const [busyId, setBusyId] = useState<number | null>(null);
-  // the mechanic and the operations manager see their colleagues; who
-  // holds an account is not a secret from them, it is just not theirs
-  // to change
-  const canManage = can(principal, 'manageTeam');
+  // everyone who can open this screen sees their colleagues; who holds
+  // an account is not a secret from them, it is just not theirs to change
+  const canManage = can(principal, 'manage_team');
 
   const { data: members, isPending } = useQuery({
     queryKey: ['team'],
     queryFn: () => api.get<TeamMember[]>('/team'),
   });
+  const { data: roles } = useRoles();
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['team'] });
   const failed = (err: unknown, fallback: string) =>
@@ -48,7 +47,9 @@ export default function Team() {
   };
 
   const create = useMutation({
-    mutationFn: (body: Record<string, string>) => api.post<TeamMember>('/team', body),
+    mutationFn: (body: Record<string, string>) =>
+      // every FormData value is a string, and the API wants the id it is
+      api.post<TeamMember>('/team', { ...body, roleId: Number(body.roleId) }),
     onSuccess: (member) => {
       close();
       toast.show(`${member.fullName} can now sign in`);
@@ -67,7 +68,7 @@ export default function Team() {
         fullName?: string;
         email?: string;
         password?: string;
-        role?: string;
+        roleId?: number;
         active?: boolean;
       };
     }) => {
@@ -77,8 +78,8 @@ export default function Team() {
     onSuccess: (updated, { patch }) => {
       close();
       toast.show(
-        patch.role !== undefined
-          ? `${updated.fullName} is now ${roleLabel(updated.role).toLowerCase()}`
+        patch.roleId !== undefined
+          ? `${updated.fullName} is now ${updated.roleName.toLowerCase()}`
           : patch.active !== undefined
             ? patch.active
               ? `${updated.fullName} can sign in again`
@@ -123,7 +124,7 @@ export default function Team() {
             subtitle={
               canManage
                 ? 'Everyone with an account in this organization'
-                : 'Only the fleet coordinator can add or remove accounts'
+                : 'Your role does not add or remove accounts'
             }
             action={
               canManage ? (
@@ -163,11 +164,12 @@ export default function Team() {
             ) : (
               <MemberTable
                 members={members ?? []}
+                roles={roles ?? []}
                 canManage={canManage}
                 meId={me?.id ?? null}
                 busyId={busyId}
-                onRoleChange={(member, role) =>
-                  change.mutate({ member, patch: { role } })
+                onRoleChange={(member, roleId) =>
+                  change.mutate({ member, patch: { roleId } })
                 }
                 onSetActive={(member, active) =>
                   change.mutate({ member, patch: { active } })
@@ -274,9 +276,11 @@ export default function Team() {
                 />
                 <Select
                   label="Role"
-                  name="role"
-                  defaultValue="mechanic"
-                  options={ROLES.map((role) => ({ value: role, label: roleLabel(role) }))}
+                  name="roleId"
+                  options={(roles ?? []).map((role) => ({
+                    value: String(role.id),
+                    label: role.name,
+                  }))}
                 />
                 <button
                   type="submit"
@@ -299,6 +303,8 @@ export default function Team() {
             </SidePanel>
           )}
         </div>
+
+        <RolesPanel canManage={canManage} />
       </div>
     </AppShell>
   );

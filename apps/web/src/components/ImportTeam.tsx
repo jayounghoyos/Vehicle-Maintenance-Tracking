@@ -2,9 +2,9 @@ import { useMutation } from '@tanstack/react-query';
 import { AlertTriangle, Check, Copy, KeyRound } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 
+import { useRoles } from '../hooks/useRoles';
 import { api, type ImportResult } from '../lib/api';
 import { useCopy } from '../lib/useCopy';
-import { roleLabel } from '../lib/format';
 import { MAX_ROWS, parseTeamRows, type ParsedRow } from '../lib/parseTeamRows';
 import { PasteDemo } from './PasteDemo';
 
@@ -20,7 +20,7 @@ const EXAMPLE = [
 
 const asRows = (rows: string[][]) => rows.map((cells) => cells.join('\t')).join('\n');
 
-function Instructions() {
+function Instructions({ fallbackName }: { fallbackName: string }) {
   const { copied, copy } = useCopy();
 
   return (
@@ -92,7 +92,7 @@ function Instructions() {
 
         <ul className="mt-2.5 space-y-1.5 text-[12px] text-ink-muted">
           <li>The name and the email are the only two we need from you.</li>
-          <li>Leave the role empty and that person becomes a mechanic.</li>
+          <li>Leave the role empty and that person gets {fallbackName}.</li>
           <li>
             Leave the password empty and we invent one. It appears on the next screen and
             only there, so copy it before you close it.
@@ -214,9 +214,18 @@ export function ImportTeam({ onImported }: { onImported: () => void }) {
   const [text, setText] = useState('');
   const [result, setResult] = useState<ImportResult | null>(null);
   const [sent, setSent] = useState<ParsedRow[]>([]);
+  const [fallbackId, setFallbackId] = useState<number | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const rows = useMemo(() => parseTeamRows(text), [text]);
+  const { data: roles } = useRoles();
+  // whichever the organization made last, until somebody picks another:
+  // a spreadsheet of workers is rarely a spreadsheet of coordinators
+  const fallback = roles?.find((role) => role.id === fallbackId) ?? roles?.at(-1) ?? null;
+
+  const rows = useMemo(
+    () => parseTeamRows(text, roles ?? [], fallback?.id ?? null),
+    [text, roles, fallback],
+  );
   const valid = useMemo(() => rows.filter((row) => !row.error), [rows]);
   const broken = rows.length - valid.length;
   const tooMany = valid.length > MAX_ROWS;
@@ -225,10 +234,10 @@ export function ImportTeam({ onImported }: { onImported: () => void }) {
     mutationFn: () => {
       setSent(valid);
       return api.post<ImportResult>('/team/bulk', {
-        members: valid.map(({ fullName, email, role, password }) => ({
+        members: valid.map(({ fullName, email, roleId, password }) => ({
           fullName,
           email,
-          role,
+          roleId,
           // an empty cell must not travel as an empty password
           ...(password ? { password } : {}),
         })),
@@ -257,7 +266,24 @@ export function ImportTeam({ onImported }: { onImported: () => void }) {
 
   return (
     <div className="space-y-5 p-5">
-      <Instructions />
+      <Instructions fallbackName={fallback?.name ?? 'no role'} />
+
+      <label className="block">
+        <span className="mb-1.5 block text-body text-ink-muted">
+          Role for the rows that leave that column empty
+        </span>
+        <select
+          value={fallback?.id ?? ''}
+          onChange={(event) => setFallbackId(Number(event.target.value))}
+          className="w-full max-w-xs rounded-xl border border-white/10 bg-panel px-3.5 py-2.5 text-body focus:border-lime/40 focus:outline-none"
+        >
+          {(roles ?? []).map((role) => (
+            <option key={role.id} value={role.id} className="bg-panel">
+              {role.name}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="flex min-w-0 flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -307,7 +333,7 @@ export function ImportTeam({ onImported }: { onImported: () => void }) {
                         <span className="text-overdue">{row.error}</span>
                       ) : (
                         <span className="text-ink-muted">
-                          {roleLabel(row.role)}
+                          {row.roleName}
                           {row.password ? ' · own password' : ''}
                         </span>
                       )}

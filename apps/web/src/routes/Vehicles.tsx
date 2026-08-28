@@ -34,7 +34,7 @@ export default function Vehicles() {
   // which row is waiting on the API, so its own controls go quiet
   // instead of the whole table
   const [busyId, setBusyId] = useState<number | null>(null);
-  const canManage = can(principal, 'manageVehicles');
+  const canManage = can(principal, 'manage_vehicles');
 
   const { data: vehicles, isPending } = useQuery({
     queryKey: ['vehicles'],

@@ -36,7 +36,7 @@ export default function Organization() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const canEdit = can(principal, 'editOrganization');
+  const canEdit = can(principal, 'edit_organization');
 
   const { data: org, isPending } = useQuery({
     queryKey: ['organization'],
