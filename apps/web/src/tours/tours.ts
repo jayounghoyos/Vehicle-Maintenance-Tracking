@@ -323,19 +323,19 @@ export const TOURS: Tour[] = [
   {
     path: '/team/organization',
     label: 'How the company details work',
-    needs: 'editOrganization',
+    needs: 'edit_organization',
     build: organizationTour,
   },
   {
     path: '/vehicles',
     label: 'How the vehicle list works',
-    needs: 'manageVehicles',
+    needs: 'manage_vehicles',
     build: vehiclesTour,
   },
   {
     path: '/team',
     label: 'How the team list works',
-    needs: 'manageTeam',
+    needs: 'manage_team',
     build: teamTour,
   },
   { path: '/', label: 'How the dashboard works', build: dashboardTour },

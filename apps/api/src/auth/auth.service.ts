@@ -8,10 +8,28 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { Organization, PlatformAdmin, User, UserRole } from '../entities';
+import { Organization, PlatformAdmin, Role, User } from '../entities';
+import { BASE_ROLES, OWNER_ROLE } from '../roles/base-roles';
 import type { AuthResponse, JwtPayload, Principal } from './auth.types';
 import type { LoginDto, RegisterOrganizationDto } from './dto';
 import { hashPassword, verifyPassword } from './password';
+
+/** The role and its grants come along on every read of a user, because
+ *  the principal is worthless without them. */
+const WITH_ROLE = { organization: true, role: { permissions: true } } as const;
+
+function principalOf(user: User): Principal {
+  return {
+    kind: 'user',
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    roleId: user.roleId,
+    roleName: user.role.name,
+    permissions: user.role.permissions.map((granted) => granted.permission),
+    organizationId: user.organizationId,
+  };
+}
 
 @Injectable()
 export class AuthService {
@@ -32,7 +50,7 @@ export class AuthService {
 
     // one transaction: an organization with nobody able to sign into it
     // would be unreachable and impossible to clean up from the UI
-    const user = await this.dataSource.transaction(async (manager) => {
+    const created = await this.dataSource.transaction(async (manager) => {
       const org = await manager.save(
         manager.create(Organization, {
           name: dto.organizationName,
@@ -45,6 +63,16 @@ export class AuthService {
         }),
       );
 
+      const roles = await manager.save(
+        BASE_ROLES.map(({ name, permissions }) =>
+          manager.create(Role, {
+            organizationId: org.id,
+            name,
+            permissions: permissions.map((permission) => ({ permission })),
+          }),
+        ),
+      );
+
       return manager.save(
         manager.create(User, {
           organizationId: org.id,
@@ -53,12 +81,19 @@ export class AuthService {
           passwordHash,
           // whoever registers runs the fleet, and that is the role that
           // can then create the rest of the team
-          role: UserRole.FLEET_COORDINATOR,
+          roleId: roles.find((role) => role.name === OWNER_ROLE)!.id,
         }),
       );
     });
 
-    return this.issueForUser(user);
+    // read back rather than assemble by hand, so registering and signing
+    // in produce the same principal from the same query
+    const user = await this.users.findOne({
+      where: { id: created.id },
+      relations: WITH_ROLE,
+    });
+
+    return this.issueForUser(user!);
   }
 
   async login(dto: LoginDto): Promise<AuthResponse> {
@@ -81,7 +116,7 @@ export class AuthService {
 
     const user = await this.users.findOne({
       where: { email: dto.email },
-      relations: { organization: true },
+      relations: WITH_ROLE,
     });
     // the same message either way, so the response cannot be used to
     // find out which addresses are registered
@@ -110,16 +145,8 @@ export class AuthService {
         sub: user.id,
         kind: 'user',
         organizationId: user.organizationId,
-        role: user.role,
       }),
-      principal: {
-        kind: 'user',
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        organizationId: user.organizationId,
-      },
+      principal: principalOf(user),
     };
   }
 
@@ -144,19 +171,12 @@ export class AuthService {
 
     const user = await this.users.findOne({
       where: { id: payload.sub },
-      relations: { organization: true },
+      relations: WITH_ROLE,
     });
     if (!user || user.deletedAt !== null) throw new UnauthorizedException();
     if (user.organization.deletedAt !== null || !user.organization.isActive) {
       throw new ForbiddenException('This organization is not available');
     }
-    return {
-      kind: 'user',
-      id: user.id,
-      fullName: user.fullName,
-      email: user.email,
-      role: user.role,
-      organizationId: user.organizationId,
-    };
+    return principalOf(user);
   }
 }

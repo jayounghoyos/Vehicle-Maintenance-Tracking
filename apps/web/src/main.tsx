@@ -44,7 +44,7 @@ createRoot(document.getElementById('root')!).render(
               <Route
                 path="/vehicles"
                 element={
-                  <RequireAuth kind="user">
+                  <RequireAuth kind="user" need="view_vehicles">
                     <Vehicles />
                   </RequireAuth>
                 }
@@ -52,7 +52,7 @@ createRoot(document.getElementById('root')!).render(
               <Route
                 path="/service-log"
                 element={
-                  <RequireAuth kind="user">
+                  <RequireAuth kind="user" need="view_service_log">
                     <ServiceLog />
                   </RequireAuth>
                 }
@@ -60,7 +60,7 @@ createRoot(document.getElementById('root')!).render(
               <Route
                 path="/team"
                 element={
-                  <RequireAuth kind="user">
+                  <RequireAuth kind="user" need="view_team">
                     <Team />
                   </RequireAuth>
                 }
@@ -68,7 +68,7 @@ createRoot(document.getElementById('root')!).render(
               <Route
                 path="/team/organization"
                 element={
-                  <RequireAuth kind="user">
+                  <RequireAuth kind="user" need="view_team">
                     <Organization />
                   </RequireAuth>
                 }

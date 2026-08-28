@@ -10,31 +10,38 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
 import type { Principal } from './auth.types';
-import { UserRole } from '../entities';
+import { Permission } from '../entities';
 
 /** Requires a valid token. Nothing more. */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {}
 
-export const ROLES_KEY = 'roles';
+export const PERMISSIONS_KEY = 'permissions';
 
-/** Roles a fleet member must have. Admins are not fleet members and
- *  never satisfy this — they have their own guard. */
-export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);
+/**
+ * What the caller's role has to grant. Names a permission rather than a
+ * role, because which role carries it is now the client's decision and
+ * changes without anybody touching this file.
+ */
+export const Requires = (...permissions: Permission[]) =>
+  SetMetadata(PERMISSIONS_KEY, permissions);
 
 @Injectable()
-export class RolesGuard implements CanActivate {
+export class PermissionsGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const required = this.reflector.getAllAndOverride<UserRole[] | undefined>(ROLES_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const required = this.reflector.getAllAndOverride<Permission[] | undefined>(
+      PERMISSIONS_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (!required?.length) return true;
 
     const { user } = context.switchToHttp().getRequest<{ user?: Principal }>();
-    if (!user || user.kind !== 'user' || !required.includes(user.role as UserRole)) {
+    // admins run the service and belong to no fleet, so they satisfy
+    // nothing here: they have their own guard
+    if (user?.kind !== 'user') throw new ForbiddenException('Not allowed');
+    if (!required.every((permission) => user.permissions.includes(permission))) {
       throw new ForbiddenException('Not allowed');
     }
     return true;

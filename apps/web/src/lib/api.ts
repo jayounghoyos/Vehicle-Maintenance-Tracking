@@ -1,3 +1,4 @@
+import type { Permission } from '../auth/permissions';
 import type { Principal } from '../auth/session';
 import { tokenStore } from '../auth/session';
 import type { MaintenanceState } from '../domain/maintenance';
@@ -44,7 +45,7 @@ export const api = {
 export type AuthResponse = { accessToken: string; principal: Principal };
 
 export type DashboardResponse = {
-  user: { id: number; fullName: string; role: string };
+  user: { id: number; fullName: string; roleName: string };
   counts: { active: number; overdue: number; dueSoon: number; inShop: number };
   attention: {
     scheduleId: number;
@@ -149,12 +150,21 @@ export type TeamMember = {
   id: number;
   fullName: string;
   email: string;
-  role: string;
+  roleId: number;
+  roleName: string;
   /** false once the person has left: the row stays, the login does not */
   active: boolean;
   /** what decides whether an account can be removed or only retired */
   recordedEvents: number;
   createdAt: string;
+};
+
+/** A role the organization defined, and how many people hold it. */
+export type RoleSummary = {
+  id: number;
+  name: string;
+  permissions: Permission[];
+  members: number;
 };
 
 /** One row of the fleet-wide service log. */

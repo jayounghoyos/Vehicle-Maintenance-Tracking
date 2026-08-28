@@ -7,10 +7,11 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { UserRole } from './enums';
 import { Organization } from './organization.entity';
+import { Role } from './role.entity';
 
 @Index('users_organization_idx', ['organizationId'])
+@Index('users_role_idx', ['roleId'])
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
@@ -37,8 +38,14 @@ export class User {
   @Column({ type: 'varchar', name: 'password_hash' })
   passwordHash: string;
 
-  @Column({ type: 'enum', enum: UserRole, enumName: 'user_role' })
-  role: UserRole;
+  @Column({ type: 'int', name: 'role_id' })
+  roleId: number;
+
+  /** "is_assigned" in the diagram. Restricted rather than cascading: a
+   *  role somebody holds cannot be deleted out from under them. */
+  @ManyToOne(() => Role, { nullable: false })
+  @JoinColumn({ name: 'role_id' })
+  role: Role;
 
   /** set when the person leaves: the row stays so the service events
    *  they recorded still say who did the work, and the account stops

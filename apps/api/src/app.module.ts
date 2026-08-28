@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { databaseOptions } from './database';
 import { OrganizationModule } from './organization/organization.module';
+import { RolesModule } from './roles/roles.module';
 import { ServiceEventsModule } from './service-events/service-events.module';
 import { TeamModule } from './team/team.module';
 import { TenantModule } from './tenant/tenant.module';
@@ -32,6 +33,7 @@ import { HealthModule } from './health/health.module';
     VehiclesModule,
     ServiceEventsModule,
     TeamModule,
+    RolesModule,
     OrganizationModule,
     AdminModule,
   ],

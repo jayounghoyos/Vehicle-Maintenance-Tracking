@@ -3,13 +3,13 @@ import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
 import { isReadOnly } from '../auth/permissions';
-import { initials, roleLabel } from '../lib/format';
+import { initials } from '../lib/format';
 
 export function SidebarFooter({
   user,
   overdueCount,
 }: {
-  user: { fullName: string; role?: string };
+  user: { fullName: string; roleName?: string };
   overdueCount?: number;
 }) {
   const { principal, signOut } = useAuth();
@@ -56,9 +56,7 @@ export function SidebarFooter({
           <span className="min-w-0 flex-1 leading-tight">
             <span className="block truncate font-medium">{user.fullName}</span>
             <span className="flex items-center gap-1.5 text-[12px] text-ink-muted">
-              <span className="truncate">
-                {user.role ? roleLabel(user.role) : 'Platform admin'}
-              </span>
+              <span className="truncate">{user.roleName ?? 'Platform admin'}</span>
               {readOnly && (
                 // neutral on purpose: the manual keeps orange, amber and
                 // green for maintenance state and nothing else

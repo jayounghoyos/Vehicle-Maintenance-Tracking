@@ -37,7 +37,10 @@ export class DashboardService {
       order: { plate: 'ASC' },
     });
 
-    const user = await users.findOne({ where: { id: userId } });
+    const user = await users.findOne({
+      where: { id: userId },
+      relations: { role: true },
+    });
     if (!user) throw new NotFoundException('User not found');
 
     const schedules = await this.tenants.for(MaintenanceSchedule, organizationId).find({
@@ -94,7 +97,7 @@ export class DashboardService {
 
     const states = [...byVehicle.values()].map((one) => one.state);
     return {
-      user: { id: user.id, fullName: user.fullName, role: user.role },
+      user: { id: user.id, fullName: user.fullName, roleName: user.role.name },
       counts: {
         active: vehicles.filter((v) => v.status === VehicleStatus.ACTIVE).length,
         inShop: vehicles.filter((v) => v.status === VehicleStatus.IN_SHOP).length,
