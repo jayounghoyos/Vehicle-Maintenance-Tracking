@@ -14,8 +14,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { Principal } from '../auth/auth.types';
-import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../auth/guards';
-import { UserRole } from '../entities';
+import { CurrentUser, JwtAuthGuard, PermissionsGuard, Requires } from '../auth/guards';
+import { Permission } from '../entities';
 import { CreateVehicleDto, ImportVehiclesDto, UpdateVehicleDto } from './dto';
 import { VehiclesService } from './vehicles.service';
 import type { ImportResult, VehicleDetail, VehicleRow } from './vehicles.types';
@@ -28,7 +28,7 @@ import type { ImportResult, VehicleDetail, VehicleRow } from './vehicles.types';
  */
 @ApiTags('vehicles')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('vehicles')
 export class VehiclesController {
   constructor(private readonly vehicles: VehiclesService) {}
@@ -39,12 +39,14 @@ export class VehiclesController {
   }
 
   @Get()
+  @Requires(Permission.VIEW_VEHICLES)
   @ApiOperation({ summary: 'Every vehicle in the fleet' })
   list(@CurrentUser() principal: Principal): Promise<VehicleRow[]> {
     return this.vehicles.list(this.asUser(principal).organizationId);
   }
 
   @Get(':id')
+  @Requires(Permission.VIEW_VEHICLES)
   @ApiOperation({ summary: 'One vehicle, with its schedules and recent services' })
   one(
     @CurrentUser() principal: Principal,
@@ -54,7 +56,7 @@ export class VehiclesController {
   }
 
   @Post()
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_VEHICLES)
   @ApiOperation({ summary: 'Register a vehicle' })
   create(
     @CurrentUser() principal: Principal,
@@ -64,7 +66,7 @@ export class VehiclesController {
   }
 
   @Post('bulk')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_VEHICLES)
   @ApiOperation({ summary: 'Register many vehicles from a pasted list' })
   importMany(
     @CurrentUser() principal: Principal,
@@ -74,7 +76,7 @@ export class VehiclesController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_VEHICLES)
   @ApiOperation({ summary: 'Correct a vehicle' })
   update(
     @CurrentUser() principal: Principal,
@@ -85,7 +87,7 @@ export class VehiclesController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_VEHICLES)
   @HttpCode(204)
   @ApiOperation({ summary: 'Delete a vehicle nothing is attached to yet' })
   remove(

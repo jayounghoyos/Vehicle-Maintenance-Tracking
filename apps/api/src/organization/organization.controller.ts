@@ -9,8 +9,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { Principal } from '../auth/auth.types';
-import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../auth/guards';
-import { UserRole } from '../entities';
+import { CurrentUser, JwtAuthGuard, PermissionsGuard, Requires } from '../auth/guards';
+import { Permission } from '../entities';
 import { UpdateOrganizationDto } from './dto';
 import { OrganizationService, type OrganizationProfile } from './organization.service';
 
@@ -19,12 +19,12 @@ import { OrganizationService, type OrganizationProfile } from './organization.se
  * one your token belongs to, so there is no id to tamper with and no way
  * to ask for somebody else's.
  *
- * Everyone may read it. Only the coordinator may correct it, the same
- * split the team screen uses.
+ * Everyone may read it. Correcting it is a permission, so which role
+ * can do that is the client's decision.
  */
 @ApiTags('organization')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('organization')
 export class OrganizationController {
   constructor(private readonly organizations: OrganizationService) {}
@@ -41,7 +41,7 @@ export class OrganizationController {
   }
 
   @Patch()
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.EDIT_ORGANIZATION)
   @ApiOperation({ summary: 'Correct the organization details' })
   update(
     @CurrentUser() principal: Principal,

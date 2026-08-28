@@ -1,14 +1,15 @@
 import { hashPassword } from '../auth/password';
 import dataSource from '../data-source';
+import { BASE_ROLES } from '../roles/base-roles';
 import {
   MaintenanceSchedule,
   MaintenanceTask,
   Organization,
   PlatformAdmin,
+  Role,
   ServiceEvent,
   ServiceType,
   User,
-  UserRole,
   Vehicle,
   VehicleModel,
   VehicleStatus,
@@ -40,8 +41,8 @@ async function seed(): Promise<void> {
 
   await dataSource.query(`
     TRUNCATE service_event_photos, service_events, maintenance_schedules,
-             maintenance_tasks, vehicles, vehicle_models, users, organizations,
-             platform_admins
+             maintenance_tasks, vehicles, vehicle_models, users, role_permissions,
+             roles, organizations, platform_admins
     RESTART IDENTITY CASCADE
   `);
 
@@ -59,29 +60,41 @@ async function seed(): Promise<void> {
 
   const passwordHash = await hashPassword(DEV_PASSWORD);
 
-  // one of each role, so the difference between them can be seen by
-  // signing in rather than by reading the guards
+  // the three every organization starts with, which the client is then
+  // free to rename, re-grant or add to
+  const [coordinator, mechanic, manager] = await db.save(
+    BASE_ROLES.map(({ name, permissions }) =>
+      db.create(Role, {
+        organizationId: org.id,
+        name,
+        permissions: permissions.map((permission) => ({ permission })),
+      }),
+    ),
+  );
+
+  // one of each, so the difference between them can be seen by signing
+  // in rather than by reading the guards
   const [ana, carlos] = await db.save(User, [
     {
       organizationId: org.id,
       fullName: 'Ana Restrepo',
       email: 'ana@citylogistics.co',
       passwordHash,
-      role: UserRole.FLEET_COORDINATOR,
+      roleId: coordinator.id,
     },
     {
       organizationId: org.id,
       fullName: 'Carlos Mejia',
       email: 'carlos@citylogistics.co',
       passwordHash,
-      role: UserRole.MECHANIC,
+      roleId: mechanic.id,
     },
     {
       organizationId: org.id,
       fullName: 'Laura Gomez',
       email: 'laura@citylogistics.co',
       passwordHash,
-      role: UserRole.OPERATIONS_MANAGER,
+      roleId: manager.id,
     },
   ]);
 
