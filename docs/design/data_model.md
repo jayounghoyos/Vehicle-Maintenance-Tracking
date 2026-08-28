@@ -44,11 +44,28 @@ Two uniqueness rules changed:
 
 `vehicle_models` is the exception and stays shared. Nobody owns "Chevrolet NHR" and nobody edits it, so a copy per company would duplicate rows for nothing.
 
+## Roles the client invents
+
+The role was an enum on `users`, so every organization had the same three and none could add a fourth. Clients asked for their own, so it became a row.
+
+| Table | What it adds |
+|---|---|
+| `roles` | A job title one organization invented, and the only thing `users` points at now. |
+| `role_permissions` | One row per permission a role grants. |
+
+Every organization is seeded with a fleet coordinator, a mechanic and an operations manager carrying what the three enum values used to carry. They are ordinary rows from that moment: the client renames them, changes what they grant, or adds a fourth. "Mechanic" here and "Mechanic" somewhere else are separate rows that may mean different things.
+
+The grants are rows rather than an array column on `roles`. An array would be one table fewer and one normal form worse, and the relationship would be hidden inside a value instead of drawn on the diagram.
+
+The list of permissions is not the client's to extend. Each one is a guard or a route that has to exist in code, so `permission` is an enum: a client composes roles out of it and cannot invent an entry.
+
 ## Rules to know
 
 Due date passed and nobody logged that service = overdue.
 
 `schedule_id` can be empty. A breakdown is work nobody planned.
+
+A role somebody holds cannot be deleted, and the last role granting `manage_team` cannot drop it. Between them that is what stops a client locking itself out of its own team screen, which nobody but a platform admin could undo.
 
 `is_active` and `deleted_at` are not the same thing. `is_active = false` is a suspension the company comes back from; `deleted_at` is gone for good, with the rows kept so the service history still reads. Either one blocks sign-in.
 
@@ -69,6 +86,6 @@ false, and sign-in is where that is enforced.
 
 ## Reading the diagram
 
-Every line is named with what it does, so the diagram explains itself. An organization `employs` users and `owns` vehicles; a vehicle `is_scheduled_for` maintenance; a user `records` a service event, and a photo `documents` one.
+Every line is named with what it does, so the diagram explains itself. An organization `employs` users, `owns` vehicles and `sets_up` roles; a role `grants` permissions and a user `is_assigned` one; a vehicle `is_scheduled_for` maintenance; a user `records` a service event, and a photo `documents` one.
 
 Source: [`data_model.dbml`](./data_model.dbml), edited at [dbdiagram.io](https://dbdiagram.io/d/6a78f2a8829f06bdc8b425db).
