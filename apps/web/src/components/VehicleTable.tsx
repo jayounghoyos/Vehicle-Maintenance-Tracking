@@ -266,7 +266,19 @@ export function VehicleTable({
                   }`}
                 >
                   <td className="px-5 py-3.5 font-semibold whitespace-nowrap">
-                    {vehicle.plate}
+                    <span className="flex items-center gap-2.5">
+                      {/* only when there is one: an empty frame on every
+                          row would be noise on a screen nobody has put
+                          pictures in yet */}
+                      {vehicle.photoUrl && (
+                        <img
+                          src={vehicle.photoUrl}
+                          alt=""
+                          className="size-8 shrink-0 rounded-lg object-cover"
+                        />
+                      )}
+                      {vehicle.plate}
+                    </span>
                   </td>
                   <td className="px-5 py-3.5">
                     <span className="whitespace-nowrap">

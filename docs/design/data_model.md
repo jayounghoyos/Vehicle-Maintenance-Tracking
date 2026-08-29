@@ -59,6 +59,14 @@ The grants are rows rather than an array column on `roles`. An array would be on
 
 The list of permissions is not the client's to extend. Each one is a guard or a route that has to exist in code, so `permission` is an enum: a client composes roles out of it and cannot invent an entry.
 
+## Pictures
+
+`vehicles.photo_key` and `service_event_photos.storage_key` both hold a key, never the bytes. The files live in an object store, which is Cloudinary on the free plan: Render's disk is wiped on every deploy and every time the free instance wakes up, so anything written there would not survive the afternoon.
+
+One picture per vehicle, added by editing a van that already exists rather than when it is registered. Sizing happens on delivery, so the fleet table and the profile ask the same stored file for different widths.
+
+The API runs without the credentials, with upload switched off, so a teammate who has not set them up can still work on everything else.
+
 ## Rules to know
 
 Due date passed and nobody logged that service = overdue.

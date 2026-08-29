@@ -11,6 +11,7 @@ import {
 } from '../entities';
 import { maintenanceByVehicle, stateSchedules } from '../maintenance/fleet-state';
 import { scheduleState } from '../maintenance/maintenance';
+import { PhotoStorage } from '../photos/photo-storage.service';
 import { TenantRepositories, type TenantRepository } from '../tenant/tenant-repository';
 import type { CreateVehicleDto, ImportVehiclesDto, UpdateVehicleDto } from './dto';
 import type {
@@ -22,6 +23,11 @@ import type {
 } from './vehicles.types';
 
 const RECENT_EVENT_LIMIT = 5;
+
+/* Delivery widths, in pixels. One stored file, sized by whoever asks for
+ * it, so the fleet table does not download a photo meant for a profile. */
+const PHOTO_THUMBNAIL = 96;
+const PHOTO_PROFILE = 640;
 
 /**
  * Plates are written down by people, so ABC123, abc123 and "ABC 123" are
@@ -41,6 +47,7 @@ export class VehiclesService {
      *  client reads, so it cannot go through a tenant repository */
     @InjectRepository(VehicleModel)
     private readonly models: Repository<VehicleModel>,
+    private readonly photos: PhotoStorage,
   ) {}
 
   private scoped(organizationId: number): {
@@ -55,7 +62,11 @@ export class VehiclesService {
     };
   }
 
-  async list(organizationId: number, today = new Date()): Promise<VehicleRow[]> {
+  async list(
+    organizationId: number,
+    today = new Date(),
+    photoWidth = PHOTO_THUMBNAIL,
+  ): Promise<VehicleRow[]> {
     const { vehicles, schedules } = this.scoped(organizationId);
 
     const rows = await vehicles.find({
@@ -83,6 +94,7 @@ export class VehiclesService {
       year: vehicle.year,
       odometerKm: vehicle.odometerKm,
       status: vehicle.status,
+      photoUrl: this.photos.url(vehicle.photoKey, photoWidth),
       // a vehicle nobody scheduled anything for is not behind on anything
       state: byVehicle.get(vehicle.id)?.state ?? 'on_track',
       nextTask: byVehicle.get(vehicle.id)?.nextTask ?? null,
@@ -99,7 +111,9 @@ export class VehiclesService {
     today = new Date(),
   ): Promise<VehicleDetail> {
     const { schedules, events } = this.scoped(organizationId);
-    const row = (await this.list(organizationId, today)).find((one) => one.id === id);
+    const row = (await this.list(organizationId, today, PHOTO_PROFILE)).find(
+      (one) => one.id === id,
+    );
     if (!row) throw new NotFoundException('No such vehicle');
 
     const mine = await schedules.find({
@@ -195,6 +209,41 @@ export class VehiclesService {
   }
 
   /**
+   * The picture arrives when an existing vehicle is edited, not when it
+   * is registered: filling in a plate and choosing a file are different
+   * kinds of work, and one should not hold up the other.
+   *
+   * The row is pointed at the new file before the old one is deleted. A
+   * failed delete then costs a leftover image; the other order would
+   * cost a vehicle pointing at a file that is gone.
+   */
+  async setPhoto(organizationId: number, id: number, file: Buffer): Promise<VehicleRow> {
+    const { vehicles } = this.scoped(organizationId);
+    const vehicle = await vehicles.findOne({ where: { id } });
+    if (!vehicle) throw new NotFoundException('No such vehicle');
+
+    const previous = vehicle.photoKey;
+    vehicle.photoKey = await this.photos.upload(file, organizationId);
+    await vehicles.save(vehicle);
+    if (previous) await this.photos.remove(previous);
+
+    return this.rowFor(organizationId, id);
+  }
+
+  async removePhoto(organizationId: number, id: number): Promise<VehicleRow> {
+    const { vehicles } = this.scoped(organizationId);
+    const vehicle = await vehicles.findOne({ where: { id } });
+    if (!vehicle) throw new NotFoundException('No such vehicle');
+
+    const previous = vehicle.photoKey;
+    vehicle.photoKey = null;
+    await vehicles.save(vehicle);
+    if (previous) await this.photos.remove(previous);
+
+    return this.rowFor(organizationId, id);
+  }
+
+  /**
    * Permanent, and only for a vehicle nothing points at. Schedules and
    * service events both hold a foreign key to it with no cascade, so
    * deleting one that has either fails in the database as a 500 unless
@@ -219,6 +268,9 @@ export class VehiclesService {
     }
 
     await vehicles.delete({ id });
+    // after the row is gone: an orphaned image is harmless, a vehicle
+    // whose picture was deleted by a failed request is not
+    if (vehicle.photoKey) await this.photos.remove(vehicle.photoKey);
   }
 
   /**

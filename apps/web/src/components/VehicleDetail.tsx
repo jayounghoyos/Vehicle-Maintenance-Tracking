@@ -1,11 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { CalendarClock, Truck } from 'lucide-react';
 
+import { useAuth } from '../auth/context';
+import { can } from '../auth/permissions';
 import { STATE_LABEL, dueLabel } from '../domain/maintenance';
 import { VEHICLE_STATUS_LABEL, type VehicleStatus } from '../domain/vehicleStatus';
 import { api, type VehicleDetail as Detail } from '../lib/api';
 import { odometer, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
+import { VehiclePhoto } from './VehiclePhoto';
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -37,6 +40,7 @@ function interval(days: number | null, km: number | null): string {
  * out rather than invented.
  */
 export function VehicleDetail({ id }: { id: number }) {
+  const { principal } = useAuth();
   const { data: vehicle, isPending } = useQuery({
     queryKey: ['vehicles', id],
     queryFn: () => api.get<Detail>(`/vehicles/${id}`),
@@ -48,6 +52,8 @@ export function VehicleDetail({ id }: { id: number }) {
 
   return (
     <div className="space-y-5 p-5">
+      <VehiclePhoto vehicle={vehicle} canManage={can(principal, 'manage_vehicles')} />
+
       <div className="flex items-start gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime/15">
           <Truck className="size-5 text-lime" strokeWidth={1.75} />
