@@ -38,10 +38,12 @@ export class PhotoStorage {
       cloudinary.uploader
         .upload_stream(
           { folder: `mts/org-${organizationId}`, resource_type: 'image' },
-          (error, uploaded) =>
-            error || !uploaded
-              ? reject(error ?? new Error('Upload failed'))
-              : resolve(uploaded),
+          (error, uploaded) => {
+            // cloudinary hands back its own error shape, which is not an
+            // Error, and a rejection that is not one loses its stack
+            if (uploaded) return resolve(uploaded);
+            reject(new Error(error?.message ?? 'The image could not be stored'));
+          },
         )
         .end(file);
     });
