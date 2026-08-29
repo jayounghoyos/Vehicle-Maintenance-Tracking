@@ -1,5 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsHexColor,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateIf,
+} from 'class-validator';
 
 /**
  * Every field is optional so a partial edit is a legal request, but none
@@ -43,4 +51,15 @@ export class UpdateOrganizationDto {
   @IsEmail()
   @MaxLength(200)
   email?: string;
+
+  /**
+   * The one exception to "nothing may be blanked": null is a real answer
+   * here and means going back to the colour in the brand manual.
+   */
+  @ApiPropertyOptional({ example: '#CFF255', nullable: true })
+  @IsOptional()
+  @ValidateIf((_object, value) => value !== null)
+  @IsHexColor()
+  @MaxLength(7)
+  accentColor?: string | null;
 }

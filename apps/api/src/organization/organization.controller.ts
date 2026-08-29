@@ -1,12 +1,20 @@
 import {
   Body,
   Controller,
+  Delete,
+  FileTypeValidator,
   ForbiddenException,
   Get,
+  MaxFileSizeValidator,
+  ParseFilePipe,
   Patch,
+  Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { Principal } from '../auth/auth.types';
 import { CurrentUser, JwtAuthGuard, PermissionsGuard, Requires } from '../auth/guards';
@@ -22,6 +30,10 @@ import { OrganizationService, type OrganizationProfile } from './organization.se
  * Everyone may read it. Correcting it is a permission, so which role
  * can do that is the client's decision.
  */
+/* A logo is a mark, not a photograph: anything approaching this size is
+ * a mistake worth catching before it is stored. */
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+
 @ApiTags('organization')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -48,5 +60,34 @@ export class OrganizationController {
     @Body() dto: UpdateOrganizationDto,
   ): Promise<OrganizationProfile> {
     return this.organizations.update(this.asUser(principal).organizationId, dto);
+  }
+
+  @Post('logo')
+  @Requires(Permission.EDIT_ORGANIZATION)
+  @UseInterceptors(FileInterceptor('logo', { limits: { fileSize: MAX_LOGO_BYTES } }))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Put your own mark on the interface' })
+  setLogo(
+    @CurrentUser() principal: Principal,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: MAX_LOGO_BYTES }),
+          // svg is not here on purpose: it is a document that can carry
+          // script, and it would be served from the same origin
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ }),
+        ],
+      }),
+    )
+    logo: Express.Multer.File,
+  ): Promise<OrganizationProfile> {
+    return this.organizations.setLogo(this.asUser(principal).organizationId, logo.buffer);
+  }
+
+  @Delete('logo')
+  @Requires(Permission.EDIT_ORGANIZATION)
+  @ApiOperation({ summary: 'Go back to the default mark' })
+  removeLogo(@CurrentUser() principal: Principal): Promise<OrganizationProfile> {
+    return this.organizations.removeLogo(this.asUser(principal).organizationId);
   }
 }

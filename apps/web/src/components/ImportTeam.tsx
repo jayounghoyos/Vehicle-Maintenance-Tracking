@@ -149,7 +149,7 @@ function Result({
           <button
             type="button"
             onClick={onAgain}
-            className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page transition-opacity hover:opacity-90"
+            className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-on-accent transition-opacity hover:opacity-90"
           >
             Import another list
           </button>
@@ -363,7 +363,7 @@ export function ImportTeam({ onImported }: { onImported: () => void }) {
             type="button"
             disabled={valid.length === 0 || tooMany || send.isPending}
             onClick={() => send.mutate()}
-            className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page transition-opacity hover:opacity-90 disabled:opacity-40"
+            className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-on-accent transition-opacity hover:opacity-90 disabled:opacity-40"
           >
             {send.isPending
               ? 'Creating…'

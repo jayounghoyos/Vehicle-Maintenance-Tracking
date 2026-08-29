@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { applyAccent } from '../lib/brand';
 import { ApiError, api, type AuthResponse } from '../lib/api';
 import { AuthContext } from './context';
 import { tokenStore, type Principal } from './session';
@@ -58,8 +59,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     tokenStore.clear();
     setPrincipal(null);
     // otherwise the next person to sign in on this browser sees the
-    // previous one's fleet for a moment
+    // previous one's fleet for a moment, and their colours for longer
     queryClient.clear();
+    applyAccent(null);
   }, [queryClient]);
 
   const value = useMemo(

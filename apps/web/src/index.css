@@ -5,8 +5,11 @@
    Every colour is assigned to a role. No colour is used outside the role
    it is defined for — status hues never decorate, lime is never status. */
 @theme {
-  /* Accent — the one action that matters on screen, and the active nav item */
+  /* Accent — the one action that matters on screen, and the active nav item.
+     A client may replace this one with their own; lib/brand.ts moves both
+     properties together so whatever sits on the accent stays readable. */
   --color-lime: #cff255;
+  --color-on-accent: #0a0b0c;
 
   /* Status — maintenance state, and nothing else */
   --color-overdue: #ff7a59;
@@ -234,7 +237,7 @@
 
 .driver-popover.mts-tour .driver-popover-footer button.driver-popover-next-btn {
   background-color: var(--color-lime);
-  color: var(--color-page);
+  color: var(--color-on-accent);
 }
 
 .driver-popover.mts-tour .driver-popover-footer button.driver-popover-next-btn:hover {

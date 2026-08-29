@@ -32,6 +32,8 @@ Table organizations {
   phone varchar [not null]
   email varchar [not null]
   is_active boolean [not null, default: true]
+  logo_key varchar
+  accent_color varchar(7)
   deleted_at timestamp
   created_at timestamp [default: `now()`]
 
@@ -51,6 +53,11 @@ Table organizations {
     CREATE UNIQUE INDEX ON organizations (name) WHERE deleted_at IS NULL;
 
   email is not unique: it is a contact address. The login namespace is users.email.
+
+  logo_key and accent_color are how a client sees themselves in the product. Both
+  null means the brand manual, which is what everybody starts with. Only these two:
+  the status hues mean overdue, due soon and on track, so they are not a client's to
+  change and are not stored per organization.
   '''
 }
 
