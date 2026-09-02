@@ -1,4 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import type { DashboardResponse } from '../lib/api';
 import { relativeDay } from '../lib/format';
@@ -58,12 +59,12 @@ export function RecentEvents({ events }: { events: DashboardResponse['recentEven
         </ul>
       )}
 
-      <button
-        type="button"
+      <Link
+        to="/service-log"
         className="flex items-center justify-center gap-2 border-t border-white/5 px-5 py-3.5 text-body text-ink-muted transition-colors hover:text-ink"
       >
         Open service log <ArrowUpRight className="size-3.5" />
-      </button>
+      </Link>
     </Panel>
   );
 }

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
 import { AppShell, PrimaryAction } from '../components/AppShell';
+import { LogServiceModal } from '../components/LogServiceModal';
 import { Panel } from '../components/Panel';
 import { ServiceLogTable } from '../components/ServiceLogTable';
 import { SidebarFooter } from '../components/SidebarFooter';
@@ -15,6 +16,7 @@ export default function ServiceLog() {
   const me = principal?.kind === 'user' ? principal : null;
   // undefined is every vehicle; the select's own "All vehicles" option
   const [vehicleId, setVehicleId] = useState<number | undefined>(undefined);
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
 
   const { data: vehicles } = useQuery({
     queryKey: ['vehicles'],
@@ -29,7 +31,9 @@ export default function ServiceLog() {
   // the operations manager reads the log and decides on it; recording
   // the work belongs to whoever did it
   const action = can(principal, 'logService') ? (
-    <PrimaryAction icon={Plus}>Log service</PrimaryAction>
+    <PrimaryAction icon={Plus} onClick={() => setIsLogModalOpen(true)}>
+      Log service
+    </PrimaryAction>
   ) : undefined;
 
   const shown = events ?? [];
@@ -75,6 +79,12 @@ export default function ServiceLog() {
           <ServiceLogTable events={shown} />
         )}
       </Panel>
+
+      <LogServiceModal
+        isOpen={isLogModalOpen}
+        onClose={() => setIsLogModalOpen(false)}
+        initialVehicleId={vehicleId}
+      />
     </AppShell>
   );
 }

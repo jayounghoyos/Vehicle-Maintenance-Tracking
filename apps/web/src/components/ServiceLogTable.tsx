@@ -1,7 +1,11 @@
+import { Camera } from 'lucide-react';
+import { useState } from 'react';
+
 import { sortRows, useMultiSort, type Sort } from '../hooks/useMultiSort';
 import { odometer, relativeDay, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
-import type { ServiceLogItem } from '../lib/api';
+import type { PhotoItem, ServiceLogItem } from '../lib/api';
+import { PhotoViewerModal } from './PhotoViewerModal';
 import { SortHeader } from './SortHeader';
 
 type SortKey = 'date' | 'vehicle' | 'task' | 'type' | 'odometer' | 'recorder';
@@ -60,9 +64,15 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
   const sort = useMultiSort<SortKey>({ defaultSort: DEFAULT_SORT, startsAscending });
   const shown = sortRows(events, sort.order, compare);
 
+  const [activePhotos, setActivePhotos] = useState<{
+    photos: PhotoItem[];
+    title: string;
+    subtitle: string;
+  } | null>(null);
+
   return (
     <div className="overflow-x-auto border-t border-white/5">
-      <table className="w-full min-w-[760px] text-left">
+      <table className="w-full min-w-[820px] text-left">
         <thead>
           <tr className="border-b border-white/5">
             {COLUMNS.map(({ key, label }) => (
@@ -89,11 +99,15 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
                 onClick={() => sort.toggle(key)}
               />
             ))}
+            <th className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase">
+              Photos
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/5">
           {shown.map((event) => {
             const Icon = taskIcon(event.task);
+            const eventPhotos = event.photos ?? [];
             return (
               <tr key={event.id} className="transition-colors hover:bg-white/[0.03]">
                 <td className="px-5 py-3.5 whitespace-nowrap">
@@ -113,6 +127,11 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
                     <Icon className="size-4 shrink-0 text-ink-muted" strokeWidth={1.75} />
                     {event.task}
                   </span>
+                  {event.notes && (
+                    <span className="mt-0.5 block max-w-xs truncate text-[12px] text-ink-muted italic" title={event.notes}>
+                      {event.notes}
+                    </span>
+                  )}
                 </td>
                 <td className="px-5 py-3.5">
                   <TypeBadge type={event.type} />
@@ -122,6 +141,27 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
                 </td>
                 <td className="px-5 py-3.5 text-body whitespace-nowrap">
                   {event.recorder}
+                </td>
+                <td className="px-5 py-3.5 whitespace-nowrap">
+                  {eventPhotos.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActivePhotos({
+                          photos: eventPhotos,
+                          title: `${event.plate} — ${event.task}`,
+                          subtitle: `${shortDate(event.performedAt)} · ${event.recorder}`,
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[12px] font-medium text-ink transition-colors hover:border-lime/30 hover:bg-lime/10 hover:text-lime"
+                      title="View attached photos"
+                    >
+                      <Camera className="size-3.5 text-lime" />
+                      <span>{eventPhotos.length} {eventPhotos.length === 1 ? 'photo' : 'photos'}</span>
+                    </button>
+                  ) : (
+                    <span className="text-body text-ink-muted/40">—</span>
+                  )}
                 </td>
               </tr>
             );
@@ -133,6 +173,16 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
         <p className="px-5 py-8 text-center text-body text-ink-muted">
           Nothing logged yet.
         </p>
+      )}
+
+      {activePhotos && (
+        <PhotoViewerModal
+          isOpen={true}
+          photos={activePhotos.photos}
+          title={activePhotos.title}
+          subtitle={activePhotos.subtitle}
+          onClose={() => setActivePhotos(null)}
+        />
       )}
     </div>
   );

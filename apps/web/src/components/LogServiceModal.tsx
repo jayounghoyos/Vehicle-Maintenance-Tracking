@@ -30,6 +30,23 @@ type Props = {
 };
 
 export function LogServiceModal({ isOpen, onClose, initialVehicleId }: Props) {
+  if (!isOpen) return null;
+
+  return (
+    <LogServiceDialog
+      onClose={onClose}
+      initialVehicleId={initialVehicleId}
+    />
+  );
+}
+
+function LogServiceDialog({
+  onClose,
+  initialVehicleId,
+}: {
+  onClose: () => void;
+  initialVehicleId?: number;
+}) {
   const { principal } = useAuth();
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -55,47 +72,29 @@ export function LogServiceModal({ isOpen, onClose, initialVehicleId }: Props) {
   const { data: vehicles } = useQuery({
     queryKey: ['vehicles'],
     queryFn: () => api.get<VehicleRow[]>('/vehicles'),
-    enabled: isOpen,
   });
 
   // Load organization tasks
   const { data: taskOptions } = useQuery({
     queryKey: ['maintenance-tasks'],
     queryFn: fetchTasks,
-    enabled: isOpen,
   });
 
   // Load selected vehicle details to see active schedules & odometer
   const { data: selectedVehicle } = useQuery({
     queryKey: ['vehicles', vehicleId],
     queryFn: () => api.get<VehicleDetail>(`/vehicles/${vehicleId}`),
-    enabled: isOpen && vehicleId !== undefined,
+    enabled: vehicleId !== undefined,
   });
-
-  // Sync initialVehicleId if changed
-  useEffect(() => {
-    if (initialVehicleId !== undefined) {
-      setVehicleId(initialVehicleId);
-    }
-  }, [initialVehicleId]);
-
-  // When selected vehicle loads, auto-suggest odometer if empty
-  useEffect(() => {
-    if (selectedVehicle && odometerKm === '') {
-      setOdometerKm(String(selectedVehicle.odometerKm || ''));
-    }
-  }, [selectedVehicle]);
 
   // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
+      if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [onClose]);
 
   // When schedule is chosen, automatically set task name and preventive type
   const handleScheduleChange = (val: string) => {
@@ -154,10 +153,6 @@ export function LogServiceModal({ isOpen, onClose, initialVehicleId }: Props) {
         void queryClient.invalidateQueries({ queryKey: ['vehicles', vehicleId] });
       }
       onClose();
-      // Reset form
-      setPhotos([]);
-      setNotes('');
-      setErrorMsg(null);
     },
     onError: (err: unknown) => {
       setErrorMsg(
@@ -198,8 +193,6 @@ export function LogServiceModal({ isOpen, onClose, initialVehicleId }: Props) {
       photos: photos.map((p) => p.dataUrl),
     });
   };
-
-  if (!isOpen) return null;
 
   const currentKm = selectedVehicle?.odometerKm ?? 0;
   const newKm = odometerKm.trim() !== '' ? Number(odometerKm) : null;

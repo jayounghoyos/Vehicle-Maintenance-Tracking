@@ -1,11 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { CalendarClock, Truck } from 'lucide-react';
+import { CalendarClock, Camera, Plus, Truck } from 'lucide-react';
+import { useState } from 'react';
 
+import { useAuth } from '../auth/context';
+import { can } from '../auth/permissions';
 import { STATE_LABEL, dueLabel } from '../domain/maintenance';
 import { VEHICLE_STATUS_LABEL, type VehicleStatus } from '../domain/vehicleStatus';
-import { api, type VehicleDetail as Detail } from '../lib/api';
+import { api, type PhotoItem, type VehicleDetail as Detail } from '../lib/api';
 import { odometer, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
+import { LogServiceModal } from './LogServiceModal';
+import { PhotoViewerModal } from './PhotoViewerModal';
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -37,6 +42,14 @@ function interval(days: number | null, km: number | null): string {
  * out rather than invented.
  */
 export function VehicleDetail({ id }: { id: number }) {
+  const { principal } = useAuth();
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [activePhotos, setActivePhotos] = useState<{
+    photos: PhotoItem[];
+    title: string;
+    subtitle: string;
+  } | null>(null);
+
   const { data: vehicle, isPending } = useQuery({
     queryKey: ['vehicles', id],
     queryFn: () => api.get<Detail>(`/vehicles/${id}`),
@@ -46,18 +59,33 @@ export function VehicleDetail({ id }: { id: number }) {
     return <p className="p-5 text-body text-ink-muted">Loading the vehicle…</p>;
   }
 
+  const canLog = can(principal, 'logService');
+
   return (
     <div className="space-y-5 p-5">
-      <div className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime/15">
-          <Truck className="size-5 text-lime" strokeWidth={1.75} />
-        </span>
-        <div className="min-w-0">
-          <p className="text-section font-semibold">{vehicle.plate}</p>
-          <p className="text-body text-ink-muted">
-            {vehicle.make} {vehicle.model}
-          </p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime/15">
+            <Truck className="size-5 text-lime" strokeWidth={1.75} />
+          </span>
+          <div className="min-w-0">
+            <p className="text-section font-semibold">{vehicle.plate}</p>
+            <p className="text-body text-ink-muted">
+              {vehicle.make} {vehicle.model}
+            </p>
+          </div>
         </div>
+
+        {canLog && (
+          <button
+            type="button"
+            onClick={() => setIsLogModalOpen(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-lime px-3 py-1.5 text-[13px] font-semibold text-page transition-opacity hover:opacity-90"
+          >
+            <Plus className="size-3.5" strokeWidth={2.5} />
+            Log service
+          </button>
+        )}
       </div>
 
       {vehicle.nextDueDate && vehicle.state !== 'on_track' && (
@@ -144,20 +172,39 @@ export function VehicleDetail({ id }: { id: number }) {
           <ul className="space-y-3">
             {vehicle.recentEvents.map((event) => {
               const Icon = taskIcon(event.task);
+              const eventPhotos = event.photos ?? [];
               return (
                 <li key={event.id} className="flex items-start gap-3">
                   <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-white/5">
                     <Icon className="size-3.5 text-ink-muted" strokeWidth={1.75} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium">
-                      {event.task}
-                      {event.type === 'corrective' && (
-                        <span className="ml-2 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
-                          Unplanned
-                        </span>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="font-medium">
+                        {event.task}
+                        {event.type === 'corrective' && (
+                          <span className="ml-2 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
+                            Unplanned
+                          </span>
+                        )}
+                      </p>
+                      {eventPhotos.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setActivePhotos({
+                              photos: eventPhotos,
+                              title: `${vehicle.plate} — ${event.task}`,
+                              subtitle: `${shortDate(event.performedAt)} · ${event.recorder}`,
+                            })
+                          }
+                          className="flex items-center gap-1 rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] font-medium text-ink transition-colors hover:bg-white/20"
+                        >
+                          <Camera className="size-3 text-lime" />
+                          {eventPhotos.length} {eventPhotos.length === 1 ? 'photo' : 'photos'}
+                        </button>
                       )}
-                    </p>
+                    </div>
                     <p className="text-body text-ink-muted">
                       {event.recorder} · {shortDate(event.performedAt)}
                       {event.odometerKm !== null && ` · ${odometer(event.odometerKm)} km`}
@@ -166,6 +213,30 @@ export function VehicleDetail({ id }: { id: number }) {
                       <p className="mt-0.5 text-body text-ink-muted italic">
                         {event.notes}
                       </p>
+                    )}
+                    {eventPhotos.length > 0 && (
+                      <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+                        {eventPhotos.map((photo) => (
+                          <button
+                            key={photo.id}
+                            type="button"
+                            onClick={() =>
+                              setActivePhotos({
+                                photos: eventPhotos,
+                                title: `${vehicle.plate} — ${event.task}`,
+                                subtitle: `${shortDate(event.performedAt)} · ${event.recorder}`,
+                              })
+                            }
+                            className="size-12 shrink-0 overflow-hidden rounded-lg border border-white/10 transition-transform hover:scale-105"
+                          >
+                            <img
+                              src={photo.url}
+                              alt="Service thumbnail"
+                              className="h-full w-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </li>
@@ -179,6 +250,22 @@ export function VehicleDetail({ id }: { id: number }) {
         <CalendarClock className="mt-0.5 size-3.5 shrink-0" strokeWidth={1.75} />
         Schedules are set on the Schedules screen, which is not built yet.
       </p>
+
+      <LogServiceModal
+        isOpen={isLogModalOpen}
+        onClose={() => setIsLogModalOpen(false)}
+        initialVehicleId={id}
+      />
+
+      {activePhotos && (
+        <PhotoViewerModal
+          isOpen={true}
+          photos={activePhotos.photos}
+          title={activePhotos.title}
+          subtitle={activePhotos.subtitle}
+          onClose={() => setActivePhotos(null)}
+        />
+      )}
     </div>
   );
 }
