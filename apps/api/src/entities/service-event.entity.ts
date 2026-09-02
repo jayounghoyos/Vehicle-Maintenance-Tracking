@@ -4,6 +4,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -11,6 +12,7 @@ import { ServiceType } from './enums';
 import { MaintenanceSchedule } from './maintenance-schedule.entity';
 import { MaintenanceTask } from './maintenance-task.entity';
 import { Organization } from './organization.entity';
+import { ServiceEventPhoto } from './service-event-photo.entity';
 import { User } from './user.entity';
 import { Vehicle } from './vehicle.entity';
 
@@ -75,6 +77,9 @@ export class ServiceEvent {
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;
+
+  @OneToMany(() => ServiceEventPhoto, (photo) => photo.serviceEvent)
+  photos: ServiceEventPhoto[];
 
   @Column({ type: 'timestamp', name: 'created_at', default: () => 'now()' })
   createdAt: Date;

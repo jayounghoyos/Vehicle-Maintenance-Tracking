@@ -109,7 +109,7 @@ export class VehiclesService {
     });
     const history = await events.find({
       where: { vehicleId: id },
-      relations: { task: true, recorder: true },
+      relations: { task: true, recorder: true, photos: true },
       order: { performedAt: 'DESC' },
       take: RECENT_EVENT_LIMIT,
     });
@@ -131,7 +131,12 @@ export class VehiclesService {
       performedAt: event.performedAt,
       odometerKm: event.odometerKm,
       notes: event.notes,
-      recorder: event.recorder.fullName,
+      recorder: event.recorder?.fullName ?? 'Unknown',
+      photos: (event.photos ?? []).map((photo) => ({
+        id: photo.id,
+        storageKey: photo.storageKey,
+        url: `/api/service-events/photos/${photo.storageKey}`,
+      })),
     }));
 
     return { ...row, schedules: scheduleItems, recentEvents };
