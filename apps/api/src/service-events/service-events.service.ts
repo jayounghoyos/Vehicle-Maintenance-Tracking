@@ -11,6 +11,7 @@ import {
   User,
   Vehicle,
 } from '../entities';
+import { PhotoStorage } from '../photos/photo-storage.service';
 import { TenantRepositories } from '../tenant/tenant-repository';
 import type { RecordServiceEventDto } from './dto';
 import type { ServiceLogRow, TaskItem } from './service-events.types';
@@ -19,8 +20,11 @@ const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'photos');
 
 @Injectable()
 export class ServiceEventsService {
-  constructor(private readonly tenants: TenantRepositories) {
-    // Ensure upload directory exists
+  constructor(
+    private readonly tenants: TenantRepositories,
+    private readonly photos: PhotoStorage,
+  ) {
+    // Ensure upload directory exists as local fallback
     try {
       if (!fs.existsSync(UPLOAD_DIR)) {
         fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -28,6 +32,13 @@ export class ServiceEventsService {
     } catch (err) {
       console.warn('Could not create upload directory:', err);
     }
+  }
+
+  resolvePhotoUrl(storageKey: string): string {
+    const cloudinaryUrl = this.photos.url(storageKey, 1600, { crop: 'limit' });
+    return (
+      cloudinaryUrl ?? `/api/service-events/photos/${encodeURIComponent(storageKey)}`
+    );
   }
 
   async list(organizationId: number, vehicleId?: number): Promise<ServiceLogRow[]> {
@@ -60,7 +71,7 @@ export class ServiceEventsService {
       photos: (event.photos ?? []).map((photo) => ({
         id: photo.id,
         storageKey: photo.storageKey,
-        url: `/api/service-events/photos/${photo.storageKey}`,
+        url: this.resolvePhotoUrl(photo.storageKey),
       })),
     }));
   }
@@ -161,11 +172,13 @@ export class ServiceEventsService {
     if (dto.photos && dto.photos.length > 0) {
       for (const photoData of dto.photos) {
         try {
-          const storageKey = await this.savePhotoToDisk(
-            organizationId,
-            event.id,
-            photoData,
-          );
+          let storageKey: string;
+          if (this.photos.isConfigured) {
+            const buffer = this.extractBase64Buffer(photoData);
+            storageKey = await this.photos.upload(buffer, organizationId);
+          } else {
+            storageKey = await this.savePhotoToDisk(organizationId, event.id, photoData);
+          }
           const photo = await photosRepo.save(
             photosRepo.create({
               serviceEventId: event.id,
@@ -198,15 +211,18 @@ export class ServiceEventsService {
       photos: savedPhotos.map((photo) => ({
         id: photo.id,
         storageKey: photo.storageKey,
-        url: `/api/service-events/photos/${photo.storageKey}`,
+        url: this.resolvePhotoUrl(photo.storageKey),
       })),
     };
   }
 
-  async getPhotoFilePath(
+  async getPhotoResource(
     organizationId: number,
     storageKey: string,
-  ): Promise<{ filePath: string; contentType: string }> {
+  ): Promise<
+    | { type: 'redirect'; url: string }
+    | { type: 'file'; filePath: string; contentType: string }
+  > {
     const photos = this.tenants.for(ServiceEventPhoto, organizationId);
     const photo = await photos.findOne({ where: { storageKey } });
 
@@ -214,9 +230,20 @@ export class ServiceEventsService {
       throw new NotFoundException('Photo not found');
     }
 
+    if (this.photos.isConfigured && !storageKey.startsWith('org_')) {
+      const cloudinaryUrl = this.photos.url(storageKey, 1600, { crop: 'limit' });
+      if (cloudinaryUrl) {
+        return { type: 'redirect', url: cloudinaryUrl };
+      }
+    }
+
     const filePath = path.join(UPLOAD_DIR, storageKey);
     if (!fs.existsSync(filePath)) {
-      throw new NotFoundException('Photo file missing on disk');
+      if (this.photos.isConfigured) {
+        const cloudinaryUrl = this.photos.url(storageKey, 1600, { crop: 'limit' });
+        if (cloudinaryUrl) return { type: 'redirect', url: cloudinaryUrl };
+      }
+      throw new NotFoundException('Photo file missing');
     }
 
     const ext = path.extname(storageKey).toLowerCase();
@@ -225,7 +252,13 @@ export class ServiceEventsService {
     else if (ext === '.webp') contentType = 'image/webp';
     else if (ext === '.gif') contentType = 'image/gif';
 
-    return { filePath, contentType };
+    return { type: 'file', filePath, contentType };
+  }
+
+  private extractBase64Buffer(photoData: string): Buffer {
+    const dataUrlMatch = photoData.match(/^data:(image\/[a-zA-Z0-9-.+]+);base64,(.*)$/);
+    const base64String = dataUrlMatch ? dataUrlMatch[2] : photoData;
+    return Buffer.from(base64String, 'base64');
   }
 
   private async savePhotoToDisk(
