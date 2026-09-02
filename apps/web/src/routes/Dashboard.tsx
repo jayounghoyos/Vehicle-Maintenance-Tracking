@@ -82,10 +82,7 @@ export default function Dashboard() {
         <FleetTable rows={fleet} />
       </div>
 
-      <LogServiceModal
-        isOpen={isLogModalOpen}
-        onClose={() => setIsLogModalOpen(false)}
-      />
+      <LogServiceModal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} />
     </AppShell>
   );
 }

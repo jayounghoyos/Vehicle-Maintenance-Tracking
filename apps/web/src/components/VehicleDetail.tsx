@@ -201,7 +201,8 @@ export function VehicleDetail({ id }: { id: number }) {
                           className="flex items-center gap-1 rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] font-medium text-ink transition-colors hover:bg-white/20"
                         >
                           <Camera className="size-3 text-lime" />
-                          {eventPhotos.length} {eventPhotos.length === 1 ? 'photo' : 'photos'}
+                          {eventPhotos.length}{' '}
+                          {eventPhotos.length === 1 ? 'photo' : 'photos'}
                         </button>
                       )}
                     </div>

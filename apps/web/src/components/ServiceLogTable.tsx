@@ -128,7 +128,10 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
                     {event.task}
                   </span>
                   {event.notes && (
-                    <span className="mt-0.5 block max-w-xs truncate text-[12px] text-ink-muted italic" title={event.notes}>
+                    <span
+                      className="mt-0.5 block max-w-xs truncate text-[12px] text-ink-muted italic"
+                      title={event.notes}
+                    >
                       {event.notes}
                     </span>
                   )}
@@ -157,7 +160,10 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
                       title="View attached photos"
                     >
                       <Camera className="size-3.5 text-lime" />
-                      <span>{eventPhotos.length} {eventPhotos.length === 1 ? 'photo' : 'photos'}</span>
+                      <span>
+                        {eventPhotos.length}{' '}
+                        {eventPhotos.length === 1 ? 'photo' : 'photos'}
+                      </span>
                     </button>
                   ) : (
                     <span className="text-body text-ink-muted/40">—</span>

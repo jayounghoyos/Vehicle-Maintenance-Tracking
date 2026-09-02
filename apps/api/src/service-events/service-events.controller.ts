@@ -58,7 +58,9 @@ export class ServiceEventsController {
       throw new ForbiddenException('Admins cannot record fleet services');
     }
     if (principal.role !== 'fleet_coordinator' && principal.role !== 'mechanic') {
-      throw new ForbiddenException('Only fleet coordinators and mechanics may record service');
+      throw new ForbiddenException(
+        'Only fleet coordinators and mechanics may record service',
+      );
     }
     return this.serviceEvents.recordService(principal.organizationId, principal.id, dto);
   }

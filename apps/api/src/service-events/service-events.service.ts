@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -17,10 +13,7 @@ import {
 } from '../entities';
 import { TenantRepositories } from '../tenant/tenant-repository';
 import type { RecordServiceEventDto } from './dto';
-import type {
-  ServiceLogRow,
-  TaskItem,
-} from './service-events.types';
+import type { ServiceLogRow, TaskItem } from './service-events.types';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'photos');
 
@@ -168,7 +161,11 @@ export class ServiceEventsService {
     if (dto.photos && dto.photos.length > 0) {
       for (const photoData of dto.photos) {
         try {
-          const storageKey = await this.savePhotoToDisk(organizationId, event.id, photoData);
+          const storageKey = await this.savePhotoToDisk(
+            organizationId,
+            event.id,
+            photoData,
+          );
           const photo = await photosRepo.save(
             photosRepo.create({
               serviceEventId: event.id,

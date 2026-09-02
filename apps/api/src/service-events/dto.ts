@@ -44,16 +44,23 @@ export class RecordServiceEventDto {
   @ApiProperty({
     enum: ServiceType,
     example: ServiceType.PREVENTIVE,
-    description: 'Whether planned maintenance (preventive) or breakdown repair (corrective)',
+    description:
+      'Whether planned maintenance (preventive) or breakdown repair (corrective)',
   })
   @IsEnum(ServiceType)
   type: ServiceType;
 
-  @ApiProperty({ example: '2026-09-02', description: 'Date the work was performed (YYYY-MM-DD)' })
+  @ApiProperty({
+    example: '2026-09-02',
+    description: 'Date the work was performed (YYYY-MM-DD)',
+  })
   @IsDateString()
   performedAt: string;
 
-  @ApiPropertyOptional({ example: 129500, description: 'Vehicle odometer reading at time of service' })
+  @ApiPropertyOptional({
+    example: 129500,
+    description: 'Vehicle odometer reading at time of service',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

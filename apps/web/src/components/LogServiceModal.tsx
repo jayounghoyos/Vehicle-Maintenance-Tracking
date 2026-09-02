@@ -32,12 +32,7 @@ type Props = {
 export function LogServiceModal({ isOpen, onClose, initialVehicleId }: Props) {
   if (!isOpen) return null;
 
-  return (
-    <LogServiceDialog
-      onClose={onClose}
-      initialVehicleId={initialVehicleId}
-    />
-  );
+  return <LogServiceDialog onClose={onClose} initialVehicleId={initialVehicleId} />;
 }
 
 function LogServiceDialog({
@@ -63,9 +58,9 @@ function LogServiceDialog({
   );
   const [odometerKm, setOdometerKm] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
-  const [photos, setPhotos] = useState<{ id: string; preview: string; dataUrl: string }[]>(
-    [],
-  );
+  const [photos, setPhotos] = useState<
+    { id: string; preview: string; dataUrl: string }[]
+  >([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Load vehicles
@@ -155,9 +150,7 @@ function LogServiceDialog({
       onClose();
     },
     onError: (err: unknown) => {
-      setErrorMsg(
-        err instanceof Error ? err.message : 'Could not record service event',
-      );
+      setErrorMsg(err instanceof Error ? err.message : 'Could not record service event');
     },
   });
 
@@ -340,12 +333,11 @@ function LogServiceDialog({
                       {t.name}
                     </option>
                   ))}
-                  {taskName &&
-                    !(taskOptions ?? []).some((t) => t.name === taskName) && (
-                      <option value={taskName} className="bg-panel">
-                        {taskName}
-                      </option>
-                    )}
+                  {taskName && !(taskOptions ?? []).some((t) => t.name === taskName) && (
+                    <option value={taskName} className="bg-panel">
+                      {taskName}
+                    </option>
+                  )}
                 </select>
               )}
             </div>
@@ -430,9 +422,7 @@ function LogServiceDialog({
           {/* Photo Upload Section */}
           <div>
             <div className="flex items-baseline justify-between">
-              <label className="block text-body font-medium text-ink">
-                Photographs
-              </label>
+              <label className="block text-body font-medium text-ink">Photographs</label>
               <span className="text-[12px] text-ink-muted">
                 {photos.length} {photos.length === 1 ? 'photo' : 'photos'} attached
               </span>
