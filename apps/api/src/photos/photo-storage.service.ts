@@ -62,14 +62,23 @@ export class PhotoStorage {
     }
   }
 
+  get isConfigured(): boolean {
+    return this.configured;
+  }
+
   /** Sized on delivery rather than on upload, so the table asks for a
    *  thumbnail and the profile asks for the big one from the same file. */
-  url(storageKey: string | null, width: number): string | null {
+  url(
+    storageKey: string | null,
+    width?: number,
+    options?: { crop?: string; height?: number },
+  ): string | null {
     if (!storageKey || !this.configured) return null;
     return cloudinary.url(storageKey, {
       secure: true,
-      width,
-      crop: 'fill',
+      ...(width !== undefined ? { width } : {}),
+      ...(options?.height !== undefined ? { height: options.height } : {}),
+      crop: options?.crop ?? (width !== undefined ? 'fill' : undefined),
       quality: 'auto',
       fetch_format: 'auto',
     });

@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { ServiceEventsService } from './service-events.service';
-import { TenantRepositories } from '../tenant/tenant-repository';
 import {
   MaintenanceSchedule,
   MaintenanceTask,
@@ -11,9 +9,18 @@ import {
   User,
   Vehicle,
 } from '../entities';
+import { PhotoStorage } from '../photos/photo-storage.service';
+import { TenantRepositories } from '../tenant/tenant-repository';
+import { ServiceEventsService } from './service-events.service';
 
 describe('ServiceEventsService', () => {
   let service: ServiceEventsService;
+  let mockPhotos: {
+    isConfigured: boolean;
+    upload: jest.Mock;
+    url: jest.Mock;
+    remove: jest.Mock;
+  };
 
   const mockVehicle = {
     id: 1,
@@ -125,17 +132,27 @@ describe('ServiceEventsService', () => {
   };
 
   beforeEach(async () => {
+    mockPhotos = {
+      isConfigured: true,
+      upload: jest.fn().mockResolvedValue('mts/org-10/photo_abc123'),
+      url: jest.fn().mockImplementation((key: string | null) =>
+        key ? `https://res.cloudinary.com/demo/image/upload/${key}` : null,
+      ),
+      remove: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ServiceEventsService,
         { provide: TenantRepositories, useValue: mockTenants },
+        { provide: PhotoStorage, useValue: mockPhotos },
       ],
     }).compile();
 
     service = module.get<ServiceEventsService>(ServiceEventsService);
   });
 
-  it('records service, recalculates schedule next due date/km, and updates odometer', async () => {
+  it('records service with Cloudinary photo, recalculates schedule next due date/km, and updates odometer', async () => {
     const result = await service.recordService(10, 20, {
       vehicleId: 1,
       scheduleId: 5,
@@ -154,8 +171,10 @@ describe('ServiceEventsService', () => {
     expect(result.type).toBe(ServiceType.PREVENTIVE);
     expect(result.odometerKm).toBe(52000);
     expect(result.recorder).toBe('Carlos Mejia');
+    expect(mockPhotos.upload).toHaveBeenCalledWith(expect.any(Buffer), 10);
     expect(result.photos.length).toBe(1);
-    expect(result.photos[0].url).toContain('/api/service-events/photos/');
+    expect(result.photos[0].storageKey).toBe('mts/org-10/photo_abc123');
+    expect(result.photos[0].url).toContain('https://res.cloudinary.com/');
   });
 
   it('lists service events with photo metadata', async () => {

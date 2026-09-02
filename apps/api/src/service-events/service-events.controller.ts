@@ -75,12 +75,17 @@ export class ServiceEventsController {
     if (principal.kind !== 'user') {
       throw new ForbiddenException('Admins cannot access fleet service photos');
     }
-    const { filePath, contentType } = await this.serviceEvents.getPhotoFilePath(
+    const resource = await this.serviceEvents.getPhotoResource(
       principal.organizationId,
       storageKey,
     );
-    res.setHeader('Content-Type', contentType);
+
+    if (resource.type === 'redirect') {
+      return res.redirect(resource.url);
+    }
+
+    res.setHeader('Content-Type', resource.contentType);
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    res.sendFile(filePath);
+    res.sendFile(resource.filePath);
   }
 }

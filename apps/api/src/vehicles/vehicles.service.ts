@@ -149,7 +149,9 @@ export class VehiclesService {
       photos: (event.photos ?? []).map((photo) => ({
         id: photo.id,
         storageKey: photo.storageKey,
-        url: `/api/service-events/photos/${photo.storageKey}`,
+        url:
+          this.photos.url(photo.storageKey, 1600, { crop: 'limit' }) ??
+          `/api/service-events/photos/${encodeURIComponent(photo.storageKey)}`,
       })),
     }));
 
