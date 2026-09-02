@@ -1,5 +1,11 @@
 import type { ServiceType } from '../entities';
 
+export type ServiceEventPhotoItem = {
+  id: number;
+  storageKey: string;
+  url: string;
+};
+
 /** One row of the fleet-wide service log. */
 export type ServiceLogRow = {
   id: number;
@@ -13,4 +19,10 @@ export type ServiceLogRow = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  photos: ServiceEventPhotoItem[];
+};
+
+export type TaskItem = {
+  id: number;
+  name: string;
 };

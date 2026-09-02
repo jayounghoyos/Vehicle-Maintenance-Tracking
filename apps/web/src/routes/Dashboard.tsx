@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
+import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
 import { AppShell, PrimaryAction } from '../components/AppShell';
 import { FleetTable } from '../components/FleetTable';
+import { LogServiceModal } from '../components/LogServiceModal';
 import { NeedsAttention } from '../components/NeedsAttention';
 import { RecentEvents } from '../components/RecentEvents';
 import { SidebarFooter } from '../components/SidebarFooter';
@@ -14,6 +16,8 @@ import { greeting, longDate } from '../lib/format';
 
 export default function Dashboard() {
   const { principal } = useAuth();
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: fetchDashboard,
@@ -23,7 +27,9 @@ export default function Dashboard() {
   // the operations manager reads the fleet and decides on it; recording
   // the work belongs to whoever did it
   const action = can(principal, 'log_service') ? (
-    <PrimaryAction icon={Plus}>Log service</PrimaryAction>
+    <PrimaryAction icon={Plus} onClick={() => setIsLogModalOpen(true)}>
+      Log service
+    </PrimaryAction>
   ) : undefined;
 
   if (isPending) {
@@ -75,6 +81,8 @@ export default function Dashboard() {
         </div>
         <FleetTable rows={fleet} />
       </div>
+
+      <LogServiceModal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} />
     </AppShell>
   );
 }

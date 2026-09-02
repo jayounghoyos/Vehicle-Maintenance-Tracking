@@ -35,6 +35,12 @@ export type ScheduleItem = {
   state: MaintenanceState;
 };
 
+export type ServiceEventPhotoItem = {
+  id: number;
+  storageKey: string;
+  url: string;
+};
+
 export type ServiceEventItem = {
   id: number;
   task: string;
@@ -43,6 +49,7 @@ export type ServiceEventItem = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  photos: ServiceEventPhotoItem[];
 };
 
 /** Everything the profile panel shows about one vehicle. */
