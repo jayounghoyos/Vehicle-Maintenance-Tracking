@@ -135,9 +135,11 @@ describe('ServiceEventsService', () => {
     mockPhotos = {
       isConfigured: true,
       upload: jest.fn().mockResolvedValue('mts/org-10/photo_abc123'),
-      url: jest.fn().mockImplementation((key: string | null) =>
-        key ? `https://res.cloudinary.com/demo/image/upload/${key}` : null,
-      ),
+      url: jest
+        .fn()
+        .mockImplementation((key: string | null) =>
+          key ? `https://res.cloudinary.com/demo/image/upload/${key}` : null,
+        ),
       remove: jest.fn().mockResolvedValue(undefined),
     };
 

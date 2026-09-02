@@ -36,7 +36,9 @@ export class ServiceEventsService {
 
   resolvePhotoUrl(storageKey: string): string {
     const cloudinaryUrl = this.photos.url(storageKey, 1600, { crop: 'limit' });
-    return cloudinaryUrl ?? `/api/service-events/photos/${encodeURIComponent(storageKey)}`;
+    return (
+      cloudinaryUrl ?? `/api/service-events/photos/${encodeURIComponent(storageKey)}`
+    );
   }
 
   async list(organizationId: number, vehicleId?: number): Promise<ServiceLogRow[]> {
@@ -175,11 +177,7 @@ export class ServiceEventsService {
             const buffer = this.extractBase64Buffer(photoData);
             storageKey = await this.photos.upload(buffer, organizationId);
           } else {
-            storageKey = await this.savePhotoToDisk(
-              organizationId,
-              event.id,
-              photoData,
-            );
+            storageKey = await this.savePhotoToDisk(organizationId, event.id, photoData);
           }
           const photo = await photosRepo.save(
             photosRepo.create({
