@@ -1,7 +1,3 @@
-import { Camera, X } from 'lucide-react';
-import { useState } from 'react';
-
-
 import { sortRows, useMultiSort, type Sort } from '../hooks/useMultiSort';
 import { odometer, relativeDay, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
@@ -63,9 +59,6 @@ function TypeBadge({ type }: { type: ServiceLogItem['type'] }) {
 export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
   const sort = useMultiSort<SortKey>({ defaultSort: DEFAULT_SORT, startsAscending });
   const shown = sortRows(events, sort.order, compare);
-  const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; title: string } | null>(
-    null,
-  );
 
   return (
     <div className="overflow-x-auto border-t border-white/5">
@@ -104,29 +97,10 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
             return (
               <tr key={event.id} className="transition-colors hover:bg-white/[0.03]">
                 <td className="px-5 py-3.5 whitespace-nowrap">
-                  <div className="flex items-center gap-2.5">
-                    <div>
-                      <span className="font-medium">{shortDate(event.performedAt)}</span>
-                      <span className="block text-body text-ink-muted">
-                        {relativeDay(event.performedAt)}
-                      </span>
-                    </div>
-                    {event.photoUrl && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSelectedPhoto({
-                            url: event.photoUrl!,
-                            title: `${event.plate} · ${event.task}`,
-                          })
-                        }
-                        title="View service photo"
-                        className="rounded-lg bg-white/5 p-1.5 text-lime transition-colors hover:bg-lime/20"
-                      >
-                        <Camera className="size-3.5" />
-                      </button>
-                    )}
-                  </div>
+                  {shortDate(event.performedAt)}
+                  <span className="block text-body text-ink-muted">
+                    {relativeDay(event.performedAt)}
+                  </span>
                 </td>
                 <td className="px-5 py-3.5">
                   <span className="font-semibold whitespace-nowrap">{event.plate}</span>
@@ -160,38 +134,6 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
           Nothing logged yet.
         </p>
       )}
-
-      {/* Photo lightbox modal */}
-      {selectedPhoto && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-          onClick={() => setSelectedPhoto(null)}
-        >
-          <div
-            className="relative max-h-[85vh] max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header className="flex items-center justify-between border-b border-white/10 px-5 py-3">
-              <h3 className="text-body font-semibold text-ink">{selectedPhoto.title}</h3>
-              <button
-                type="button"
-                onClick={() => setSelectedPhoto(null)}
-                className="rounded-lg p-1 text-ink-muted transition-colors hover:bg-white/5 hover:text-ink"
-              >
-                <X className="size-5" />
-              </button>
-            </header>
-            <div className="p-3">
-              <img
-                src={selectedPhoto.url}
-                alt={selectedPhoto.title}
-                className="max-h-[65vh] w-full rounded-xl object-contain"
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-

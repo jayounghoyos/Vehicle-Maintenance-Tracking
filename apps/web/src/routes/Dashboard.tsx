@@ -1,16 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
 import { AppShell, PrimaryAction } from '../components/AppShell';
 import { FleetTable } from '../components/FleetTable';
-import { LogServiceForm } from '../components/LogServiceForm';
 import { NeedsAttention } from '../components/NeedsAttention';
-import { PANEL_LAYOUT } from '../components/panelLayout';
 import { RecentEvents } from '../components/RecentEvents';
-import { SidePanel } from '../components/SidePanel';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { StatTiles } from '../components/StatTiles';
 import { fetchDashboard } from '../lib/api';
@@ -18,22 +14,16 @@ import { greeting, longDate } from '../lib/format';
 
 export default function Dashboard() {
   const { principal } = useAuth();
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: fetchDashboard,
   });
   const today = new Date();
 
-  const canLog = can(principal, 'log_service');
-
   // the operations manager reads the fleet and decides on it; recording
   // the work belongs to whoever did it
-  const action = canLog ? (
-    <PrimaryAction icon={Plus} onClick={() => setIsPanelOpen((open) => !open)}>
-      Log service
-    </PrimaryAction>
+  const action = can(principal, 'log_service') ? (
+    <PrimaryAction icon={Plus}>Log service</PrimaryAction>
   ) : undefined;
 
   if (isPending) {
@@ -77,30 +67,14 @@ export default function Dashboard() {
       action={action}
       sidebarFooter={<SidebarFooter user={user} overdueCount={counts.overdue} />}
     >
-      <div className={isPanelOpen ? PANEL_LAYOUT.open : PANEL_LAYOUT.closed}>
-        <div className="space-y-5">
-          <StatTiles counts={counts} />
-          <div className="grid items-start gap-5 xl:grid-cols-[1.6fr_1fr]">
-            <NeedsAttention items={attention} />
-            <RecentEvents events={recentEvents} />
-          </div>
-          <FleetTable rows={fleet} />
+      <div className="space-y-5">
+        <StatTiles counts={counts} />
+        <div className="grid items-start gap-5 xl:grid-cols-[1.6fr_1fr]">
+          <NeedsAttention items={attention} />
+          <RecentEvents events={recentEvents} />
         </div>
-
-        {isPanelOpen && canLog && (
-          <SidePanel
-            title="Log service"
-            subtitle="Record maintenance performed on a vehicle"
-            onClose={() => setIsPanelOpen(false)}
-          >
-            <LogServiceForm
-              onSuccess={() => setIsPanelOpen(false)}
-              onCancel={() => setIsPanelOpen(false)}
-            />
-          </SidePanel>
-        )}
+        <FleetTable rows={fleet} />
       </div>
     </AppShell>
   );
 }
-
