@@ -33,6 +33,15 @@ export class Organization {
   @Column({ type: 'varchar' })
   email: string;
 
+  /** Their own logo, in the object store, or null for the MTS one. */
+  @Column({ type: 'varchar', name: 'logo_key', nullable: true })
+  logoKey: string | null;
+
+  /** The one colour a client picks, as #rrggbb, or null for the lime in
+   *  the brand manual. Status hues are not here: they mean something. */
+  @Column({ type: 'varchar', name: 'accent_color', length: 7, nullable: true })
+  accentColor: string | null;
+
   /** false is a suspension the organization comes back from */
   @Column({ type: 'boolean', name: 'is_active', default: true })
   isActive: boolean;

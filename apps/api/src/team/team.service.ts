@@ -4,11 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { IsNull, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { hashPassword } from '../auth/password';
-import { ServiceEvent, User, UserRole } from '../entities';
+import { ServiceEvent, User } from '../entities';
+import { RolesService } from '../roles/roles.service';
 import { TenantRepositories, type TenantRepository } from '../tenant/tenant-repository';
 import type { CreateWorkerDto, ImportTeamDto, UpdateMemberDto } from './dto';
 import { temporaryPassword } from './password-generator';
@@ -17,7 +18,8 @@ export type TeamMember = {
   id: number;
   fullName: string;
   email: string;
-  role: UserRole;
+  roleId: number;
+  roleName: string;
   /** false once the person has left: the row stays, the login does not */
   active: boolean;
   /** how much history is attached to them, which is what decides
@@ -41,6 +43,7 @@ export type ImportResult = {
 export class TeamService {
   constructor(
     private readonly tenants: TenantRepositories,
+    private readonly roles: RolesService,
     /** the whole users table, only ever read to find out whether an
      *  address is taken somewhere else on the platform */
     @InjectRepository(User) private readonly everyUser: Repository<User>,
@@ -58,6 +61,7 @@ export class TeamService {
 
   async list(organizationId: number): Promise<TeamMember[]> {
     const rows = await this.scoped(organizationId).users.find({
+      relations: { role: true },
       // id breaks the tie: a whole import shares one timestamp, and
       // without it an updated row wanders to wherever postgres put it
       order: { createdAt: 'ASC', id: 'ASC' },
@@ -78,12 +82,13 @@ export class TeamService {
     return new Map(rows.map((row) => [Number(row.userId), Number(row.count)]));
   }
 
-  private asMember(user: User, recordedEvents: number): TeamMember {
+  private asMember(user: User, recordedEvents: number, roleName?: string): TeamMember {
     return {
       id: user.id,
       fullName: user.fullName,
       email: user.email,
-      role: user.role,
+      roleId: user.roleId,
+      roleName: roleName ?? user.role.name,
       active: user.deletedAt === null,
       recordedEvents,
       createdAt: user.createdAt,
@@ -96,17 +101,20 @@ export class TeamService {
     const taken = await this.everyUser.findOne({ where: { email: dto.email } });
     if (taken) throw new ConflictException('That email is already registered');
 
+    // a role id from another client is not a role here
+    const role = await this.roles.require(organizationId, dto.roleId);
+
     const users = this.scoped(organizationId).users;
     const user = await users.save(
       users.create({
         fullName: dto.fullName,
         email: dto.email,
         passwordHash: await hashPassword(dto.password),
-        role: dto.role,
+        roleId: role.id,
       }),
     );
     // brand new, so nothing is attached to them yet
-    return this.asMember(user, 0);
+    return this.asMember(user, 0, role.name);
   }
 
   /**
@@ -152,6 +160,17 @@ export class TeamService {
       wanted.delete(email.toLowerCase());
     }
 
+    // a role the organization does not have is the caller's mistake on
+    // that row, not a reason to refuse the other forty-six
+    const known = new Map(
+      (await this.roles.list(organizationId)).map((r) => [r.id, r.name]),
+    );
+    for (const [email, entry] of [...wanted]) {
+      if (known.has(entry.member.roleId)) continue;
+      skipped.push({ row: entry.row, email: entry.member.email, reason: 'Unknown role' });
+      wanted.delete(email);
+    }
+
     const pending = [...wanted.values()].sort((a, b) => a.row - b.row);
     // a row that carried a password keeps it; a row that left the column
     // empty gets one generated, to be changed by whoever receives it
@@ -168,14 +187,14 @@ export class TeamService {
           fullName: member.fullName,
           email: member.email,
           passwordHash: hashes[index],
-          role: member.role,
+          roleId: member.roleId,
         }),
       ),
     );
 
     return {
       created: saved.map((user, index) => ({
-        ...this.asMember(user, 0),
+        ...this.asMember(user, 0, known.get(user.roleId)),
         // nothing to hand back for a password the caller already chose
         temporaryPassword: chosen[index] === null ? passwords[index] : null,
       })),
@@ -198,13 +217,16 @@ export class TeamService {
     id: number,
     dto: UpdateMemberDto,
   ): Promise<TeamMember> {
-    if (id === actingUserId && (dto.role !== undefined || dto.active !== undefined)) {
+    if (id === actingUserId && (dto.roleId !== undefined || dto.active !== undefined)) {
       throw new BadRequestException(
         'You cannot change your own role or retire your own account',
       );
     }
     const users = this.scoped(organizationId).users;
-    const member = await users.findOne({ where: { id } });
+    const member = await users.findOne({
+      where: { id },
+      relations: { role: { permissions: true } },
+    });
     if (!member) throw new NotFoundException('No such team member');
 
     if (dto.email !== undefined && dto.email !== member.email) {
@@ -219,33 +241,24 @@ export class TeamService {
     if (dto.password !== undefined)
       member.passwordHash = await hashPassword(dto.password);
 
-    const losesCoordinator =
-      member.role === UserRole.FLEET_COORDINATOR &&
-      ((dto.role !== undefined && dto.role !== UserRole.FLEET_COORDINATOR) ||
-        dto.active === false);
+    // no check that somebody is left who can staff the fleet: whoever is
+    // calling this holds that permission and cannot do it to themselves,
+    // so they are the one who is left. Editing a role is the way an
+    // organization could lose it, and that is where it is refused.
+    const next =
+      dto.roleId !== undefined && dto.roleId !== member.roleId
+        ? await this.roles.require(organizationId, dto.roleId)
+        : member.role;
 
-    if (losesCoordinator && (await this.otherCoordinators(organizationId, id)) === 0) {
-      throw new ConflictException(
-        'The organization would be left with no fleet coordinator',
-      );
-    }
-
-    if (dto.role !== undefined) member.role = dto.role;
+    // both, and the relation especially: it was loaded, and TypeORM
+    // writes the loaded object back over whatever the id column says
+    member.role = next;
+    member.roleId = next.id;
     if (dto.active !== undefined) member.deletedAt = dto.active ? null : new Date();
 
     const saved = await users.save(member);
     const counts = await this.eventCounts(organizationId);
-    return this.asMember(saved, counts.get(saved.id) ?? 0);
-  }
-
-  private otherCoordinators(organizationId: number, exceptId: number): Promise<number> {
-    return this.scoped(organizationId).users.count({
-      where: {
-        role: UserRole.FLEET_COORDINATOR,
-        deletedAt: IsNull(),
-        id: Not(exceptId),
-      },
-    });
+    return this.asMember(saved, counts.get(saved.id) ?? 0, next.name);
   }
 
   /**

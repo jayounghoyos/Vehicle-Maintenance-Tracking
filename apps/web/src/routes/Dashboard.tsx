@@ -12,7 +12,7 @@ import { RecentEvents } from '../components/RecentEvents';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { StatTiles } from '../components/StatTiles';
 import { fetchDashboard } from '../lib/api';
-import { greeting, longDate, roleLabel } from '../lib/format';
+import { greeting, longDate } from '../lib/format';
 
 export default function Dashboard() {
   const { principal } = useAuth();
@@ -26,7 +26,7 @@ export default function Dashboard() {
 
   // the operations manager reads the fleet and decides on it; recording
   // the work belongs to whoever did it
-  const action = can(principal, 'logService') ? (
+  const action = can(principal, 'log_service') ? (
     <PrimaryAction icon={Plus} onClick={() => setIsLogModalOpen(true)}>
       Log service
     </PrimaryAction>
@@ -69,7 +69,7 @@ export default function Dashboard() {
   return (
     <AppShell
       title={`${greeting(today)}, ${user.fullName.split(' ')[0]}`}
-      subtitle={`${roleLabel(user.role)} · ${longDate(today.toISOString())}`}
+      subtitle={`${user.roleName} · ${longDate(today.toISOString())}`}
       action={action}
       sidebarFooter={<SidebarFooter user={user} overdueCount={counts.overdue} />}
     >

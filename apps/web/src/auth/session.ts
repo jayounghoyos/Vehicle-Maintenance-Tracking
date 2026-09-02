@@ -1,10 +1,16 @@
+import type { Permission } from './permissions';
+
 export type Principal =
   | {
       kind: 'user';
       id: number;
       fullName: string;
       email: string;
-      role: string;
+      roleId: number;
+      roleName: string;
+      /** what the role grants, decided by the client and read fresh on
+       *  every request, so an edit applies without signing in again */
+      permissions: Permission[];
       organizationId: number;
     }
   | { kind: 'admin'; id: number; fullName: string; email: string };

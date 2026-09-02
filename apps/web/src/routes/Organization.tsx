@@ -6,6 +6,7 @@ import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
 import { AppShell } from '../components/AppShell';
 import { Field } from '../components/AuthLayout';
+import { BrandPanel } from '../components/BrandPanel';
 import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { NARROW_PANEL_LAYOUT } from '../components/panelLayout';
@@ -36,7 +37,7 @@ export default function Organization() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const canEdit = can(principal, 'editOrganization');
+  const canEdit = can(principal, 'edit_organization');
 
   const { data: org, isPending } = useQuery({
     queryKey: ['organization'],
@@ -149,7 +150,7 @@ export default function Organization() {
                   <button
                     type="submit"
                     disabled={save.isPending}
-                    className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page disabled:opacity-50"
+                    className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-on-accent disabled:opacity-50"
                   >
                     {save.isPending ? 'Saving…' : 'Save changes'}
                   </button>
@@ -168,6 +169,10 @@ export default function Organization() {
             </SidePanel>
           )}
         </div>
+
+        {/* wider than the details: a colour and a mark are looked at, not
+            read, so they get the room the list of facts does not need */}
+        {org && <BrandPanel org={org} canEdit={canEdit} />}
 
         <p className="max-w-[44rem] text-body text-ink-muted">
           The contact email is not a login. People sign in with their own address, which

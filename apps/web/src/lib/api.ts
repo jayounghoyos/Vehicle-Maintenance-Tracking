@@ -1,3 +1,4 @@
+import type { Permission } from '../auth/permissions';
 import type { Principal } from '../auth/session';
 import { tokenStore } from '../auth/session';
 import type { MaintenanceState } from '../domain/maintenance';
@@ -16,10 +17,13 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = tokenStore.get();
+  // a file upload has to be left alone: only the browser knows the
+  // multipart boundary, and naming a content type here erases it
+  const isUpload = init.body instanceof FormData;
   const res = await fetch(`/api${path}`, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isUpload ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init.headers,
     },
@@ -38,13 +42,18 @@ export const api = {
     request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
   patch: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
-  del: (path: string) => request<void>(path, { method: 'DELETE' }),
+  del: <T = void>(path: string) => request<T>(path, { method: 'DELETE' }),
+  upload: <T>(path: string, field: string, file: File) => {
+    const body = new FormData();
+    body.append(field, file);
+    return request<T>(path, { method: 'POST', body });
+  },
 };
 
 export type AuthResponse = { accessToken: string; principal: Principal };
 
 export type DashboardResponse = {
-  user: { id: number; fullName: string; role: string };
+  user: { id: number; fullName: string; roleName: string };
   counts: { active: number; overdue: number; dueSoon: number; inShop: number };
   attention: {
     scheduleId: number;
@@ -83,6 +92,10 @@ export type OrganizationProfile = {
   address: string;
   phone: string;
   email: string;
+  /** their own mark, or null for the default one */
+  logoUrl: string | null;
+  /** #rrggbb, or null while they are still on the colour in the manual */
+  accentColor: string | null;
   memberCount: number;
   createdAt: string;
 };
@@ -105,6 +118,9 @@ export type VehicleRow = {
   status: VehicleStatus;
   /** whether its maintenance is behind, which is a different question */
   state: MaintenanceState;
+  /** sized by the endpoint that returned it: a thumbnail from the list,
+   *  a bigger one from the profile. Null when there is no picture. */
+  photoUrl: string | null;
   nextTask: string | null;
   nextDueDate: string | null;
   scheduleCount: number;
@@ -156,12 +172,21 @@ export type TeamMember = {
   id: number;
   fullName: string;
   email: string;
-  role: string;
+  roleId: number;
+  roleName: string;
   /** false once the person has left: the row stays, the login does not */
   active: boolean;
   /** what decides whether an account can be removed or only retired */
   recordedEvents: number;
   createdAt: string;
+};
+
+/** A role the organization defined, and how many people hold it. */
+export type RoleSummary = {
+  id: number;
+  name: string;
+  permissions: Permission[];
+  members: number;
 };
 
 /** One row of the fleet-wide service log. */

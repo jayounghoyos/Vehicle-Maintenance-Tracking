@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { databaseOptions } from './database';
 import { OrganizationModule } from './organization/organization.module';
+import { PhotosModule } from './photos/photos.module';
+import { RolesModule } from './roles/roles.module';
 import { ServiceEventsModule } from './service-events/service-events.module';
 import { TeamModule } from './team/team.module';
 import { TenantModule } from './tenant/tenant.module';
@@ -26,12 +28,14 @@ import { HealthModule } from './health/health.module';
     // the migrations can never disagree about which database this is
     TypeOrmModule.forRootAsync({ useFactory: () => databaseOptions() }),
     TenantModule,
+    PhotosModule,
     HealthModule,
     AuthModule,
     DashboardModule,
     VehiclesModule,
     ServiceEventsModule,
     TeamModule,
+    RolesModule,
     OrganizationModule,
     AdminModule,
   ],

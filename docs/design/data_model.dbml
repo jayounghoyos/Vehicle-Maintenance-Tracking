@@ -2,10 +2,15 @@
 // Source of the diagram in data_model.md.
 // Edited at https://dbdiagram.io/d/6a78f2a8829f06bdc8b425db
 
-Enum user_role {
-  fleet_coordinator
-  mechanic
-  operations_manager
+Enum permission {
+  view_vehicles
+  view_team
+  view_service_log
+  manage_vehicles
+  manage_team
+  manage_schedules
+  log_service
+  edit_organization
 }
 
 Enum vehicle_status {
@@ -27,6 +32,8 @@ Table organizations {
   phone varchar [not null]
   email varchar [not null]
   is_active boolean [not null, default: true]
+  logo_key varchar
+  accent_color varchar(7)
   deleted_at timestamp
   created_at timestamp [default: `now()`]
 
@@ -46,6 +53,11 @@ Table organizations {
     CREATE UNIQUE INDEX ON organizations (name) WHERE deleted_at IS NULL;
 
   email is not unique: it is a contact address. The login namespace is users.email.
+
+  logo_key and accent_color are how a client sees themselves in the product. Both
+  null means the brand manual, which is what everybody starts with. Only these two:
+  the status hues mean overdue, due soon and on track, so they are not a client's to
+  change and are not stored per organization.
   '''
 }
 
@@ -67,13 +79,50 @@ Table platform_admins {
   '''
 }
 
+Table roles {
+  id integer [primary key]
+  organization_id integer [not null]
+  name varchar [not null]
+  created_at timestamp [default: `now()`]
+
+  Indexes { (organization_id, name) [unique] }
+  Note: '''
+  A job title one client invented. This was an enum on users, which is why every
+  organization had the same three and none could add a fourth.
+
+  Each organization is seeded with a fleet coordinator, a mechanic and an operations
+  manager, and owns them from then on: it renames them, changes what they grant, or
+  adds others. "Mechanic" at one client and at another are separate rows that may
+  mean different things.
+
+  A role somebody holds cannot be deleted, and the last role granting manage_team
+  cannot drop it: that is what stops a client locking itself out of its own team.
+  '''
+}
+
+Table role_permissions {
+  role_id integer [not null]
+  permission permission [not null]
+
+  Indexes { (role_id, permission) [pk] }
+  Note: '''
+  One permission a role grants. A row rather than an array column on roles, so the
+  table stays in first normal form and the diagram shows the relationship instead of
+  hiding it inside a value. The key is the pair, which stops the same grant twice.
+
+  The list of permissions is developer-owned: a client composes roles out of it but
+  cannot invent an entry, because every entry is a guard or a route that has to exist
+  in code.
+  '''
+}
+
 Table users {
   id integer [primary key]
   organization_id integer [not null]
   full_name varchar [not null]
   email varchar [not null, unique]
   password_hash varchar [not null]
-  role user_role [not null]
+  role_id integer [not null]
   created_at timestamp [default: `now()`]
 
   Note: 'email stays globally unique: it is the login identifier and the sign-in screen does not ask for an organization.'
@@ -96,10 +145,18 @@ Table vehicles {
   year integer
   odometer_km integer [not null, default: 0]
   status vehicle_status [not null, default: 'active']
+  photo_key varchar
   created_at timestamp [default: `now()`]
 
   Indexes { (organization_id, plate) [unique] }
-  Note: 'The plate was globally unique. Two client brands could not both own ABC123, so it becomes unique per organization.'
+  Note: '''
+  The plate was globally unique. Two client brands could not both own ABC123, so it
+  becomes unique per organization.
+
+  photo_key points at the picture in the object store, never the picture itself, the
+  same shape service_event_photos uses. Null until somebody edits the vehicle to add
+  one: registering a van and choosing a file are different kinds of work.
+  '''
 }
 
 Table maintenance_tasks {
@@ -155,11 +212,15 @@ Table service_event_photos {
 // and the label lives in the source instead of being drawn by hand.
 
 Ref employs:   users.organization_id > organizations.id
+Ref sets_up:   roles.organization_id > organizations.id
 Ref owns:      vehicles.organization_id > organizations.id
 Ref defines:   maintenance_tasks.organization_id > organizations.id
 Ref plans:     maintenance_schedules.organization_id > organizations.id
 Ref logs:      service_events.organization_id > organizations.id
 Ref stores:    service_event_photos.organization_id > organizations.id
+
+Ref grants:          role_permissions.role_id > roles.id
+Ref is_assigned:     users.role_id > roles.id
 
 Ref classifies:      vehicles.model_id > vehicle_models.id
 Ref is_scheduled_for: maintenance_schedules.vehicle_id > vehicles.id

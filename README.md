@@ -71,11 +71,15 @@ disk, so everything that is not `/api` and not a real file has to be answered wi
 To put the demo data in the deployed database, run `pnpm seed:prod` from Render's
 shell, or point `DATABASE_URL` at Neon locally and run `pnpm seed`.
 
-Two things worth knowing before a live demo. A free Render service sleeps after
-fifteen minutes and takes about a minute to wake, so open the app before presenting.
-And service photos, once built, cannot live on Render's disk because it is
-ephemeral: they go to object storage, which is why the data model stores only a
-`storage_key`.
+**Cloudinary.** Vehicle photos go to an object store, not to Render's disk, which
+is wiped on every deploy and every wake-up. The free plan is permanent and the
+three values go in the dashboard like the others: `CLOUDINARY_CLOUD_NAME`,
+`CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET`. Leave them unset and everything
+runs with photo upload switched off.
+
+One thing worth knowing before a live demo: a free Render service sleeps after
+fifteen minutes and takes about a minute to wake, so open the app before
+presenting.
 
 ## Layout
 

@@ -2,23 +2,33 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   ForbiddenException,
   Get,
   HttpCode,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { Principal } from '../auth/auth.types';
-import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../auth/guards';
-import { UserRole } from '../entities';
+import { CurrentUser, JwtAuthGuard, PermissionsGuard, Requires } from '../auth/guards';
+import { Permission } from '../entities';
 import { CreateVehicleDto, ImportVehiclesDto, UpdateVehicleDto } from './dto';
 import { VehiclesService } from './vehicles.service';
 import type { ImportResult, VehicleDetail, VehicleRow } from './vehicles.types';
+
+/* Big enough for a photo straight off a phone, small enough that a
+ * mistaken video does not sit in the memory of a free instance. */
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 /**
  * The same split the team screen uses: everybody in the organization can
@@ -28,7 +38,7 @@ import type { ImportResult, VehicleDetail, VehicleRow } from './vehicles.types';
  */
 @ApiTags('vehicles')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('vehicles')
 export class VehiclesController {
   constructor(private readonly vehicles: VehiclesService) {}
@@ -39,12 +49,14 @@ export class VehiclesController {
   }
 
   @Get()
+  @Requires(Permission.VIEW_VEHICLES)
   @ApiOperation({ summary: 'Every vehicle in the fleet' })
   list(@CurrentUser() principal: Principal): Promise<VehicleRow[]> {
     return this.vehicles.list(this.asUser(principal).organizationId);
   }
 
   @Get(':id')
+  @Requires(Permission.VIEW_VEHICLES)
   @ApiOperation({ summary: 'One vehicle, with its schedules and recent services' })
   one(
     @CurrentUser() principal: Principal,
@@ -54,7 +66,7 @@ export class VehiclesController {
   }
 
   @Post()
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_VEHICLES)
   @ApiOperation({ summary: 'Register a vehicle' })
   create(
     @CurrentUser() principal: Principal,
@@ -64,7 +76,7 @@ export class VehiclesController {
   }
 
   @Post('bulk')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_VEHICLES)
   @ApiOperation({ summary: 'Register many vehicles from a pasted list' })
   importMany(
     @CurrentUser() principal: Principal,
@@ -74,7 +86,7 @@ export class VehiclesController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_VEHICLES)
   @ApiOperation({ summary: 'Correct a vehicle' })
   update(
     @CurrentUser() principal: Principal,
@@ -84,8 +96,43 @@ export class VehiclesController {
     return this.vehicles.update(this.asUser(principal).organizationId, id, dto);
   }
 
+  @Post(':id/photo')
+  @Requires(Permission.MANAGE_VEHICLES)
+  @UseInterceptors(FileInterceptor('photo', { limits: { fileSize: MAX_PHOTO_BYTES } }))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Put a picture on a vehicle, replacing any it had' })
+  setPhoto(
+    @CurrentUser() principal: Principal,
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: MAX_PHOTO_BYTES }),
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ }),
+        ],
+      }),
+    )
+    photo: Express.Multer.File,
+  ): Promise<VehicleRow> {
+    return this.vehicles.setPhoto(
+      this.asUser(principal).organizationId,
+      id,
+      photo.buffer,
+    );
+  }
+
+  @Delete(':id/photo')
+  @Requires(Permission.MANAGE_VEHICLES)
+  @ApiOperation({ summary: 'Take the picture off a vehicle' })
+  removePhoto(
+    @CurrentUser() principal: Principal,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<VehicleRow> {
+    return this.vehicles.removePhoto(this.asUser(principal).organizationId, id);
+  }
+
   @Delete(':id')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_VEHICLES)
   @HttpCode(204)
   @ApiOperation({ summary: 'Delete a vehicle nothing is attached to yet' })
   remove(

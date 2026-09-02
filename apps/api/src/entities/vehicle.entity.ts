@@ -61,6 +61,11 @@ export class Vehicle {
   })
   status: VehicleStatus;
 
+  /** Where the picture lives in the object store, never the picture
+   *  itself. Null until somebody edits the vehicle to add one. */
+  @Column({ type: 'varchar', name: 'photo_key', nullable: true })
+  photoKey: string | null;
+
   @Column({ type: 'timestamp', name: 'created_at', default: () => 'now()' })
   createdAt: Date;
 }

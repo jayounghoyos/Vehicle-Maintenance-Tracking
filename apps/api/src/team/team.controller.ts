@@ -14,22 +14,19 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { Principal } from '../auth/auth.types';
-import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../auth/guards';
-import { UserRole } from '../entities';
+import { CurrentUser, JwtAuthGuard, PermissionsGuard, Requires } from '../auth/guards';
+import { Permission } from '../entities';
 import { CreateWorkerDto, ImportTeamDto, UpdateMemberDto } from './dto';
 import { TeamService, type ImportResult, type TeamMember } from './team.service';
 
 /**
- * Everyone in the organization may see who their colleagues are. Only the
- * coordinator staffs the fleet, so only the coordinator writes here.
- *
- * The split is per method rather than per controller on purpose: hiding
- * the list from a mechanic would say the roles differ in what they know,
- * when what they really differ in is what they may change.
+ * Everyone in the organization may see who their colleagues are, as long
+ * as their role opens this screen at all. Staffing it is a permission of
+ * its own, so the split is per method rather than per controller.
  */
 @ApiTags('team')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('team')
 export class TeamController {
   constructor(private readonly team: TeamService) {}
@@ -40,13 +37,14 @@ export class TeamController {
   }
 
   @Get()
+  @Requires(Permission.VIEW_TEAM)
   @ApiOperation({ summary: 'Everyone in the organization' })
   list(@CurrentUser() principal: Principal): Promise<TeamMember[]> {
     return this.team.list(this.asUser(principal).organizationId);
   }
 
   @Post()
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_TEAM)
   @ApiOperation({ summary: 'Create a worker account' })
   create(
     @CurrentUser() principal: Principal,
@@ -56,7 +54,7 @@ export class TeamController {
   }
 
   @Post('bulk')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_TEAM)
   @ApiOperation({ summary: 'Create many accounts from a pasted list' })
   importMany(
     @CurrentUser() principal: Principal,
@@ -66,7 +64,7 @@ export class TeamController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_TEAM)
   @ApiOperation({ summary: 'Change a role, or retire an account and bring it back' })
   update(
     @CurrentUser() principal: Principal,
@@ -78,7 +76,7 @@ export class TeamController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.FLEET_COORDINATOR)
+  @Requires(Permission.MANAGE_TEAM)
   @HttpCode(204)
   @ApiOperation({ summary: 'Permanently remove an account with no history' })
   remove(

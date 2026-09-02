@@ -11,6 +11,7 @@ import { odometer, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
 import { LogServiceModal } from './LogServiceModal';
 import { PhotoViewerModal } from './PhotoViewerModal';
+import { VehiclePhoto } from './VehiclePhoto';
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -59,10 +60,12 @@ export function VehicleDetail({ id }: { id: number }) {
     return <p className="p-5 text-body text-ink-muted">Loading the vehicle…</p>;
   }
 
-  const canLog = can(principal, 'logService');
+  const canLog = can(principal, 'log_service');
 
   return (
     <div className="space-y-5 p-5">
+      <VehiclePhoto vehicle={vehicle} canManage={can(principal, 'manage_vehicles')} />
+
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime/15">

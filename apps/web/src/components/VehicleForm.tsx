@@ -111,7 +111,7 @@ export function VehicleForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-page disabled:opacity-50"
+          className="rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-on-accent disabled:opacity-50"
         >
           {pending ? 'Saving…' : vehicle ? 'Save changes' : 'Add vehicle'}
         </button>

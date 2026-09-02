@@ -3,15 +3,9 @@ import { useMemo, useState } from 'react';
 
 import { sortRows, useMultiSort, type Sort } from '../hooks/useMultiSort';
 import { toCsv, downloadCsv } from '../lib/csv';
-import { initials, roleLabel, shortDate } from '../lib/format';
-import type { TeamMember } from '../lib/api';
+import { initials, shortDate } from '../lib/format';
+import type { RoleSummary, TeamMember } from '../lib/api';
 import { SortHeader } from './SortHeader';
-
-const ROLES = ['fleet_coordinator', 'mechanic', 'operations_manager'] as const;
-
-/** Rank, not alphabet: sorting by role should put the person who runs
- *  the fleet at the top, not the one whose title starts with F. */
-const ROLE_RANK = new Map(ROLES.map((role, index) => [role as string, index]));
 
 type SortKey = 'person' | 'email' | 'role' | 'added';
 
@@ -29,14 +23,22 @@ const startsAscending = (key: SortKey) => key !== 'added';
  *  the ones that were just created. */
 const DEFAULT_SORT: Sort<SortKey> = { key: 'added', ascending: false };
 
-function compare(a: TeamMember, b: TeamMember, key: SortKey): number {
+/** Rank, not alphabet: sorting by role should follow the order the
+ *  organization made them in, which puts whoever runs the fleet at the
+ *  top rather than whoever's title starts with A. */
+function compare(
+  a: TeamMember,
+  b: TeamMember,
+  key: SortKey,
+  rank: Map<number, number>,
+): number {
   switch (key) {
     case 'person':
       return a.fullName.localeCompare(b.fullName);
     case 'email':
       return a.email.localeCompare(b.email);
     case 'role':
-      return (ROLE_RANK.get(a.role) ?? 0) - (ROLE_RANK.get(b.role) ?? 0);
+      return (rank.get(a.roleId) ?? 0) - (rank.get(b.roleId) ?? 0);
     case 'added':
       return a.createdAt.localeCompare(b.createdAt);
   }
@@ -44,6 +46,7 @@ function compare(a: TeamMember, b: TeamMember, key: SortKey): number {
 
 export function MemberTable({
   members,
+  roles,
   canManage,
   meId,
   busyId,
@@ -53,30 +56,37 @@ export function MemberTable({
   onRemove,
 }: {
   members: TeamMember[];
+  /** the organization's own, in the order it made them */
+  roles: RoleSummary[];
   canManage: boolean;
   meId: number | null;
   /** the row waiting on the API, so its controls stop accepting clicks */
   busyId: number | null;
   onEdit: (member: TeamMember) => void;
-  onRoleChange: (member: TeamMember, role: string) => void;
+  onRoleChange: (member: TeamMember, roleId: number) => void;
   onSetActive: (member: TeamMember, active: boolean) => void;
   onRemove: (member: TeamMember) => void;
 }) {
   const [query, setQuery] = useState('');
   const sort = useMultiSort<SortKey>({ defaultSort: DEFAULT_SORT, startsAscending });
 
+  const rank = useMemo(
+    () => new Map(roles.map((role, index) => [role.id, index])),
+    [roles],
+  );
+
   const shown = useMemo(() => {
     const needle = query.trim().toLowerCase();
     const matched = needle
       ? members.filter((member) =>
-          [member.fullName, member.email, roleLabel(member.role)]
+          [member.fullName, member.email, member.roleName]
             .join(' ')
             .toLowerCase()
             .includes(needle),
         )
       : members;
-    return sortRows(matched, sort.order, compare);
-  }, [members, query, sort.order]);
+    return sortRows(matched, sort.order, (a, b, key) => compare(a, b, key, rank));
+  }, [members, query, rank, sort.order]);
 
   const exportAll = () =>
     downloadCsv(
@@ -88,7 +98,7 @@ export function MemberTable({
         members.map((member) => [
           member.fullName,
           member.email,
-          roleLabel(member.role),
+          member.roleName,
           member.active ? 'Active' : 'Retired',
           shortDate(member.createdAt),
         ]),
@@ -175,19 +185,21 @@ export function MemberTable({
                   >
                     {canManage && !isMe && member.active ? (
                       <select
-                        value={member.role}
+                        value={member.roleId}
                         disabled={busy}
-                        onChange={(event) => onRoleChange(member, event.target.value)}
+                        onChange={(event) =>
+                          onRoleChange(member, Number(event.target.value))
+                        }
                         className="rounded-lg border border-white/10 bg-page/60 px-2.5 py-1.5 text-body text-ink transition-colors hover:border-white/20 focus:border-lime/40 focus:outline-none disabled:opacity-50"
                       >
-                        {ROLES.map((role) => (
-                          <option key={role} value={role} className="bg-panel">
-                            {roleLabel(role)}
+                        {roles.map((role) => (
+                          <option key={role.id} value={role.id} className="bg-panel">
+                            {role.name}
                           </option>
                         ))}
                       </select>
                     ) : (
-                      <span className="text-ink-muted">{roleLabel(member.role)}</span>
+                      <span className="text-ink-muted">{member.roleName}</span>
                     )}
                   </td>
                   <td className="px-5 py-3.5 text-body whitespace-nowrap text-ink-muted">

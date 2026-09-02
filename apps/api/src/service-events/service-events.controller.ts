@@ -13,19 +13,21 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 
 import type { Principal } from '../auth/auth.types';
-import { CurrentUser, JwtAuthGuard } from '../auth/guards';
+import { CurrentUser, JwtAuthGuard, PermissionsGuard, Requires } from '../auth/guards';
+import { Permission } from '../entities';
 import { RecordServiceEventDto, ServiceLogQueryDto } from './dto';
 import { ServiceEventsService } from './service-events.service';
 import type { ServiceLogRow, TaskItem } from './service-events.types';
 
 @ApiTags('service-events')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('service-events')
 export class ServiceEventsController {
   constructor(private readonly serviceEvents: ServiceEventsService) {}
 
   @Get()
+  @Requires(Permission.VIEW_SERVICE_LOG)
   @ApiOperation({ summary: 'The organization’s service events, most recent first' })
   list(
     @CurrentUser() principal: Principal,
@@ -40,6 +42,7 @@ export class ServiceEventsController {
   }
 
   @Get('tasks')
+  @Requires(Permission.LOG_SERVICE)
   @ApiOperation({ summary: 'Catalog of maintenance tasks for the organization' })
   tasks(@CurrentUser() principal: Principal): Promise<TaskItem[]> {
     if (principal.kind !== 'user') {
@@ -49,6 +52,7 @@ export class ServiceEventsController {
   }
 
   @Post()
+  @Requires(Permission.LOG_SERVICE)
   @ApiOperation({ summary: 'Record a maintenance service or breakdown event' })
   record(
     @CurrentUser() principal: Principal,
@@ -57,15 +61,11 @@ export class ServiceEventsController {
     if (principal.kind !== 'user') {
       throw new ForbiddenException('Admins cannot record fleet services');
     }
-    if (principal.role !== 'fleet_coordinator' && principal.role !== 'mechanic') {
-      throw new ForbiddenException(
-        'Only fleet coordinators and mechanics may record service',
-      );
-    }
     return this.serviceEvents.recordService(principal.organizationId, principal.id, dto);
   }
 
   @Get('photos/:storageKey')
+  @Requires(Permission.VIEW_SERVICE_LOG)
   @ApiOperation({ summary: 'Retrieve an attached service photo' })
   async getPhoto(
     @CurrentUser() principal: Principal,

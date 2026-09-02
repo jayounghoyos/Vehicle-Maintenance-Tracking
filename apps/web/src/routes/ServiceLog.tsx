@@ -30,7 +30,7 @@ export default function ServiceLog() {
 
   // the operations manager reads the log and decides on it; recording
   // the work belongs to whoever did it
-  const action = can(principal, 'logService') ? (
+  const action = can(principal, 'log_service') ? (
     <PrimaryAction icon={Plus} onClick={() => setIsLogModalOpen(true)}>
       Log service
     </PrimaryAction>

@@ -31,14 +31,6 @@ export function initials(fullName: string): string {
     .join('');
 }
 
-/** user_role in the data model -> what the sidebar shows */
-export function roleLabel(role: string): string {
-  return role
-    .split('_')
-    .map((w) => w[0]!.toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
 /** "2 days ago" / "1 week ago" — coarse on purpose, like the mockup */
 export function relativeDay(iso: string, today: Date = new Date()): string {
   const MS_PER_DAY = 86_400_000;

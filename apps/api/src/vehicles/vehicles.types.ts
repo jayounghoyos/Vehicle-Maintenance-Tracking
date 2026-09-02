@@ -15,6 +15,10 @@ export type VehicleRow = {
   state: MaintenanceState;
   nextTask: string | null;
   nextDueDate: string | null;
+  /** ready to put in an <img>, already sized for whoever asked: the
+   *  list gets a thumbnail, the profile gets the big one. Null when
+   *  nobody has added a picture. */
+  photoUrl: string | null;
   /** what is attached to it, and so whether it can be deleted at all */
   scheduleCount: number;
   serviceEventCount: number;

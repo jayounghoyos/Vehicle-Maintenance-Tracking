@@ -6,16 +6,15 @@ import {
   IsArray,
   IsBoolean,
   IsEmail,
-  IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
+  IsPositive,
   IsString,
   MaxLength,
   MinLength,
   ValidateNested,
 } from 'class-validator';
-
-import { UserRole } from '../entities';
 
 export class CreateWorkerDto {
   @ApiProperty({ example: 'Carlos Mejia' })
@@ -34,9 +33,10 @@ export class CreateWorkerDto {
   @MaxLength(200)
   password: string;
 
-  @ApiProperty({ enum: UserRole, example: UserRole.MECHANIC })
-  @IsEnum(UserRole)
-  role: UserRole;
+  @ApiProperty({ description: 'One of the roles of your own organization' })
+  @IsInt()
+  @IsPositive()
+  roleId: number;
 }
 
 export class ImportMemberDto {
@@ -50,9 +50,10 @@ export class ImportMemberDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ enum: UserRole, example: UserRole.MECHANIC })
-  @IsEnum(UserRole)
-  role: UserRole;
+  @ApiProperty({ description: 'One of the roles of your own organization' })
+  @IsInt()
+  @IsPositive()
+  roleId: number;
 
   /** Absent means the API picks one and hands it back to be passed on. */
   @ApiPropertyOptional({ minLength: 8 })
@@ -64,9 +65,10 @@ export class ImportMemberDto {
 }
 
 /**
- * The browser normalises what was pasted, so the API can stay strict:
- * "Operations Manager" becomes operations_manager before it is sent, and
- * anything this rejects is a row the preview should already have flagged.
+ * The browser resolves what was pasted against the organization's own
+ * roles, so the API can stay strict: "Operations Manager" becomes a role
+ * id before it is sent, and anything this rejects is a row the preview
+ * should already have flagged.
  *
  * 200 is a hashing limit, not a spreadsheet one. Argon2 is deliberately
  * slow, so a request holding thousands of rows would sit there for
@@ -109,10 +111,11 @@ export class UpdateMemberDto {
   @MaxLength(200)
   password?: string;
 
-  @ApiPropertyOptional({ enum: UserRole })
+  @ApiPropertyOptional({ description: 'One of the roles of your own organization' })
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsInt()
+  @IsPositive()
+  roleId?: number;
 
   /** false retires the account, true brings it back */
   @ApiPropertyOptional({ example: false })
