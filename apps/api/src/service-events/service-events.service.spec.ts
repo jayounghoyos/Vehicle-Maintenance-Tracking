@@ -74,7 +74,9 @@ describe('ServiceEventsService', () => {
           }),
           find: jest.fn().mockResolvedValue([mockTask]),
           save: jest.fn().mockImplementation((t) => Promise.resolve(t)),
-          create: jest.fn().mockImplementation((t) => t),
+          create: jest
+            .fn()
+            .mockImplementation((t: Partial<MaintenanceTask>) => t as MaintenanceTask),
         };
       }
       if (entity === MaintenanceSchedule) {
@@ -85,7 +87,11 @@ describe('ServiceEventsService', () => {
       }
       if (entity === ServiceEvent) {
         return {
-          create: jest.fn().mockImplementation((e) => ({ id: 101, ...e })),
+          create: jest
+            .fn()
+            .mockImplementation(
+              (e: Partial<ServiceEvent>) => ({ id: 101, ...e }) as ServiceEvent,
+            ),
           save: jest.fn().mockImplementation((e) => Promise.resolve({ id: 101, ...e })),
           find: jest.fn().mockResolvedValue([
             {
@@ -100,7 +106,11 @@ describe('ServiceEventsService', () => {
       }
       if (entity === ServiceEventPhoto) {
         return {
-          create: jest.fn().mockImplementation((p) => ({ id: 1, ...p })),
+          create: jest
+            .fn()
+            .mockImplementation(
+              (p: Partial<ServiceEventPhoto>) => ({ id: 1, ...p }) as ServiceEventPhoto,
+            ),
           save: jest.fn().mockImplementation((p) => Promise.resolve({ id: 1, ...p })),
           findOne: jest.fn().mockResolvedValue({ id: 1, storageKey: 'test.jpg' }),
         };
