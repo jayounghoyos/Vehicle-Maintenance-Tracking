@@ -13,4 +13,6 @@ export type ServiceLogRow = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  photoUrl: string | null;
 };
+

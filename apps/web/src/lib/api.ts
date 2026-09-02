@@ -48,7 +48,9 @@ export const api = {
     body.append(field, file);
     return request<T>(path, { method: 'POST', body });
   },
+  postForm: <T>(path: string, body: FormData) => request<T>(path, { method: 'POST', body }),
 };
+
 
 export type AuthResponse = { accessToken: string; principal: Principal };
 
@@ -146,6 +148,7 @@ export type ServiceEventItem = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  photoUrl?: string | null;
 };
 
 export type VehicleDetail = VehicleRow & {
@@ -182,6 +185,11 @@ export type RoleSummary = {
   members: number;
 };
 
+export type MaintenanceTaskItem = {
+  id: number;
+  name: string;
+};
+
 /** One row of the fleet-wide service log. */
 export type ServiceLogItem = {
   id: number;
@@ -195,6 +203,7 @@ export type ServiceLogItem = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  photoUrl?: string | null;
 };
 
 export type AdminOrganization = {
@@ -212,9 +221,13 @@ export type AdminOrganization = {
 
 export const fetchDashboard = () => api.get<DashboardResponse>('/dashboard');
 
+export const fetchMaintenanceTasks = () =>
+  api.get<MaintenanceTaskItem[]>('/service-events/tasks');
+
 export const fetchServiceLog = (vehicleId?: number) =>
   api.get<ServiceLogItem[]>(
     vehicleId === undefined
       ? '/service-events'
       : `/service-events?vehicleId=${vehicleId}`,
   );
+
