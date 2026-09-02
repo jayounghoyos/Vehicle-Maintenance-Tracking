@@ -122,6 +122,12 @@ export type ScheduleItem = {
   state: MaintenanceState;
 };
 
+export type PhotoItem = {
+  id: number;
+  storageKey: string;
+  url: string;
+};
+
 export type ServiceEventItem = {
   id: number;
   task: string;
@@ -130,6 +136,7 @@ export type ServiceEventItem = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  photos?: PhotoItem[];
 };
 
 export type VehicleDetail = VehicleRow & {
@@ -170,6 +177,7 @@ export type ServiceLogItem = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  photos?: PhotoItem[];
 };
 
 export type AdminOrganization = {
@@ -185,6 +193,22 @@ export type AdminOrganization = {
   createdAt: string;
 };
 
+export type TaskItem = {
+  id: number;
+  name: string;
+};
+
+export type RecordServicePayload = {
+  vehicleId: number;
+  scheduleId?: number | null;
+  taskName: string;
+  type: 'preventive' | 'corrective';
+  performedAt: string;
+  odometerKm?: number | null;
+  notes?: string | null;
+  photos?: string[];
+};
+
 export const fetchDashboard = () => api.get<DashboardResponse>('/dashboard');
 
 export const fetchServiceLog = (vehicleId?: number) =>
@@ -193,3 +217,8 @@ export const fetchServiceLog = (vehicleId?: number) =>
       ? '/service-events'
       : `/service-events?vehicleId=${vehicleId}`,
   );
+
+export const fetchTasks = () => api.get<TaskItem[]>('/service-events/tasks');
+
+export const recordServiceEvent = (payload: RecordServicePayload) =>
+  api.post<ServiceLogItem>('/service-events', payload);
