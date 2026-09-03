@@ -22,6 +22,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  matchByDataKey,
   type BarShapeProps,
   type PieSectorShapeProps,
 } from 'recharts';
@@ -39,6 +40,15 @@ type Props = {
 };
 
 const TICK = { fill: AXIS, fontSize: 11 };
+
+/**
+ * Recharts pairs old points with new ones by array position by default,
+ * and its own docs say that when the array shrinks "some old points are
+ * skipped" — which is why widening the range animated and narrowing it
+ * jumped. Matching on the key each row already carries means the months
+ * that survive the change slide to their new places and the rest leave.
+ */
+const MATCH = matchByDataKey('key');
 
 /**
  * One component for all four shapes, because every metric answers with
@@ -117,6 +127,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
             >
               <RadialBar
                 dataKey="value"
+                animationMatchBy={MATCH}
                 background={{ fill: 'rgba(255,255,255,.04)' }}
                 cornerRadius={6}
                 onMouseEnter={(_, index) => setHovered(points.length - 1 - index)}
@@ -146,6 +157,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
           <PolarAngleAxis dataKey="label" tick={TICK} />
           <Radar
             dataKey="value"
+            animationMatchBy={MATCH}
             stroke={accent}
             strokeWidth={2}
             fill={accent}
@@ -190,6 +202,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
               <Pie
                 data={points}
                 dataKey="value"
+                animationMatchBy={MATCH}
                 nameKey="label"
                 innerRadius="58%"
                 outerRadius="82%"
@@ -250,6 +263,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
   const bars = (
     <Bar
       dataKey="value"
+      animationMatchBy={MATCH}
       radius={type === 'row' ? [0, 6, 6, 0] : [6, 6, 0, 0]}
       maxBarSize={type === 'row' ? 30 : 56}
       shape={(props: BarShapeProps) => {
@@ -313,6 +327,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
             {axes}
             <Area
               dataKey="value"
+              animationMatchBy={MATCH}
               stroke={accent}
               strokeWidth={2}
               fill={`url(#${gradient})`}
@@ -325,6 +340,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
             {axes}
             <Line
               dataKey="value"
+              animationMatchBy={MATCH}
               stroke={accent}
               strokeWidth={2}
               dot={false}
