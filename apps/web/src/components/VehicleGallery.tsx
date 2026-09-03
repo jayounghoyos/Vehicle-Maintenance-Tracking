@@ -71,6 +71,18 @@ export function VehicleGallery({ vehicleId, plate, photos, canManage, onOpen }: 
       toast.show('Every picture has to be under 5 MB', 'failed');
       return;
     }
+    // said here because past this many the upload is refused by the
+    // parser, whose complaint names a form field nobody chose
+    const room = MAX_PHOTOS - photos.length;
+    if (files.length > room) {
+      toast.show(
+        room === 0
+          ? `${plate} already holds ${MAX_PHOTOS} pictures`
+          : `Room for ${room} more ${room === 1 ? 'picture' : 'pictures'} on ${plate}`,
+        'failed',
+      );
+      return;
+    }
     add.mutate(files);
   };
 
