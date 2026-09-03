@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
-import { AppShell } from '../components/AppShell';
+import { AppShell, PrimaryAction } from '../components/AppShell';
 import { Panel } from '../components/Panel';
 import { PANEL_LAYOUT } from '../components/panelLayout';
 import { SidebarFooter } from '../components/SidebarFooter';
@@ -118,15 +118,14 @@ export default function Vehicles() {
                   <Upload className="size-4" strokeWidth={1.75} />
                   Import many
                 </button>
-                <button
-                  type="button"
+                <PrimaryAction
+                  icon={Plus}
+                  size="panel"
                   data-tour="vehicle-add"
                   onClick={() => setPanel(panel?.kind === 'add' ? null : { kind: 'add' })}
-                  className="flex items-center gap-2 rounded-xl bg-lime px-3.5 py-2 text-body font-semibold text-on-accent transition-opacity hover:opacity-90"
                 >
-                  <Plus className="size-4" strokeWidth={2.5} />
                   Add vehicle
-                </button>
+                </PrimaryAction>
               </div>
             ) : undefined
           }

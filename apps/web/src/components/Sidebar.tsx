@@ -27,7 +27,13 @@ type NavItem = {
 const NAV: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: LayoutGrid, ready: true },
   { to: '/vehicles', label: 'Vehicles', icon: Truck, ready: true, need: 'view_vehicles' },
-  { to: '/schedules', label: 'Schedules', icon: CalendarClock, ready: false },
+  {
+    to: '/schedules',
+    label: 'Schedules',
+    icon: CalendarClock,
+    ready: true,
+    need: 'view_vehicles',
+  },
   {
     to: '/service-log',
     label: 'Service Log',

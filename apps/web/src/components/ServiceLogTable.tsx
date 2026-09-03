@@ -74,7 +74,7 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
     <div className="overflow-x-auto border-t border-white/5">
       <table className="w-full min-w-[820px] text-left">
         <thead>
-          <tr className="border-b border-white/5">
+          <tr data-tour="service-log-headings" className="border-b border-white/5">
             {COLUMNS.map(({ key, label }) => (
               <SortHeader
                 key={key}
@@ -99,7 +99,10 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
                 onClick={() => sort.toggle(key)}
               />
             ))}
-            <th className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase">
+            <th
+              data-tour="service-log-photos"
+              className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase"
+            >
               Photos
             </th>
           </tr>

@@ -1,5 +1,7 @@
 type Props = {
-  title: string;
+  /** usually a string; a node when the title carries its own badge,
+   *  e.g. a count next to it */
+  title: React.ReactNode;
   subtitle?: string;
   action?: React.ReactNode;
   children: React.ReactNode;

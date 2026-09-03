@@ -11,6 +11,7 @@ import Login from './routes/Login.tsx';
 import Organization from './routes/Organization.tsx';
 import Register from './routes/Register.tsx';
 import { Reports } from './reports/lazy.ts';
+import Schedules from './routes/Schedules.tsx';
 import ServiceLog from './routes/ServiceLog.tsx';
 import Team from './routes/Team.tsx';
 import Vehicles from './routes/Vehicles.tsx';
@@ -47,6 +48,14 @@ createRoot(document.getElementById('root')!).render(
                 element={
                   <RequireAuth kind="user" need="view_vehicles">
                     <Vehicles />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/schedules"
+                element={
+                  <RequireAuth kind="user" need="view_vehicles">
+                    <Schedules />
                   </RequireAuth>
                 }
               />
