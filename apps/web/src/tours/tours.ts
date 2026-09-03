@@ -399,6 +399,62 @@ export const schedulesTour = ({ canManage }: Audience): DriveStep[] => [
   ...workspace,
 ];
 
+export const serviceLogTour = ({ canManage }: Audience): DriveStep[] => [
+  {
+    popover: {
+      title: 'Everything the workshop has done',
+      description:
+        'Every job finished, newest first. Recording one here is what moves a vehicle’s next due date forward, so the schedule stays accurate without anybody updating it by hand.',
+    },
+  },
+  ...(canManage ? [] : [readOnly('recording a service or a breakdown')]),
+  {
+    element: anchor('service-log-vehicle-filter'),
+    popover: {
+      title: 'Looking at one vehicle',
+      description:
+        'Narrows the list to a single vehicle’s history. Choose All vehicles to see the whole fleet again.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('service-log-headings'),
+    popover: {
+      title: 'Changing the order',
+      description:
+        'Click a word to reorder the list by it. Click again to flip it, a third time to undo. Click a second word to sort by both at once.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('service-log-photos'),
+    popover: {
+      title: 'What was captured on site',
+      description:
+        'Photographs attached when the job was recorded: parts replaced, damage found, proof the work was done. Click a count to see them.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  ...(canManage
+    ? [
+        {
+          element: anchor('service-log-add'),
+          popover: {
+            title: 'Recording a job',
+            description:
+              'Say which vehicle, what was done, and when. Link it to a scheduled rule and the next due date moves forward on its own.',
+            side: 'bottom' as const,
+            align: 'end' as const,
+          },
+        },
+      ]
+    : []),
+  ...workspace,
+];
+
 type Tour = {
   path: string;
   /** names its own screen rather than saying "this page" everywhere: a
@@ -436,6 +492,12 @@ export const TOURS: Tour[] = [
     label: 'How schedules work',
     needs: 'manage_schedules',
     build: schedulesTour,
+  },
+  {
+    path: '/service-log',
+    label: 'How the service log works',
+    needs: 'log_service',
+    build: serviceLogTour,
   },
   { path: '/', label: 'How the dashboard works', build: dashboardTour },
 ];
