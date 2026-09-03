@@ -15,6 +15,8 @@ import type { ScheduleRow, TaskItem } from './schedules.types';
 /** postgres unique_violation */
 const UNIQUE_VIOLATION = '23505';
 
+type LastService = { performedAt: string; odometerKm: number | null };
+
 @Injectable()
 export class SchedulesService {
   constructor(private readonly tenants: TenantRepositories) {}
@@ -28,11 +30,17 @@ export class SchedulesService {
     const rows = await schedules.find({
       where: vehicleId === undefined ? {} : { vehicleId },
       relations: { vehicle: { model: true }, task: true },
-      // id breaks the tie: two plans due the same day share a spot
+      // id breaks the tie: two schedules due the same day share a spot
       order: { nextDueDate: 'ASC', id: 'ASC' },
     });
 
-    return rows.map((schedule) => this.toRow(schedule, today));
+    const lastService = await this.lastServiceByScheduleId(
+      organizationId,
+      rows.map((schedule) => schedule.id),
+    );
+    return rows.map((schedule) =>
+      this.toRow(schedule, today, lastService.get(schedule.id) ?? null),
+    );
   }
 
   async listTasks(organizationId: number): Promise<TaskItem[]> {
@@ -73,6 +81,15 @@ export class SchedulesService {
   }
 
   async create(organizationId: number, dto: CreateScheduleDto): Promise<ScheduleRow> {
+    // the DTO already rejects this over HTTP; checked again here so the
+    // entity's own invariant holds for any caller of the service, not
+    // only ones that went through the ValidationPipe
+    if ((dto.intervalDays ?? null) === null && (dto.intervalKm ?? null) === null) {
+      throw new BadRequestException(
+        'At least one of intervalDays or intervalKm is required',
+      );
+    }
+
     const vehicles = this.tenants.for(Vehicle, organizationId);
     const vehicle = await vehicles.findOne({ where: { id: dto.vehicleId } });
     if (!vehicle) throw new NotFoundException('Vehicle not found');
@@ -88,9 +105,9 @@ export class SchedulesService {
         taskId: task.id,
         intervalDays: dto.intervalDays ?? null,
         intervalKm: dto.intervalKm ?? null,
-        // set only once a service is actually logged against this plan —
-        // see service-events.service.ts#recordService, which owns that
-        // recalculation and is not duplicated here
+        // set only once a service is actually logged against this
+        // schedule — see service-events.service.ts#recordService, which
+        // owns that recalculation and is not duplicated here
         nextDueDate: null,
         nextDueKm: null,
       }),
@@ -130,10 +147,15 @@ export class SchedulesService {
   }
 
   /**
-   * Permanent, and only for a plan nothing has been logged against.
+   * Permanent, and only for a schedule nothing has been logged against.
    * service_events.schedule_id has no cascade, so deleting one that has
    * history fails in the database as a 500 unless it is refused here
    * first — the same reasoning vehicles.service.ts uses for a vehicle.
+   *
+   * Whether a schedule with history should instead be deletable by
+   * detaching its service events (schedule_id is nullable precisely so
+   * that is possible) is a business decision, not this fix — see the
+   * tracking issue.
    */
   async remove(organizationId: number, id: number): Promise<void> {
     const schedules = this.tenants.for(MaintenanceSchedule, organizationId);
@@ -145,14 +167,18 @@ export class SchedulesService {
     if (eventCount > 0) {
       throw new ConflictException(
         `${eventCount} service event${eventCount === 1 ? '' : 's'} logged against ` +
-          `this plan, so it cannot be deleted`,
+          `this schedule, so it cannot be deleted`,
       );
     }
 
     await schedules.delete({ id });
   }
 
-  private toRow(schedule: MaintenanceSchedule, today: Date): ScheduleRow {
+  private toRow(
+    schedule: MaintenanceSchedule,
+    today: Date,
+    lastService: LastService | null,
+  ): ScheduleRow {
     return {
       id: schedule.id,
       vehicleId: schedule.vehicleId,
@@ -163,6 +189,8 @@ export class SchedulesService {
       task: schedule.task.name,
       intervalDays: schedule.intervalDays,
       intervalKm: schedule.intervalKm,
+      lastServiceDate: lastService?.performedAt ?? null,
+      lastServiceOdometerKm: lastService?.odometerKm ?? null,
       nextDueDate: schedule.nextDueDate,
       nextDueKm: schedule.nextDueKm,
       state: scheduleState(schedule.nextDueDate, today),
@@ -176,7 +204,41 @@ export class SchedulesService {
       relations: { vehicle: { model: true }, task: true },
     });
     if (!schedule) throw new NotFoundException('No such schedule');
-    return this.toRow(schedule, new Date());
+
+    const lastService = await this.lastServiceByScheduleId(organizationId, [id]);
+    return this.toRow(schedule, new Date(), lastService.get(id) ?? null);
+  }
+
+  /**
+   * One row per schedule — the most recent service event logged against
+   * it, if any. DISTINCT ON rather than a query per row: a fleet's
+   * worth of schedules is one round trip, not N.
+   */
+  private async lastServiceByScheduleId(
+    organizationId: number,
+    scheduleIds: number[],
+  ): Promise<Map<number, LastService>> {
+    const map = new Map<number, LastService>();
+    if (scheduleIds.length === 0) return map;
+
+    const events = this.tenants.for(ServiceEvent, organizationId);
+    const rows = await events
+      .builder('e')
+      .distinctOn(['e.schedule_id'])
+      .andWhere('e.schedule_id IN (:...scheduleIds)', { scheduleIds })
+      .orderBy('e.schedule_id', 'ASC')
+      .addOrderBy('e.performed_at', 'DESC')
+      .addOrderBy('e.id', 'DESC')
+      .getMany();
+
+    for (const event of rows) {
+      if (event.scheduleId === null) continue;
+      map.set(event.scheduleId, {
+        performedAt: event.performedAt,
+        odometerKm: event.odometerKm,
+      });
+    }
+    return map;
   }
 
   private isUniqueViolation(err: unknown): boolean {
