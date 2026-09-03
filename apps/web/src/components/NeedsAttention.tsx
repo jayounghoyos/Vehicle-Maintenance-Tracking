@@ -1,4 +1,5 @@
 import { ArrowRight, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import { dueLabel } from '../domain/maintenance';
 import type { DashboardResponse } from '../lib/api';
@@ -25,12 +26,12 @@ export function NeedsAttention({ items }: { items: DashboardResponse['attention'
       title="Needs attention"
       subtitle="Maintenance overdue or coming up"
       action={
-        <button
-          type="button"
+        <Link
+          to="/vehicles"
           className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-1.5 text-body text-ink-muted transition-colors hover:text-ink"
         >
           View all <ArrowRight className="size-3.5" />
-        </button>
+        </Link>
       }
     >
       {items.length === 0 ? (

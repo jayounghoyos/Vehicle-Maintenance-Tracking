@@ -6,13 +6,6 @@ export type ReportPoint = {
   value: number;
 };
 
-/**
- * A metric declares the charts it suits, and the picker offers nothing
- * else, so an odometer reading can never be asked for as a time series.
- * The combinations are unrepresentable rather than validated.
- */
-export type ChartType = 'bar' | 'line' | 'area' | 'donut';
-
 export const METRIC_IDS = [
   'servicesPerMonth',
   'servicesByType',
@@ -27,15 +20,11 @@ export const METRIC_IDS = [
 
 export type MetricId = (typeof METRIC_IDS)[number];
 
-export type MetricDefinition = {
-  id: MetricId;
-  label: string;
-  /** First is the default. */
-  charts: ChartType[];
-  /** Status hues, and only for the metric that reports maintenance state. */
-  tone: 'neutral' | 'state';
-};
-
+/**
+ * Which chart shapes a metric suits is not here: the API serves numbers
+ * and the screen decides how to draw them, so that catalogue lives in
+ * apps/web/src/reports/metrics.ts and nowhere else.
+ */
 export type ReportsResponse = {
   months: number;
   /** How many service events the range covers, for the CSV and the header. */
