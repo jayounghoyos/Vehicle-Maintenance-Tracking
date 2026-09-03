@@ -116,6 +116,19 @@ export const METRICS: Record<MetricId, MetricDefinition> = {
 
 export const METRIC_LIST = Object.values(METRICS);
 
+/**
+ * What the chart is drawn over, as opposed to what it is drawing.
+ *
+ * Changing the range swaps one window of months for another, and no
+ * pairing rule survives that: matching by position skips points when the
+ * range narrows, matching by key flies the new months in from nowhere
+ * when it widens. So a chart whose categories changed is redrawn, and
+ * one whose categories held still animates its numbers into place.
+ */
+export function shapeKey(points: ReportPoint[]): string {
+  return points.map((point) => point.key).join('|');
+}
+
 /** Keeps a chosen chart when the new metric also offers it. */
 export function chartFor(metric: MetricId, wanted: ChartType): ChartType {
   const { charts } = METRICS[metric];

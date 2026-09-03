@@ -15,6 +15,7 @@ import { ReportSummary } from '../reports/ReportSummary';
 import {
   METRICS,
   chartFor,
+  shapeKey,
   type ChartType,
   type MetricId,
   type ReportsResponse,
@@ -122,6 +123,7 @@ export default function Reports() {
             >
               <div className="px-2 pb-4">
                 <ReportChart
+                  key={shapeKey(data.metrics[HERO])}
                   points={data.metrics[HERO]}
                   type="area"
                   metric={METRICS[HERO]}
@@ -136,6 +138,7 @@ export default function Reports() {
                 <Panel key={id} title={METRICS[id].label}>
                   <div className="px-5 pb-5">
                     <ReportChart
+                      key={shapeKey(data.metrics[id])}
                       points={data.metrics[id]}
                       type={METRICS[id].charts[0]}
                       metric={METRICS[id]}
@@ -163,6 +166,7 @@ export default function Reports() {
             >
               <div className="px-2 pb-4">
                 <ReportChart
+                  key={shapeKey(data.metrics[choice.metric])}
                   points={data.metrics[choice.metric]}
                   type={choice.chart}
                   metric={METRICS[choice.metric]}
