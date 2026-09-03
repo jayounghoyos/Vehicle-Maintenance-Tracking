@@ -8,7 +8,10 @@ type Props = {
   /** page title and subtitle, left of the header */
   title: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** the one lime action for this screen, if the role has one */
+  /** A page-level action, for a screen not built around one table — the
+   *  dashboard's "Log service" is the only one. A listing screen's
+   *  primary action belongs next to its own table instead, in that
+   *  Panel's action prop, the way Vehicles and Team do it. */
   action?: React.ReactNode;
   /** rendered at the bottom of the sidebar */
   sidebarFooter?: React.ReactNode;
@@ -52,11 +55,17 @@ export function PrimaryAction({
   icon: Icon,
   children,
   onClick,
+  size = 'header',
   ...rest
 }: {
   icon: LucideIcon;
   children: React.ReactNode;
   onClick?: () => void;
+  /** 'header' sits beside the help button in AppShell's own header.
+   *  'panel' sits in a listing screen's Panel action, sized to match
+   *  the controls already there — the vehicle select, the outline
+   *  "Import many" button. */
+  size?: 'header' | 'panel';
   /** so a guided tour can point at this button */
   'data-tour'?: string;
 }) {
@@ -65,7 +74,9 @@ export function PrimaryAction({
       type="button"
       onClick={onClick}
       {...rest}
-      className="flex items-center gap-2 rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-on-accent transition-opacity hover:opacity-90"
+      className={`flex items-center gap-2 rounded-xl bg-lime text-body font-semibold text-on-accent transition-opacity hover:opacity-90 ${
+        size === 'panel' ? 'px-3.5 py-2' : 'px-4 py-2.5'
+      }`}
     >
       <Icon className="size-4" strokeWidth={2.5} />
       {children}

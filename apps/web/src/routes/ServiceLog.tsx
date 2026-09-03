@@ -30,15 +30,7 @@ export default function ServiceLog() {
 
   // the operations manager reads the log and decides on it; recording
   // the work belongs to whoever did it
-  const action = can(principal, 'log_service') ? (
-    <PrimaryAction
-      icon={Plus}
-      onClick={() => setIsLogModalOpen(true)}
-      data-tour="service-log-add"
-    >
-      Log service
-    </PrimaryAction>
-  ) : undefined;
+  const canLog = can(principal, 'log_service');
 
   const shown = events ?? [];
 
@@ -46,7 +38,6 @@ export default function ServiceLog() {
     <AppShell
       title="Service log"
       subtitle="Everything the workshop has recorded"
-      action={action}
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
       <Panel
@@ -57,25 +48,37 @@ export default function ServiceLog() {
             : `${shown.length} ${shown.length === 1 ? 'event' : 'events'} logged, newest first`
         }
         action={
-          <select
-            data-tour="service-log-vehicle-filter"
-            value={vehicleId ?? ''}
-            onChange={(event) =>
-              setVehicleId(
-                event.target.value === '' ? undefined : Number(event.target.value),
-              )
-            }
-            className="rounded-xl border border-white/10 bg-page/60 px-3.5 py-2 text-body focus:border-lime/40 focus:outline-none"
-          >
-            <option value="" className="bg-panel">
-              All vehicles
-            </option>
-            {(vehicles ?? []).map((vehicle) => (
-              <option key={vehicle.id} value={vehicle.id} className="bg-panel">
-                {vehicle.plate}
+          <div className="flex items-center gap-2">
+            <select
+              data-tour="service-log-vehicle-filter"
+              value={vehicleId ?? ''}
+              onChange={(event) =>
+                setVehicleId(
+                  event.target.value === '' ? undefined : Number(event.target.value),
+                )
+              }
+              className="rounded-xl border border-white/10 bg-page/60 px-3.5 py-2 text-body focus:border-lime/40 focus:outline-none"
+            >
+              <option value="" className="bg-panel">
+                All vehicles
               </option>
-            ))}
-          </select>
+              {(vehicles ?? []).map((vehicle) => (
+                <option key={vehicle.id} value={vehicle.id} className="bg-panel">
+                  {vehicle.plate}
+                </option>
+              ))}
+            </select>
+            {canLog && (
+              <PrimaryAction
+                icon={Plus}
+                size="panel"
+                data-tour="service-log-add"
+                onClick={() => setIsLogModalOpen(true)}
+              >
+                Log service
+              </PrimaryAction>
+            )}
+          </div>
         }
       >
         {isPending ? (
