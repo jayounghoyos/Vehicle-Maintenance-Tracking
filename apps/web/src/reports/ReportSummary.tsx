@@ -43,7 +43,10 @@ export function ReportSummary({ data }: { data: ReportsResponse }) {
   ];
 
   return (
-    <section className="grid grid-cols-1 divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/5 bg-panel sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
+    <section
+      data-tour="report-summary"
+      className="grid grid-cols-1 divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/5 bg-panel sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x"
+    >
       {tiles.map(({ label, value, caption, icon: Icon }) => (
         <div key={label} className="flex flex-col gap-3 p-5">
           <span className="flex items-center gap-2 text-nav-label text-ink-muted uppercase">

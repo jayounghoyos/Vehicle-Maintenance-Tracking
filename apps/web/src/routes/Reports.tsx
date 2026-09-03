@@ -74,7 +74,10 @@ export default function Reports() {
     >
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-          <div className="flex gap-1 rounded-xl border border-white/5 bg-page/60 p-1">
+          <div
+            data-tour="report-range"
+            className="flex gap-1 rounded-xl border border-white/5 bg-page/60 p-1"
+          >
             {RANGES.map((range) => (
               <button
                 key={range}
@@ -99,6 +102,7 @@ export default function Reports() {
             type="button"
             onClick={exportAll}
             disabled={!data}
+            data-tour="report-export"
             className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
           >
             <Download className="size-4" />
@@ -125,6 +129,7 @@ export default function Reports() {
             <ReportSummary data={data} />
 
             <Panel
+              data-tour="report-hero"
               title={METRICS[HERO].label}
               subtitle="Every service the workshop recorded, month by month"
             >
@@ -158,6 +163,7 @@ export default function Reports() {
             </div>
 
             <Panel
+              data-tour="report-builder"
               title="Build your own"
               subtitle="Pick what to show and how to draw it"
               action={

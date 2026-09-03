@@ -306,6 +306,67 @@ export const organizationTour = ({ canManage }: Audience): DriveStep[] => [
   ...workspace,
 ];
 
+export const reportsTour = (): DriveStep[] => [
+  {
+    popover: {
+      title: 'What the fleet has been doing',
+      description:
+        'The other screens show today. This one shows the months behind it, so you can see whether the fleet is getting better or worse.',
+    },
+  },
+  {
+    element: anchor('report-range'),
+    popover: {
+      title: 'How far back to look',
+      description:
+        'Three months answers what is happening now. Twelve answers whether it is improving. Everything below changes with this.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('report-summary'),
+    popover: {
+      title: 'The four numbers',
+      description:
+        'Planned work was on the calendar. A breakdown was not, so a fleet with many of those is being repaired rather than looked after.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('report-hero'),
+    popover: {
+      title: 'Every service, month by month',
+      description:
+        'A month nobody recorded anything in still shows, as a zero. A quiet month and a month nobody wrote down look different here.',
+      side: 'top',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('report-builder'),
+    popover: {
+      title: 'Asking your own question',
+      description:
+        'Choose what to count on the left and how to draw it on the right. Only the drawings that suit those numbers are offered.',
+      side: 'top',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('report-export'),
+    popover: {
+      title: 'Taking the numbers out',
+      description:
+        'Saves everything on this screen as a file you can open in Excel, for somebody who does not use this system.',
+      side: 'left',
+      align: 'start',
+    },
+  },
+  ...workspace,
+];
+
 type Tour = {
   path: string;
   /** names its own screen rather than saying "this page" everywhere: a
@@ -338,6 +399,7 @@ export const TOURS: Tour[] = [
     needs: 'manage_team',
     build: teamTour,
   },
+  { path: '/reports', label: 'How the reports work', build: reportsTour },
   { path: '/', label: 'How the dashboard works', build: dashboardTour },
 ];
 
