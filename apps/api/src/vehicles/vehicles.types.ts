@@ -56,6 +56,8 @@ export type ServiceEventItem = {
 export type VehicleDetail = VehicleRow & {
   schedules: ScheduleItem[];
   recentEvents: ServiceEventItem[];
+  /** The pictures beyond the main one, which stays on photoUrl. */
+  photos: ServiceEventPhotoItem[];
 };
 
 export type ImportResult = {

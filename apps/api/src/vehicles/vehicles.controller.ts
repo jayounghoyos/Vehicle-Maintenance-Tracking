@@ -13,10 +13,11 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { Principal } from '../auth/auth.types';
@@ -29,6 +30,9 @@ import type { ImportResult, VehicleDetail, VehicleRow } from './vehicles.types';
 /* Big enough for a photo straight off a phone, small enough that a
  * mistaken video does not sit in the memory of a free instance. */
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+/* Per request. The gallery ceiling itself is the service's to enforce,
+   since it has to count what is already there. */
+const MAX_GALLERY_UPLOAD = 12;
 
 /**
  * The same split the team screen uses: everybody in the organization can
@@ -119,6 +123,63 @@ export class VehiclesController {
       id,
       photo.buffer,
     );
+  }
+
+  @Post(':id/photos')
+  @Requires(Permission.MANAGE_VEHICLES)
+  @UseInterceptors(
+    FilesInterceptor('photos', MAX_GALLERY_UPLOAD, {
+      limits: { fileSize: MAX_PHOTO_BYTES },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Add pictures to a vehicle beyond its main one' })
+  addPhotos(
+    @CurrentUser() principal: Principal,
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: MAX_PHOTO_BYTES }),
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ }),
+        ],
+      }),
+    )
+    photos: Express.Multer.File[],
+  ): Promise<VehicleDetail> {
+    const user = this.asUser(principal);
+    return this.vehicles.addPhotos(
+      user.organizationId,
+      id,
+      user.id,
+      photos.map((photo) => photo.buffer),
+    );
+  }
+
+  @Delete(':id/photos/:photoId')
+  @Requires(Permission.MANAGE_VEHICLES)
+  @ApiOperation({ summary: 'Take one picture out of a vehicle gallery' })
+  removeGalleryPhoto(
+    @CurrentUser() principal: Principal,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('photoId', ParseIntPipe) photoId: number,
+  ): Promise<VehicleDetail> {
+    return this.vehicles.removeGalleryPhoto(
+      this.asUser(principal).organizationId,
+      id,
+      photoId,
+    );
+  }
+
+  @Post(':id/photos/:photoId/promote')
+  @Requires(Permission.MANAGE_VEHICLES)
+  @ApiOperation({ summary: 'Make a gallery picture the main one' })
+  promotePhoto(
+    @CurrentUser() principal: Principal,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('photoId', ParseIntPipe) photoId: number,
+  ): Promise<VehicleDetail> {
+    return this.vehicles.promotePhoto(this.asUser(principal).organizationId, id, photoId);
   }
 
   @Delete(':id/photo')
