@@ -15,7 +15,6 @@ import { ReportSummary } from '../reports/ReportSummary';
 import {
   METRICS,
   chartFor,
-  shapeKey,
   type ChartType,
   type MetricId,
   type ReportsResponse,
@@ -34,6 +33,9 @@ export default function Reports() {
   const { accent } = useBrand();
 
   const [months, setMonths] = useState(12);
+  // which way the window moved, because the two directions need different
+  // pairing and the button knows it without anything having to guess
+  const [pairing, setPairing] = useState<'index' | 'key'>('index');
   const [choice, setChoice] = useState(readChoice);
 
   const { data, isPending, isFetching, isError } = useQuery({
@@ -48,6 +50,8 @@ export default function Reports() {
   });
 
   const pick = (next: Partial<typeof choice>) => {
+    // a different metric is a different subject, not a narrower window
+    if (next.metric) setPairing('index');
     const merged = { ...choice, ...next };
     merged.chart = chartFor(merged.metric, merged.chart);
     setChoice(merged);
@@ -75,7 +79,10 @@ export default function Reports() {
               <button
                 key={range}
                 type="button"
-                onClick={() => setMonths(range)}
+                onClick={() => {
+                  setPairing(range < months ? 'key' : 'index');
+                  setMonths(range);
+                }}
                 aria-pressed={range === months}
                 className={`rounded-lg px-3 py-1.5 text-body transition-colors ${
                   range === months
@@ -123,11 +130,11 @@ export default function Reports() {
             >
               <div className="px-2 pb-4">
                 <ReportChart
-                  key={shapeKey(data.metrics[HERO])}
                   points={data.metrics[HERO]}
                   type="area"
                   metric={METRICS[HERO]}
                   accent={accent}
+                  pairing={pairing}
                   height={260}
                 />
               </div>
@@ -138,11 +145,11 @@ export default function Reports() {
                 <Panel key={id} title={METRICS[id].label}>
                   <div className="px-5 pb-5">
                     <ReportChart
-                      key={shapeKey(data.metrics[id])}
                       points={data.metrics[id]}
                       type={METRICS[id].charts[0]}
                       metric={METRICS[id]}
                       accent={accent}
+                      pairing={pairing}
                       height={220}
                     />
                   </div>
@@ -166,11 +173,11 @@ export default function Reports() {
             >
               <div className="px-2 pb-4">
                 <ReportChart
-                  key={shapeKey(data.metrics[choice.metric])}
                   points={data.metrics[choice.metric]}
                   type={choice.chart}
                   metric={METRICS[choice.metric]}
                   accent={accent}
+                  pairing={pairing}
                   height={280}
                 />
               </div>

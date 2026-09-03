@@ -23,6 +23,7 @@ import {
   XAxis,
   YAxis,
   matchByDataKey,
+  matchByIndex,
   type BarShapeProps,
   type PieSectorShapeProps,
 } from 'recharts';
@@ -37,18 +38,21 @@ type Props = {
   metric: MetricDefinition;
   accent: string;
   height?: number;
+  /** 'key' only where the categories are being narrowed. */
+  pairing?: 'index' | 'key';
 };
 
 const TICK = { fill: AXIS, fontSize: 11 };
 
 /**
- * Recharts pairs old points with new ones by array position by default,
- * and its own docs say that when the array shrinks "some old points are
- * skipped" — which is why widening the range animated and narrowing it
- * jumped. Matching on the key each row already carries means the months
- * that survive the change slide to their new places and the rest leave.
+ * Neither pairing rule works both ways, so the caller says which.
+ *
+ * Growing, Recharts stretches each old point across the new ones and the
+ * line flows into its longer shape. Shrinking, that same rule skips old
+ * points and the line jumps, so 'key' is used instead and the months
+ * that survive slide to their new places while the rest animate out.
  */
-const MATCH = matchByDataKey('key');
+const BY_KEY = matchByDataKey('key');
 
 /**
  * One component for all four shapes, because every metric answers with
@@ -58,9 +62,17 @@ const MATCH = matchByDataKey('key');
  * the installed version marks deprecated. Animation is left at its
  * default of 'auto', which already honours prefers-reduced-motion.
  */
-export function ReportChart({ points, type, metric, accent, height = 240 }: Props) {
+export function ReportChart({
+  points,
+  type,
+  metric,
+  accent,
+  height = 240,
+  pairing = 'index',
+}: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
   const gradient = useId();
+  const match = pairing === 'key' ? BY_KEY : matchByIndex;
 
   if (points.length === 0 || points.every((point) => point.value === 0)) {
     return (
@@ -127,7 +139,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
             >
               <RadialBar
                 dataKey="value"
-                animationMatchBy={MATCH}
+                animationMatchBy={match}
                 background={{ fill: 'rgba(255,255,255,.04)' }}
                 cornerRadius={6}
                 onMouseEnter={(_, index) => setHovered(points.length - 1 - index)}
@@ -157,7 +169,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
           <PolarAngleAxis dataKey="label" tick={TICK} />
           <Radar
             dataKey="value"
-            animationMatchBy={MATCH}
+            animationMatchBy={match}
             stroke={accent}
             strokeWidth={2}
             fill={accent}
@@ -202,7 +214,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
               <Pie
                 data={points}
                 dataKey="value"
-                animationMatchBy={MATCH}
+                animationMatchBy={match}
                 nameKey="label"
                 innerRadius="58%"
                 outerRadius="82%"
@@ -263,7 +275,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
   const bars = (
     <Bar
       dataKey="value"
-      animationMatchBy={MATCH}
+      animationMatchBy={match}
       radius={type === 'row' ? [0, 6, 6, 0] : [6, 6, 0, 0]}
       maxBarSize={type === 'row' ? 30 : 56}
       shape={(props: BarShapeProps) => {
@@ -327,7 +339,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
             {axes}
             <Area
               dataKey="value"
-              animationMatchBy={MATCH}
+              animationMatchBy={match}
               stroke={accent}
               strokeWidth={2}
               fill={`url(#${gradient})`}
@@ -340,7 +352,7 @@ export function ReportChart({ points, type, metric, accent, height = 240 }: Prop
             {axes}
             <Line
               dataKey="value"
-              animationMatchBy={MATCH}
+              animationMatchBy={match}
               stroke={accent}
               strokeWidth={2}
               dot={false}
