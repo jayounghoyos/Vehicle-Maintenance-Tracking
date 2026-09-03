@@ -8,9 +8,10 @@ import { ServiceEventPhoto } from './service-event-photo.entity';
 import { ServiceEvent } from './service-event.entity';
 import { User } from './user.entity';
 import { VehicleModel } from './vehicle-model.entity';
+import { VehiclePhoto } from './vehicle-photo.entity';
 import { Vehicle } from './vehicle.entity';
 
-/** The eleven tables in docs/design/data_model.dbml. Nothing more. */
+/** The twelve tables in docs/design/data_model.dbml. Nothing more. */
 export const entities = [
   Organization,
   PlatformAdmin,
@@ -23,6 +24,7 @@ export const entities = [
   MaintenanceSchedule,
   ServiceEvent,
   ServiceEventPhoto,
+  VehiclePhoto,
 ];
 
 export * from './enums';
@@ -38,4 +40,5 @@ export {
   User,
   Vehicle,
   VehicleModel,
+  VehiclePhoto,
 };

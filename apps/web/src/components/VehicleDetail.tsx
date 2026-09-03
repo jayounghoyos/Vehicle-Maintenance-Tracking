@@ -11,6 +11,7 @@ import { odometer, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
 import { LogServiceModal } from './LogServiceModal';
 import { PhotoViewerModal } from './PhotoViewerModal';
+import { VehicleGallery } from './VehicleGallery';
 import { VehiclePhoto } from './VehiclePhoto';
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -49,6 +50,7 @@ export function VehicleDetail({ id }: { id: number }) {
     photos: PhotoItem[];
     title: string;
     subtitle: string;
+    initialIndex?: number;
   } | null>(null);
 
   const { data: vehicle, isPending } = useQuery({
@@ -65,6 +67,21 @@ export function VehicleDetail({ id }: { id: number }) {
   return (
     <div className="space-y-5 p-5">
       <VehiclePhoto vehicle={vehicle} canManage={can(principal, 'manage_vehicles')} />
+
+      <VehicleGallery
+        vehicleId={vehicle.id}
+        plate={vehicle.plate}
+        photos={vehicle.photos ?? []}
+        canManage={can(principal, 'manage_vehicles')}
+        onOpen={(index) =>
+          setActivePhotos({
+            photos: vehicle.photos ?? [],
+            title: vehicle.plate,
+            subtitle: `${vehicle.make} ${vehicle.model}`,
+            initialIndex: index,
+          })
+        }
+      />
 
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
@@ -265,6 +282,7 @@ export function VehicleDetail({ id }: { id: number }) {
         <PhotoViewerModal
           isOpen={true}
           photos={activePhotos.photos}
+          initialIndex={activePhotos.initialIndex}
           title={activePhotos.title}
           subtitle={activePhotos.subtitle}
           onClose={() => setActivePhotos(null)}

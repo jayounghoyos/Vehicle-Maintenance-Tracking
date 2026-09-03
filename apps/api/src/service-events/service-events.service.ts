@@ -102,10 +102,11 @@ export class ServiceEventsService {
       throw new BadRequestException('Task name cannot be empty');
     }
 
-    // Look for existing task or create a new one
+    // andWhere, not where: builder() has already applied the organization
+    // condition and where() would replace it, matching another client's task
     let task = await tasks
       .builder('t')
-      .where('LOWER(t.name) = LOWER(:name)', { name: taskName })
+      .andWhere('LOWER(t.name) = LOWER(:name)', { name: taskName })
       .getOne();
 
     if (!task) {

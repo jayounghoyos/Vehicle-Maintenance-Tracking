@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 import { useAuth } from '../auth/context';
-import { applyAccent } from '../lib/brand';
+import { DEFAULT_ACCENT, applyAccent } from '../lib/brand';
 import { api, type OrganizationProfile } from '../lib/api';
 
 /**
@@ -12,7 +12,11 @@ import { api, type OrganizationProfile } from '../lib/api';
  * costs nothing beyond an effect. Signing out clears it in AuthContext,
  * which is what puts the default back before the next person arrives.
  */
-export function useBrand(): { logoUrl: string | null; name: string | null } {
+export function useBrand(): {
+  logoUrl: string | null;
+  name: string | null;
+  accent: string;
+} {
   const { principal } = useAuth();
   const isMember = principal?.kind === 'user';
 
@@ -27,5 +31,11 @@ export function useBrand(): { logoUrl: string | null; name: string | null } {
     applyAccent(accent);
   }, [accent]);
 
-  return { logoUrl: data?.logoUrl ?? null, name: data?.name ?? null };
+  // charts need the accent as a value, not as a CSS property: var() is
+  // not resolved inside an SVG presentation attribute
+  return {
+    logoUrl: data?.logoUrl ?? null,
+    name: data?.name ?? null,
+    accent: accent ?? DEFAULT_ACCENT,
+  };
 }

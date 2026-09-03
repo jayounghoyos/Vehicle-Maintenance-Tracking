@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import {
   MaintenanceSchedule,
   ServiceEvent,
+  VehiclePhoto,
   Vehicle,
   VehicleModel,
   VehicleStatus,
@@ -28,6 +29,9 @@ const RECENT_EVENT_LIMIT = 5;
  * it, so the fleet table does not download a photo meant for a profile. */
 const PHOTO_THUMBNAIL = 96;
 const PHOTO_PROFILE = 640;
+/* Enough to show a van from every side. A gallery with no ceiling is an
+   object store bill nobody agreed to. */
+const MAX_GALLERY_PHOTOS = 12;
 
 /**
  * Plates are written down by people, so ABC123, abc123 and "ABC 123" are
@@ -54,11 +58,13 @@ export class VehiclesService {
     vehicles: TenantRepository<Vehicle>;
     schedules: TenantRepository<MaintenanceSchedule>;
     events: TenantRepository<ServiceEvent>;
+    gallery: TenantRepository<VehiclePhoto>;
   } {
     return {
       vehicles: this.tenants.for(Vehicle, organizationId),
       schedules: this.tenants.for(MaintenanceSchedule, organizationId),
       events: this.tenants.for(ServiceEvent, organizationId),
+      gallery: this.tenants.for(VehiclePhoto, organizationId),
     };
   }
 
@@ -110,11 +116,16 @@ export class VehiclesService {
     id: number,
     today = new Date(),
   ): Promise<VehicleDetail> {
-    const { schedules, events } = this.scoped(organizationId);
+    const { schedules, events, gallery } = this.scoped(organizationId);
     const row = (await this.list(organizationId, today, PHOTO_PROFILE)).find(
       (one) => one.id === id,
     );
     if (!row) throw new NotFoundException('No such vehicle');
+
+    const pictures = await gallery.find({
+      where: { vehicleId: id },
+      order: { position: 'ASC', id: 'ASC' },
+    });
 
     const mine = await schedules.find({
       where: { vehicleId: id },
@@ -155,7 +166,16 @@ export class VehiclesService {
       })),
     }));
 
-    return { ...row, schedules: scheduleItems, recentEvents };
+    return {
+      ...row,
+      schedules: scheduleItems,
+      recentEvents,
+      photos: pictures.map((photo) => ({
+        id: photo.id,
+        storageKey: photo.storageKey,
+        url: this.photos.url(photo.storageKey, PHOTO_PROFILE) ?? '',
+      })),
+    };
   }
 
   async create(organizationId: number, dto: CreateVehicleDto): Promise<VehicleRow> {
@@ -235,6 +255,100 @@ export class VehiclesService {
     if (previous) await this.photos.remove(previous);
 
     return this.rowFor(organizationId, id);
+  }
+
+  /**
+   * The pictures beyond the main one. Several at a time, because
+   * photographing a van is one job rather than six.
+   */
+  async addPhotos(
+    organizationId: number,
+    id: number,
+    userId: number,
+    files: Buffer[],
+  ): Promise<VehicleDetail> {
+    const { vehicles, gallery } = this.scoped(organizationId);
+    const vehicle = await vehicles.findOne({ where: { id } });
+    if (!vehicle) throw new NotFoundException('No such vehicle');
+
+    const held = await gallery.count({ where: { vehicleId: id } });
+    if (held + files.length > MAX_GALLERY_PHOTOS) {
+      throw new ConflictException(
+        `A vehicle holds ${MAX_GALLERY_PHOTOS} pictures. This one already has ${held}.`,
+      );
+    }
+
+    // every file first, so a failure half way through leaves no rows and
+    // no gallery that half worked. The uploads already done are undone
+    // before the error travels.
+    const uploaded: string[] = [];
+    try {
+      for (const file of files) {
+        uploaded.push(await this.photos.upload(file, organizationId));
+      }
+    } catch (error) {
+      await Promise.all(uploaded.map((key) => this.photos.remove(key)));
+      throw error;
+    }
+
+    await gallery.save(
+      gallery.createMany(
+        uploaded.map((storageKey, index) => ({
+          vehicleId: id,
+          storageKey,
+          uploadedBy: userId,
+          position: held + index,
+        })),
+      ),
+    );
+
+    return this.one(organizationId, id);
+  }
+
+  /** Row first, file second, for the reason setPhoto gives. */
+  async removeGalleryPhoto(
+    organizationId: number,
+    id: number,
+    photoId: number,
+  ): Promise<VehicleDetail> {
+    const { gallery } = this.scoped(organizationId);
+    const photo = await gallery.findOne({ where: { id: photoId, vehicleId: id } });
+    if (!photo) throw new NotFoundException('No such picture');
+
+    await gallery.delete({ id: photoId });
+    await this.photos.remove(photo.storageKey);
+
+    return this.one(organizationId, id);
+  }
+
+  /**
+   * Swaps rather than moves: the main picture takes the promoted one's
+   * place in the gallery, so nothing is lost and no file is touched.
+   */
+  async promotePhoto(
+    organizationId: number,
+    id: number,
+    photoId: number,
+  ): Promise<VehicleDetail> {
+    const { vehicles, gallery } = this.scoped(organizationId);
+    const vehicle = await vehicles.findOne({ where: { id } });
+    if (!vehicle) throw new NotFoundException('No such vehicle');
+
+    const photo = await gallery.findOne({ where: { id: photoId, vehicleId: id } });
+    if (!photo) throw new NotFoundException('No such picture');
+
+    const demoted = vehicle.photoKey;
+    vehicle.photoKey = photo.storageKey;
+    await vehicles.save(vehicle);
+
+    if (demoted) {
+      photo.storageKey = demoted;
+      await gallery.save(photo);
+    } else {
+      await gallery.delete({ id: photoId });
+    }
+
+    return this.one(organizationId, id);
   }
 
   async removePhoto(organizationId: number, id: number): Promise<VehicleRow> {

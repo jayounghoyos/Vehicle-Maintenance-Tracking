@@ -61,9 +61,11 @@ The list of permissions is not the client's to extend. Each one is a guard or a 
 
 ## Pictures
 
-`vehicles.photo_key` and `service_event_photos.storage_key` both hold a key, never the bytes. The files live in an object store, which is Cloudinary on the free plan: Render's disk is wiped on every deploy and every time the free instance wakes up, so anything written there would not survive the afternoon.
+`vehicles.photo_key`, `vehicle_photos.storage_key` and `service_event_photos.storage_key` all hold a key, never the bytes. The files live in an object store, which is Cloudinary on the free plan: Render's disk is wiped on every deploy and every time the free instance wakes up, so anything written there would not survive the afternoon.
 
-One picture per vehicle, added by editing a van that already exists rather than when it is registered. Sizing happens on delivery, so the fleet table and the profile ask the same stored file for different widths.
+Pictures are added by editing a van that already exists rather than when it is registered: typing a plate and choosing a file are different kinds of work. Sizing happens on delivery, so the fleet table and the profile ask the same stored file for different widths.
+
+A vehicle has one main picture and a gallery. The main one stays as a column on `vehicles`, because the fleet list draws a thumbnail on every row and reading it from another table would mean a join for each one. `vehicle_photos` holds the rest, and any of them can be promoted: the swap exchanges the two keys, so the picture being replaced is kept rather than dropped. Twelve per vehicle, checked before anything is uploaded — an unbounded gallery is an object store bill nobody agreed to.
 
 The API runs without the credentials, with upload switched off, so a teammate who has not set them up can still work on everything else.
 
@@ -85,6 +87,8 @@ A role somebody holds cannot be deleted, and the last role granting `manage_team
 
 `is_active` and `deleted_at` are not the same thing. `is_active = false` is a suspension the company comes back from; `deleted_at` is gone for good, with the rows kept so the service history still reads. Either one blocks sign-in.
 
+Nothing in the model holds money. No table has a cost, a price or an invoice, so the reports answer how often and how many, never how much. Adding spend means a column, not a query.
+
 `users.email` is unique across the whole table and a deleted organization keeps its rows, so that address stays taken. Fine while there is one company. Worth revisiting before the second.
 
 ## Signing in
@@ -102,6 +106,6 @@ false, and sign-in is where that is enforced.
 
 ## Reading the diagram
 
-Every line is named with what it does, so the diagram explains itself. An organization `employs` users, `owns` vehicles and `sets_up` roles; a role `grants` permissions and a user `is_assigned` one; a vehicle `is_scheduled_for` maintenance; a user `records` a service event, and a photo `documents` one.
+Every line is named with what it does, so the diagram explains itself. An organization `employs` users, `owns` vehicles and `sets_up` roles; a role `grants` permissions and a user `is_assigned` one; a vehicle `is_scheduled_for` maintenance; a user `records` a service event, and a photo `documents` one or `illustrates` a vehicle.
 
 Source: [`data_model.dbml`](./data_model.dbml), edited at [dbdiagram.io](https://dbdiagram.io/d/6a78f2a8829f06bdc8b425db).

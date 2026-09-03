@@ -35,7 +35,7 @@ const NAV: NavItem[] = [
     ready: true,
     need: 'view_service_log',
   },
-  { to: '/reports', label: 'Reports', icon: BarChart3, ready: false },
+  { to: '/reports', label: 'Reports', icon: BarChart3, ready: true },
   // the mockup's Settings slot, spent on the team: accounts are the only
   // thing there is anything to configure yet
   { to: '/team', label: 'Team', icon: Users, ready: true, need: 'view_team' },
@@ -57,7 +57,7 @@ export function Sidebar({
   return (
     <aside
       data-tour="sidebar"
-      className="flex w-64 shrink-0 flex-col gap-8 border-r border-white/5 bg-sidebar p-5"
+      className="print:hidden flex w-64 shrink-0 flex-col gap-8 border-r border-white/5 bg-sidebar p-5"
     >
       <Logo logoUrl={brand?.logoUrl} name={brand?.name} />
 

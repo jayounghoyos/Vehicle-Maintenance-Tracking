@@ -4,12 +4,14 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { VehicleStatus } from './enums';
 import { Organization } from './organization.entity';
 import { VehicleModel } from './vehicle-model.entity';
+import { VehiclePhoto } from './vehicle-photo.entity';
 
 /**
  * The plate was globally unique. Two client brands could not both own
@@ -65,6 +67,9 @@ export class Vehicle {
    *  itself. Null until somebody edits the vehicle to add one. */
   @Column({ type: 'varchar', name: 'photo_key', nullable: true })
   photoKey: string | null;
+
+  @OneToMany(() => VehiclePhoto, (photo) => photo.vehicle)
+  photos: VehiclePhoto[];
 
   @Column({ type: 'timestamp', name: 'created_at', default: () => 'now()' })
   createdAt: Date;

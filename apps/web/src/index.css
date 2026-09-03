@@ -278,3 +278,18 @@
   outline-offset: 2px;
   border-radius: 0.75rem;
 }
+
+/* Printing is the reporting snapshot the RFP asks for: the browser makes
+   the PDF, so there is no library to carry for it. Tailwind's own print:
+   variant hides the controls; this only has to repaint the page, since a
+   dark background is not what anyone wants out of a printer. */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  main {
+    padding: 0;
+  }
+}

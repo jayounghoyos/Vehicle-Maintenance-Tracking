@@ -76,7 +76,7 @@ describe('ServiceEventsService', () => {
       if (entity === MaintenanceTask) {
         return {
           builder: jest.fn().mockReturnValue({
-            where: jest.fn().mockReturnThis(),
+            andWhere: jest.fn().mockReturnThis(),
             getOne: jest.fn().mockResolvedValue(mockTask),
           }),
           find: jest.fn().mockResolvedValue([mockTask]),
