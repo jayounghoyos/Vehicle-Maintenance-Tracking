@@ -35,7 +35,10 @@ export type ScheduleItem = {
   state: MaintenanceState;
 };
 
-export type ServiceEventPhotoItem = {
+/** One stored picture, whatever it hangs off. The same three fields
+ *  answer for a vehicle gallery and for a service event, and the web
+ *  viewer takes either. */
+export type PhotoItem = {
   id: number;
   storageKey: string;
   url: string;
@@ -49,15 +52,16 @@ export type ServiceEventItem = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
-  photos: ServiceEventPhotoItem[];
+  photos: PhotoItem[];
 };
 
 /** Everything the profile panel shows about one vehicle. */
 export type VehicleDetail = VehicleRow & {
   schedules: ScheduleItem[];
   recentEvents: ServiceEventItem[];
-  /** The pictures beyond the main one, which stays on photoUrl. */
-  photos: ServiceEventPhotoItem[];
+  /** The gallery: the pictures beyond the main one, which stays on
+   *  photoUrl. */
+  photos: PhotoItem[];
 };
 
 export type ImportResult = {

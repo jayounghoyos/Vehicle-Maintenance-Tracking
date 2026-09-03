@@ -278,14 +278,29 @@ export class VehiclesService {
       );
     }
 
-    let position = held;
-    for (const file of files) {
-      const storageKey = await this.photos.upload(file, organizationId);
-      await gallery.save(
-        gallery.create({ vehicleId: id, storageKey, uploadedBy: userId, position }),
-      );
-      position += 1;
+    // every file first, so a failure half way through leaves no rows and
+    // no gallery that half worked. The uploads already done are undone
+    // before the error travels.
+    const uploaded: string[] = [];
+    try {
+      for (const file of files) {
+        uploaded.push(await this.photos.upload(file, organizationId));
+      }
+    } catch (error) {
+      await Promise.all(uploaded.map((key) => this.photos.remove(key)));
+      throw error;
     }
+
+    await gallery.save(
+      gallery.createMany(
+        uploaded.map((storageKey, index) => ({
+          vehicleId: id,
+          storageKey,
+          uploadedBy: userId,
+          position: held + index,
+        })),
+      ),
+    );
 
     return this.one(organizationId, id);
   }

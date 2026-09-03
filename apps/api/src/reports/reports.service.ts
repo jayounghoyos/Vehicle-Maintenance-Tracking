@@ -33,7 +33,6 @@ export class ReportsService {
     today = new Date(),
   ): Promise<ReportsResponse> {
     const from = monthStart(today, months - 1);
-    const events = this.tenants.for(ServiceEvent, organizationId);
 
     // grouped in the database rather than in memory: the dashboard reads
     // every row to count them, and a report asks more questions than it
@@ -53,7 +52,7 @@ export class ReportsService {
       .for(MaintenanceSchedule, organizationId)
       .find({ relations: { task: true } });
 
-    const totalEvents = await events.count();
+    const totalEvents = perMonth.reduce((sum, row) => sum + Number(row.count), 0);
 
     const metrics: Record<MetricId, ReportPoint[]> = {
       servicesPerMonth: fillMonths(perMonth, today, months),

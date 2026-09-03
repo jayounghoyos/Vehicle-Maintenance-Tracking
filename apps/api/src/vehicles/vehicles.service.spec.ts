@@ -38,8 +38,10 @@ describe('VehiclesService gallery', () => {
         id: gallery.length + 1,
         ...data,
       })),
-      save: jest.fn((photo: (typeof gallery)[number]) => {
-        if (!gallery.includes(photo)) gallery.push(photo);
+      save: jest.fn((photo: (typeof gallery)[number] | (typeof gallery)[number][]) => {
+        for (const one of Array.isArray(photo) ? photo : [photo]) {
+          if (!gallery.includes(one)) gallery.push(one);
+        }
         return Promise.resolve(photo);
       }),
       delete: jest.fn(({ id }: { id: number }) => {
@@ -106,6 +108,25 @@ describe('VehiclesService gallery', () => {
       service.addPhotos(ORG, VEHICLE_ID, 1, [Buffer.from('x')]),
     ).rejects.toBeInstanceOf(ConflictException);
     expect(photos.upload).not.toHaveBeenCalled();
+  });
+
+  it('undoes what it uploaded when a later file fails', async () => {
+    photos.upload
+      .mockResolvedValueOnce('first')
+      .mockResolvedValueOnce('second')
+      .mockRejectedValueOnce(new Error('object store said no'));
+
+    await expect(
+      service.addPhotos(ORG, VEHICLE_ID, 1, [
+        Buffer.from('a'),
+        Buffer.from('b'),
+        Buffer.from('c'),
+      ]),
+    ).rejects.toThrow('object store said no');
+
+    expect(gallery).toHaveLength(0);
+    expect(photos.remove).toHaveBeenCalledWith('first');
+    expect(photos.remove).toHaveBeenCalledWith('second');
   });
 
   it('promoting swaps, so the old main picture is kept', async () => {
