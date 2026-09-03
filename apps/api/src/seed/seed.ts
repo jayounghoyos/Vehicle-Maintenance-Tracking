@@ -30,6 +30,41 @@ function isoDaysFromToday(days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * A year of history behind the handful of recent events, so the report
+ * charts have a shape to draw rather than one bar.
+ *
+ * Deterministic on purpose: a seed built on Math.random gives a
+ * different demo every run and a chart nobody can compare with the one
+ * they saw yesterday. The dates are still relative to the day it runs,
+ * like everything else here.
+ */
+function backfill(
+  org: number,
+  vehicleIds: number[],
+  taskIds: number[],
+  recorderIds: number[],
+): Record<string, unknown>[] {
+  const events: Record<string, unknown>[] = [];
+  // one every nine days, walked backwards from a month ago
+  for (let i = 0; i < 40; i += 1) {
+    const day = -30 - i * 9;
+    events.push({
+      organizationId: org,
+      vehicleId: vehicleIds[i % vehicleIds.length],
+      scheduleId: null,
+      taskId: taskIds[i % taskIds.length],
+      recordedBy: recorderIds[i % recorderIds.length],
+      // every fifth is a breakdown, which is roughly what a fleet sees
+      type: i % 5 === 0 ? ServiceType.CORRECTIVE : ServiceType.PREVENTIVE,
+      performedAt: isoDaysFromToday(day),
+      odometerKm: 40_000 + i * 1_500,
+      notes: null,
+    });
+  }
+  return events;
+}
+
 // Development credentials, printed on the way out so they are never a
 // secret anybody has to guess. Fine for a local database full of made-up
 // vehicles; nothing here is a real account.
@@ -277,6 +312,12 @@ async function seed(): Promise<void> {
       odometerKm: 187_320,
       notes: 'Rotated, front tires worn unevenly',
     },
+    ...backfill(
+      org.id,
+      vehicles.map((vehicle) => vehicle.id),
+      tasks.map((task) => task.id),
+      [carlos.id, ana.id],
+    ),
   ]);
 
   console.log(
