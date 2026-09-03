@@ -11,6 +11,7 @@ import { databaseOptions } from './database';
 import { OrganizationModule } from './organization/organization.module';
 import { PhotosModule } from './photos/photos.module';
 import { RolesModule } from './roles/roles.module';
+import { SchedulesModule } from './schedules/schedules.module';
 import { ServiceEventsModule } from './service-events/service-events.module';
 import { TeamModule } from './team/team.module';
 import { TenantModule } from './tenant/tenant.module';
@@ -34,6 +35,7 @@ import { HealthModule } from './health/health.module';
     DashboardModule,
     VehiclesModule,
     ServiceEventsModule,
+    SchedulesModule,
     TeamModule,
     RolesModule,
     OrganizationModule,
