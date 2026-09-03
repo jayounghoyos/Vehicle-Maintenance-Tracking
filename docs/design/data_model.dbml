@@ -208,6 +208,26 @@ Table service_event_photos {
   Note: 'Metadata only. The file itself lives in the object store and storage_key points at it.'
 }
 
+Table vehicle_photos {
+  id integer [primary key]
+  organization_id integer [not null]
+  vehicle_id integer [not null]
+  storage_key varchar [not null, unique]
+  position integer [not null, default: 0]
+  uploaded_by integer [not null]
+  created_at timestamp [default: `now()`]
+
+  Indexes { vehicle_id }
+  Note: '''
+    The rest of the van. The main picture stays on vehicles.photo_key so
+    the fleet list can draw a thumbnail without a join, and these are
+    everything else: the sides, the inside of the box, the damage.
+
+    position, which service_event_photos has no use for: a gallery has an
+    order and whoever took the photos will want to decide it.
+  '''
+}
+
 // Every relationship is named, so the diagram says what the line means
 // and the label lives in the source instead of being drawn by hand.
 
@@ -218,6 +238,7 @@ Ref defines:   maintenance_tasks.organization_id > organizations.id
 Ref plans:     maintenance_schedules.organization_id > organizations.id
 Ref logs:      service_events.organization_id > organizations.id
 Ref stores:    service_event_photos.organization_id > organizations.id
+Ref keeps:     vehicle_photos.organization_id > organizations.id
 
 Ref grants:          role_permissions.role_id > roles.id
 Ref is_assigned:     users.role_id > roles.id
@@ -231,3 +252,5 @@ Ref performs:        service_events.task_id > maintenance_tasks.id
 Ref records:         service_events.recorded_by > users.id
 Ref documents:       service_event_photos.service_event_id > service_events.id
 Ref uploads:         service_event_photos.uploaded_by > users.id
+Ref illustrates:     vehicle_photos.vehicle_id > vehicles.id
+Ref contributes:     vehicle_photos.uploaded_by > users.id
