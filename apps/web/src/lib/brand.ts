@@ -52,21 +52,25 @@ export function isFaint(accent: string): boolean {
   return contrast(accent, INK_ON_LIGHT) < MIN_ACCENT_CONTRAST;
 }
 
+/** The square and wrench in public/favicon.svg, redrawn so the tab can
+ *  take the client's colour. One drawing in two places: change both. */
+const mark = (accent: string) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="${accent}"/><g transform="translate(5 5) scale(.9166667)" fill="none" stroke="${readableOn(accent)}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></g></svg>`;
+
 /**
- * Repaints the interface by moving two custom properties.
+ * Repaints the interface by moving two custom properties, and the tab
+ * with them.
  *
  * Everything accented reads --color-lime through Tailwind, so one
  * assignment reaches every button, the active nav item, the focus rings
- * and the guided tour. Null removes the override and the stylesheet's
- * own value takes back over.
+ * and the guided tour. Null falls back to the brand manual.
  */
 export function applyAccent(accent: string | null): void {
+  const chosen = accent && isValidAccent(accent) ? accent : DEFAULT_ACCENT;
   const root = document.documentElement.style;
-  if (!accent || !isValidAccent(accent)) {
-    root.removeProperty('--color-lime');
-    root.removeProperty('--color-on-accent');
-    return;
-  }
-  root.setProperty('--color-lime', accent);
-  root.setProperty('--color-on-accent', readableOn(accent));
+  root.setProperty('--color-lime', chosen);
+  root.setProperty('--color-on-accent', readableOn(chosen));
+
+  const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (icon) icon.href = `data:image/svg+xml,${encodeURIComponent(mark(chosen))}`;
 }
