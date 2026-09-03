@@ -11,6 +11,7 @@ import { api } from '../lib/api';
 import { downloadCsv, toCsv } from '../lib/csv';
 import { ChartPicker } from '../reports/ChartPicker';
 import { ReportChart } from '../reports/ReportChart';
+import { ReportSummary } from '../reports/ReportSummary';
 import {
   METRICS,
   chartFor,
@@ -20,13 +21,10 @@ import {
 } from '../reports/metrics';
 
 const RANGES = [3, 6, 12];
-/* The four the fleet is judged by. The fifth is the reader's to choose. */
-const HEADLINE: MetricId[] = [
-  'fleetByState',
-  'servicesPerMonth',
-  'servicesByType',
-  'servicesByTask',
-];
+/* The year of work, which is the thing a maintenance log is really
+   about. The two below answer what and how much. */
+const HERO: MetricId = 'servicesPerMonth';
+const SUPPORTING: MetricId[] = ['fleetByState', 'servicesByTask'];
 const REMEMBERED = 'mts.report';
 
 export default function Reports() {
@@ -110,15 +108,33 @@ export default function Reports() {
 
         {data && (
           <>
+            <ReportSummary data={data} />
+
+            <Panel
+              title={METRICS[HERO].label}
+              subtitle="Every service the workshop recorded, month by month"
+            >
+              <div className="px-2 pb-4">
+                <ReportChart
+                  points={data.metrics[HERO]}
+                  type="area"
+                  metric={METRICS[HERO]}
+                  accent={accent}
+                  height={260}
+                />
+              </div>
+            </Panel>
+
             <div className="grid gap-5 xl:grid-cols-2">
-              {HEADLINE.map((id) => (
+              {SUPPORTING.map((id) => (
                 <Panel key={id} title={METRICS[id].label}>
-                  <div className="px-2 pb-4">
+                  <div className="px-5 pb-5">
                     <ReportChart
                       points={data.metrics[id]}
                       type={METRICS[id].charts[0]}
                       metric={METRICS[id]}
                       accent={accent}
+                      height={220}
                     />
                   </div>
                 </Panel>
@@ -145,7 +161,7 @@ export default function Reports() {
                   type={choice.chart}
                   metric={METRICS[choice.metric]}
                   accent={accent}
-                  height={320}
+                  height={280}
                 />
               </div>
             </Panel>

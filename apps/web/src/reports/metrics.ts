@@ -7,7 +7,16 @@
  * so asking for an odometer reading as a time series is not a mistake to
  * catch — it is a choice the interface never presents.
  */
-export const CHART_TYPES = ['bar', 'line', 'area', 'donut'] as const;
+export const CHART_TYPES = [
+  'bar',
+  'row',
+  'line',
+  'area',
+  'donut',
+  'radial',
+  'radar',
+  'treemap',
+] as const;
 export type ChartType = (typeof CHART_TYPES)[number];
 
 export type ReportPoint = { key: string; label: string; value: number };
@@ -43,63 +52,63 @@ export const METRICS: Record<MetricId, MetricDefinition> = {
   servicesPerMonth: {
     id: 'servicesPerMonth',
     label: 'Services per month',
-    charts: ['line', 'area', 'bar'],
+    charts: ['line', 'area', 'bar', 'radar'],
     tone: 'neutral',
     unit: 'services',
   },
   servicesByType: {
     id: 'servicesByType',
     label: 'Planned vs breakdown',
-    charts: ['donut', 'bar'],
+    charts: ['donut', 'bar', 'row', 'radial'],
     tone: 'neutral',
     unit: 'services',
   },
   servicesByTask: {
     id: 'servicesByTask',
     label: 'Services by task',
-    charts: ['bar', 'donut'],
+    charts: ['bar', 'row', 'donut', 'radial', 'radar', 'treemap'],
     tone: 'neutral',
     unit: 'services',
   },
   servicesByVehicle: {
     id: 'servicesByVehicle',
     label: 'Services by vehicle',
-    charts: ['bar'],
+    charts: ['bar', 'row', 'radial', 'treemap'],
     tone: 'neutral',
     unit: 'services',
   },
   servicesByMechanic: {
     id: 'servicesByMechanic',
     label: 'Services by who recorded them',
-    charts: ['bar'],
+    charts: ['row', 'bar', 'radial', 'treemap'],
     tone: 'neutral',
     unit: 'services',
   },
   fleetByState: {
     id: 'fleetByState',
     label: 'Fleet by maintenance state',
-    charts: ['donut', 'bar'],
+    charts: ['donut', 'bar', 'row', 'radial'],
     tone: 'state',
     unit: 'vehicles',
   },
   fleetByStatus: {
     id: 'fleetByStatus',
     label: 'Fleet by status',
-    charts: ['donut', 'bar'],
+    charts: ['donut', 'bar', 'row', 'radial'],
     tone: 'neutral',
     unit: 'vehicles',
   },
   fleetByMake: {
     id: 'fleetByMake',
     label: 'Fleet by make',
-    charts: ['bar', 'donut'],
+    charts: ['bar', 'row', 'donut', 'radial', 'treemap'],
     tone: 'neutral',
     unit: 'vehicles',
   },
   odometerByVehicle: {
     id: 'odometerByVehicle',
     label: 'Odometer by vehicle',
-    charts: ['bar'],
+    charts: ['row', 'bar', 'treemap', 'radial'],
     tone: 'neutral',
     unit: 'km',
   },

@@ -1,4 +1,14 @@
-import { AreaChart, BarChart3, LineChart, PieChart, type LucideIcon } from 'lucide-react';
+import {
+  AreaChart,
+  BarChart3,
+  BarChartHorizontal,
+  Disc3,
+  LayoutDashboard,
+  Radar,
+  LineChart,
+  PieChart,
+  type LucideIcon,
+} from 'lucide-react';
 
 import {
   CHART_TYPES,
@@ -10,16 +20,24 @@ import {
 
 const ICON: Record<ChartType, LucideIcon> = {
   bar: BarChart3,
+  row: BarChartHorizontal,
   line: LineChart,
   area: AreaChart,
   donut: PieChart,
+  radial: Disc3,
+  radar: Radar,
+  treemap: LayoutDashboard,
 };
 
 const LABEL: Record<ChartType, string> = {
-  bar: 'Bars',
+  bar: 'Columns',
+  row: 'Bars',
   line: 'Line',
   area: 'Area',
   donut: 'Donut',
+  radial: 'Rings',
+  radar: 'Radar',
+  treemap: 'Blocks',
 };
 
 type Props = {
