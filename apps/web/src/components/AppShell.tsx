@@ -52,15 +52,19 @@ export function PrimaryAction({
   icon: Icon,
   children,
   onClick,
+  ...rest
 }: {
   icon: LucideIcon;
   children: React.ReactNode;
   onClick?: () => void;
+  /** so a guided tour can point at this button */
+  'data-tour'?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      {...rest}
       className="flex items-center gap-2 rounded-xl bg-lime px-4 py-2.5 text-body font-semibold text-on-accent transition-opacity hover:opacity-90"
     >
       <Icon className="size-4" strokeWidth={2.5} />

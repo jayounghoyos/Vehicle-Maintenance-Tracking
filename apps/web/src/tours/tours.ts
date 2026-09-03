@@ -306,6 +306,99 @@ export const organizationTour = ({ canManage }: Audience): DriveStep[] => [
   ...workspace,
 ];
 
+export const schedulesTour = ({ canManage }: Audience): DriveStep[] => [
+  {
+    popover: {
+      title: 'Why a schedule exists',
+      description:
+        'A rule that repeats: every so many days, every so many kilometres, or both. Once it exists here, the system tells you when a vehicle is due instead of somebody remembering.',
+    },
+  },
+  {
+    popover: {
+      title: 'What moves the date',
+      description:
+        'Nothing here is edited by hand day to day. Recording a job on the service log pushes that vehicle’s next due date forward on its own.',
+    },
+  },
+  ...(canManage ? [] : [readOnly('adding, editing or deleting schedules')]),
+  {
+    element: anchor('schedules-search'),
+    popover: {
+      title: 'Finding one rule',
+      description:
+        'Type part of a plate, a vehicle or a task. The list below shrinks as you type. Clear the box to see everything again.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('schedules-vehicle-filter'),
+    popover: {
+      title: 'Looking at one vehicle',
+      description:
+        'Narrows the list to a single vehicle’s rules. Choose All vehicles to see the whole fleet again.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('schedules-filter'),
+    popover: {
+      title: 'Showing only some of them',
+      description:
+        'Overdue means the day for a job has passed and nobody recorded it. Due soon means within two weeks. The number is how many you have. Click one to see only those.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('schedules-headings'),
+    popover: {
+      title: 'Changing the order',
+      description:
+        'Click a word to reorder the list by it. Click again to flip it, a third time to undo. Click a second word to sort by both at once.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  {
+    element: anchor('schedules-last-done'),
+    popover: {
+      title: 'When it was last done',
+      description:
+        'The date, or the distance travelled, the job was last recorded at. Blank means nobody has recorded that job for this vehicle yet.',
+      side: 'bottom',
+      align: 'start',
+    },
+  },
+  ...(canManage
+    ? [
+        {
+          element: anchor('schedules-add'),
+          popover: {
+            title: 'Adding a rule',
+            description:
+              'Pick the vehicle and the task, then say how often it repeats: a number of days, a number of kilometres, or both.',
+            side: 'bottom' as const,
+            align: 'end' as const,
+          },
+        },
+        {
+          element: anchor('schedules-row-actions'),
+          popover: {
+            title: 'Changing or removing one',
+            description:
+              'Correct how often a rule repeats here. A rule with no work recorded against it yet can also be removed.',
+            side: 'left' as const,
+            align: 'start' as const,
+          },
+        },
+      ]
+    : []),
+  ...workspace,
+];
+
 type Tour = {
   path: string;
   /** names its own screen rather than saying "this page" everywhere: a
@@ -337,6 +430,12 @@ export const TOURS: Tour[] = [
     label: 'How the team list works',
     needs: 'manage_team',
     build: teamTour,
+  },
+  {
+    path: '/schedules',
+    label: 'How schedules work',
+    needs: 'manage_schedules',
+    build: schedulesTour,
   },
   { path: '/', label: 'How the dashboard works', build: dashboardTour },
 ];

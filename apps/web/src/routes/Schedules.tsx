@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock, Gauge, Info, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
@@ -88,7 +88,11 @@ export default function Schedules() {
   const shown = schedules ?? [];
 
   const action = canManage ? (
-    <PrimaryAction icon={Plus} onClick={() => setModal({ kind: 'add' })}>
+    <PrimaryAction
+      icon={Plus}
+      onClick={() => setModal({ kind: 'add' })}
+      data-tour="schedules-add"
+    >
       Add schedule
     </PrimaryAction>
   ) : undefined;
@@ -101,31 +105,6 @@ export default function Schedules() {
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
       <div className="space-y-5">
-        <section className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-white/5 bg-panel p-5">
-          <div className="flex items-start gap-3">
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-lime/15 text-lime">
-              <Info className="size-4" strokeWidth={2} />
-            </span>
-            <div>
-              <h2 className="font-semibold text-ink">How a schedule works</h2>
-              <p className="mt-1 text-body text-ink-muted">
-                A schedule repeats either every N days or every N kilometres. Logging a
-                service event moves the next due date forward.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="flex items-center gap-2 rounded-xl border border-white/10 bg-page/60 px-3.5 py-2 text-body text-ink-muted whitespace-nowrap">
-              <Clock className="size-4" strokeWidth={1.75} />
-              Time based · every N days
-            </span>
-            <span className="flex items-center gap-2 rounded-xl border border-white/10 bg-page/60 px-3.5 py-2 text-body text-ink-muted whitespace-nowrap">
-              <Gauge className="size-4" strokeWidth={1.75} />
-              Distance based · every N km
-            </span>
-          </div>
-        </section>
-
         <Panel
           title={
             <span className="flex items-center gap-2">
@@ -137,6 +116,7 @@ export default function Schedules() {
           }
           action={
             <select
+              data-tour="schedules-vehicle-filter"
               value={vehicleId ?? ''}
               onChange={(event) =>
                 setVehicleId(

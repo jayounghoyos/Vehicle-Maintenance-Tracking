@@ -145,7 +145,10 @@ export function ScheduleTable({
     <>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/5 px-5 py-3">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
-          <div className="relative min-w-0 flex-1 sm:max-w-xs">
+          <div
+            data-tour="schedules-search"
+            className="relative min-w-0 flex-1 sm:max-w-xs"
+          >
             <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-muted" />
             <input
               type="search"
@@ -156,7 +159,10 @@ export function ScheduleTable({
             />
           </div>
 
-          <div className="flex flex-wrap gap-1 rounded-xl border border-white/5 bg-page/60 p-1">
+          <div
+            data-tour="schedules-filter"
+            className="flex flex-wrap gap-1 rounded-xl border border-white/5 bg-page/60 p-1"
+          >
             {filters.map((filter) => (
               <button
                 key={filter.value}
@@ -181,7 +187,7 @@ export function ScheduleTable({
       <div className="overflow-x-auto border-t border-white/5">
         <table className="w-full min-w-[920px] text-left">
           <thead>
-            <tr className="border-b border-white/5">
+            <tr data-tour="schedules-headings" className="border-b border-white/5">
               {COLUMNS.map(({ key, label }) => (
                 <SortHeader
                   key={key}
@@ -197,7 +203,10 @@ export function ScheduleTable({
               <th className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase">
                 Interval
               </th>
-              <th className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase">
+              <th
+                data-tour="schedules-last-done"
+                className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase"
+              >
                 Last done
               </th>
               <th className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase">
@@ -256,7 +265,14 @@ export function ScheduleTable({
                   </td>
                   <td className="px-5 py-3.5">
                     {canManage && (
-                      <div className="flex justify-end gap-1">
+                      <div
+                        data-tour={
+                          schedule.id === shown[0]?.id
+                            ? 'schedules-row-actions'
+                            : undefined
+                        }
+                        className="flex justify-end gap-1"
+                      >
                         <button
                           type="button"
                           disabled={busy}
