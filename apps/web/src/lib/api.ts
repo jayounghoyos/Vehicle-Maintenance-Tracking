@@ -142,6 +142,16 @@ export type ScheduleItem = {
   nextDueDate: string | null;
   nextDueKm: number | null;
   state: MaintenanceState;
+  /** absent from a vehicle's own embedded list, where it is already
+   *  implied; present on the fleet-wide /schedules list, which is not
+   *  scoped to one vehicle */
+  vehicleId?: number;
+  plate?: string;
+  make?: string;
+  model?: string;
+  /** absent from the embedded list; needed on the fleet-wide one so the
+   *  edit form can preselect the task */
+  taskId?: number;
 };
 
 export type PhotoItem = {
@@ -255,3 +265,13 @@ export const fetchTasks = () => api.get<TaskItem[]>('/service-events/tasks');
 
 export const recordServiceEvent = (payload: RecordServicePayload) =>
   api.post<ServiceLogItem>('/service-events', payload);
+
+export const fetchSchedules = (vehicleId?: number) =>
+  api.get<ScheduleItem[]>(
+    vehicleId === undefined ? '/schedules' : `/schedules?vehicleId=${vehicleId}`,
+  );
+
+export const fetchScheduleTasks = () => api.get<TaskItem[]>('/schedules/tasks');
+
+export const createScheduleTask = (name: string) =>
+  api.post<TaskItem>('/schedules/tasks', { name });
