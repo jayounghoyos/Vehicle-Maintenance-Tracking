@@ -44,12 +44,12 @@ export class ScheduleQueryDto {
 }
 
 export class CreateScheduleDto {
-  @ApiProperty({ example: 1, description: 'The vehicle this plan applies to' })
+  @ApiProperty({ example: 1, description: 'The vehicle this schedule applies to' })
   @Type(() => Number)
   @IsInt()
   vehicleId: number;
 
-  @ApiProperty({ example: 2, description: 'The maintenance task this plan repeats' })
+  @ApiProperty({ example: 2, description: 'The maintenance task this schedule repeats' })
   @Type(() => Number)
   @IsInt()
   taskId: number;

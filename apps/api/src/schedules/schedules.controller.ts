@@ -36,14 +36,14 @@ export class SchedulesController {
   @Get()
   @Requires(Permission.VIEW_VEHICLES)
   @ApiOperation({
-    summary: 'The organization’s maintenance plan, optionally for one vehicle',
+    summary: 'The organization’s maintenance schedule, optionally for one vehicle',
   })
   list(
     @CurrentUser() principal: Principal,
     @Query() query: ScheduleQueryDto,
   ): Promise<ScheduleRow[]> {
     if (principal.kind !== 'user') {
-      throw new ForbiddenException('Admins have no fleet maintenance plan');
+      throw new ForbiddenException('Admins have no fleet maintenance schedule');
     }
     return this.schedules.list(principal.organizationId, query.vehicleId);
   }
@@ -73,27 +73,27 @@ export class SchedulesController {
 
   @Post()
   @Requires(Permission.MANAGE_SCHEDULES)
-  @ApiOperation({ summary: 'Add a maintenance plan item to a vehicle' })
+  @ApiOperation({ summary: 'Add a schedule item to a vehicle' })
   create(
     @CurrentUser() principal: Principal,
     @Body() dto: CreateScheduleDto,
   ): Promise<ScheduleRow> {
     if (principal.kind !== 'user') {
-      throw new ForbiddenException('Admins cannot manage fleet maintenance plans');
+      throw new ForbiddenException('Admins cannot manage fleet maintenance schedules');
     }
     return this.schedules.create(principal.organizationId, dto);
   }
 
   @Patch(':id')
   @Requires(Permission.MANAGE_SCHEDULES)
-  @ApiOperation({ summary: 'Correct a maintenance plan item' })
+  @ApiOperation({ summary: 'Correct a schedule item' })
   update(
     @CurrentUser() principal: Principal,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateScheduleDto,
   ): Promise<ScheduleRow> {
     if (principal.kind !== 'user') {
-      throw new ForbiddenException('Admins cannot manage fleet maintenance plans');
+      throw new ForbiddenException('Admins cannot manage fleet maintenance schedules');
     }
     return this.schedules.update(principal.organizationId, id, dto);
   }
@@ -102,14 +102,14 @@ export class SchedulesController {
   @Requires(Permission.MANAGE_SCHEDULES)
   @HttpCode(204)
   @ApiOperation({
-    summary: 'Remove a maintenance plan item nothing has been logged against',
+    summary: 'Remove a schedule item nothing has been logged against',
   })
   remove(
     @CurrentUser() principal: Principal,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {
     if (principal.kind !== 'user') {
-      throw new ForbiddenException('Admins cannot manage fleet maintenance plans');
+      throw new ForbiddenException('Admins cannot manage fleet maintenance schedules');
     }
     return this.schedules.remove(principal.organizationId, id);
   }
