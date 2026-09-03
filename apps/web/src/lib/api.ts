@@ -48,6 +48,12 @@ export const api = {
     body.append(field, file);
     return request<T>(path, { method: 'POST', body });
   },
+  /** One request for the lot: photographing a van is one job. */
+  uploadMany: <T>(path: string, field: string, files: File[]) => {
+    const body = new FormData();
+    for (const file of files) body.append(field, file);
+    return request<T>(path, { method: 'POST', body });
+  },
 };
 
 export type AuthResponse = { accessToken: string; principal: Principal };
@@ -158,6 +164,8 @@ export type ServiceEventItem = {
 export type VehicleDetail = VehicleRow & {
   schedules: ScheduleItem[];
   recentEvents: ServiceEventItem[];
+  /** The gallery. The main picture stays on photoUrl. */
+  photos: PhotoItem[];
 };
 
 export type VehicleImportResult = {
