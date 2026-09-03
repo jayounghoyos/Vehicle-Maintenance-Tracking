@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Download } from 'lucide-react';
 import { useState } from 'react';
 
@@ -35,11 +35,15 @@ export default function Reports() {
   const [months, setMonths] = useState(12);
   const [choice, setChoice] = useState(readChoice);
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isFetching, isError } = useQuery({
     queryKey: ['reports', months],
     queryFn: () => api.get<ReportsResponse>(`/reports?months=${months}`),
     // every chart arrives in one answer, so switching one costs nothing
     staleTime: 5 * 60_000,
+    // the range is the same report over a different window, so the old
+    // one stays on screen and the charts move to the new numbers rather
+    // than being torn down and grown again from zero
+    placeholderData: keepPreviousData,
   });
 
   const pick = (next: Partial<typeof choice>) => {
@@ -107,7 +111,9 @@ export default function Reports() {
         )}
 
         {data && (
-          <>
+          <div
+            className={`space-y-5 transition-opacity duration-200 ${isFetching ? 'opacity-60' : ''}`}
+          >
             <ReportSummary data={data} />
 
             <Panel
@@ -165,7 +171,7 @@ export default function Reports() {
                 />
               </div>
             </Panel>
-          </>
+          </div>
         )}
       </div>
     </AppShell>
