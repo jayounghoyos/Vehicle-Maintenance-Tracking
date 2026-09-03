@@ -87,21 +87,10 @@ export default function Schedules() {
   const me = principal?.kind === 'user' ? principal : null;
   const shown = schedules ?? [];
 
-  const action = canManage ? (
-    <PrimaryAction
-      icon={Plus}
-      onClick={() => setModal({ kind: 'add' })}
-      data-tour="schedules-add"
-    >
-      Add schedule
-    </PrimaryAction>
-  ) : undefined;
-
   return (
     <AppShell
       title="Maintenance schedules"
       subtitle="The rules that decide when a vehicle is due"
-      action={action}
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
       <div className="space-y-5">
@@ -115,25 +104,37 @@ export default function Schedules() {
             </span>
           }
           action={
-            <select
-              data-tour="schedules-vehicle-filter"
-              value={vehicleId ?? ''}
-              onChange={(event) =>
-                setVehicleId(
-                  event.target.value === '' ? undefined : Number(event.target.value),
-                )
-              }
-              className="rounded-xl border border-white/10 bg-page/60 px-3.5 py-2 text-body focus:border-lime/40 focus:outline-none"
-            >
-              <option value="" className="bg-panel">
-                All vehicles
-              </option>
-              {(vehicles ?? []).map((vehicle) => (
-                <option key={vehicle.id} value={vehicle.id} className="bg-panel">
-                  {vehicle.plate}
+            <div className="flex items-center gap-2">
+              <select
+                data-tour="schedules-vehicle-filter"
+                value={vehicleId ?? ''}
+                onChange={(event) =>
+                  setVehicleId(
+                    event.target.value === '' ? undefined : Number(event.target.value),
+                  )
+                }
+                className="rounded-xl border border-white/10 bg-page/60 px-3.5 py-2 text-body focus:border-lime/40 focus:outline-none"
+              >
+                <option value="" className="bg-panel">
+                  All vehicles
                 </option>
-              ))}
-            </select>
+                {(vehicles ?? []).map((vehicle) => (
+                  <option key={vehicle.id} value={vehicle.id} className="bg-panel">
+                    {vehicle.plate}
+                  </option>
+                ))}
+              </select>
+              {canManage && (
+                <PrimaryAction
+                  icon={Plus}
+                  size="panel"
+                  data-tour="schedules-add"
+                  onClick={() => setModal({ kind: 'add' })}
+                >
+                  Add schedule
+                </PrimaryAction>
+              )}
+            </div>
           }
         >
           {isPending ? (
