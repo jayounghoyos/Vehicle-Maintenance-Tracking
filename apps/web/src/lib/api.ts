@@ -146,6 +146,10 @@ export type ScheduleItem = {
   /** absent from the embedded list; needed on the fleet-wide one so the
    *  edit form can preselect the task */
   taskId?: number;
+  /** the most recent logged service against this schedule, if any —
+   *  absent from the embedded list, present on the fleet-wide one */
+  lastServiceDate?: string | null;
+  lastServiceOdometerKm?: number | null;
 };
 
 export type PhotoItem = {

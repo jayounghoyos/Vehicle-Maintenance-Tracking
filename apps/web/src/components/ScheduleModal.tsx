@@ -20,7 +20,7 @@ export type SchedulePatch = {
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  /** absent when adding a new plan item */
+  /** absent when adding a new schedule */
   schedule?: ScheduleItem;
   pending: boolean;
   onSubmit: (patch: SchedulePatch) => void;
@@ -135,7 +135,7 @@ function ScheduleDialog({
             </span>
             <div>
               <h2 className="text-section font-semibold">
-                {schedule ? 'Edit maintenance plan' : 'Add maintenance plan'}
+                {schedule ? 'Edit schedule' : 'Add schedule'}
               </h2>
               <p className="text-body text-ink-muted">
                 A task that repeats, every N days, every N kilometres, or both
@@ -184,7 +184,7 @@ function ScheduleDialog({
             </select>
             {schedule && (
               <p className="mt-1 text-[12px] text-ink-muted">
-                Delete and re-add the plan to move it to a different vehicle.
+                Delete and re-add the schedule to move it to a different vehicle.
               </p>
             )}
           </div>
@@ -289,7 +289,7 @@ function ScheduleDialog({
               className="flex items-center gap-2 rounded-xl bg-lime px-5 py-2.5 text-body font-semibold text-page transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {pending && <Loader2 className="size-4 animate-spin" />}
-              {pending ? 'Saving…' : schedule ? 'Save changes' : 'Add plan'}
+              {pending ? 'Saving…' : schedule ? 'Save changes' : 'Add schedule'}
             </button>
           </div>
         </form>
