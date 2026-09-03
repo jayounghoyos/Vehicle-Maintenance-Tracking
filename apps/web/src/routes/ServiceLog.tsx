@@ -31,7 +31,11 @@ export default function ServiceLog() {
   // the operations manager reads the log and decides on it; recording
   // the work belongs to whoever did it
   const action = can(principal, 'log_service') ? (
-    <PrimaryAction icon={Plus} onClick={() => setIsLogModalOpen(true)}>
+    <PrimaryAction
+      icon={Plus}
+      onClick={() => setIsLogModalOpen(true)}
+      data-tour="service-log-add"
+    >
       Log service
     </PrimaryAction>
   ) : undefined;
@@ -54,6 +58,7 @@ export default function ServiceLog() {
         }
         action={
           <select
+            data-tour="service-log-vehicle-filter"
             value={vehicleId ?? ''}
             onChange={(event) =>
               setVehicleId(
