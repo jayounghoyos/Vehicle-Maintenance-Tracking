@@ -12,6 +12,7 @@ import { OrganizationModule } from './organization/organization.module';
 import { ReportsModule } from './reports/reports.module';
 import { PhotosModule } from './photos/photos.module';
 import { RolesModule } from './roles/roles.module';
+import { SchedulesModule } from './schedules/schedules.module';
 import { ServiceEventsModule } from './service-events/service-events.module';
 import { TeamModule } from './team/team.module';
 import { TenantModule } from './tenant/tenant.module';
@@ -36,6 +37,7 @@ import { HealthModule } from './health/health.module';
     VehiclesModule,
     ReportsModule,
     ServiceEventsModule,
+    SchedulesModule,
     TeamModule,
     RolesModule,
     OrganizationModule,
