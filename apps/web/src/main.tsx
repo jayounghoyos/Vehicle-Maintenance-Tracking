@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { StrictMode } from 'react';
+import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
@@ -10,6 +10,7 @@ import Dashboard from './routes/Dashboard.tsx';
 import Login from './routes/Login.tsx';
 import Organization from './routes/Organization.tsx';
 import Register from './routes/Register.tsx';
+import { Reports } from './reports/lazy.ts';
 import ServiceLog from './routes/ServiceLog.tsx';
 import Team from './routes/Team.tsx';
 import Vehicles from './routes/Vehicles.tsx';
@@ -54,6 +55,16 @@ createRoot(document.getElementById('root')!).render(
                 element={
                   <RequireAuth kind="user" need="view_service_log">
                     <ServiceLog />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <RequireAuth kind="user">
+                    <Suspense fallback={null}>
+                      <Reports />
+                    </Suspense>
                   </RequireAuth>
                 }
               />
