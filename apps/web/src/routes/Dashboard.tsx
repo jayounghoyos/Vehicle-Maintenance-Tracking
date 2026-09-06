@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
@@ -17,6 +18,7 @@ import { greeting, longDate } from '../lib/format';
 
 export default function Dashboard() {
   const { principal } = useAuth();
+  const navigate = useNavigate();
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   // which vehicle the form opens on, when the click named one
   const [logVehicleId, setLogVehicleId] = useState<number | undefined>(undefined);
@@ -30,6 +32,11 @@ export default function Dashboard() {
   // the operations manager reads the fleet and decides on it; recording
   // the work belongs to whoever did it
   const canLog = can(principal, 'log_service');
+  // the fleet table hands a row to the screen that owns vehicles, which
+  // is closed to a role without the permission to open it
+  const openVehicle = can(principal, 'view_vehicles')
+    ? (vehicleId: number) => navigate(`/vehicles?vehicle=${vehicleId}`)
+    : undefined;
 
   // one way in, two ways to reach it: the header button starts blank, a
   // row starts on the vehicle it names
@@ -92,7 +99,7 @@ export default function Dashboard() {
           <NeedsAttention items={attention} onSelect={canLog ? openLog : undefined} />
           <RecentEvents events={recentEvents} />
         </div>
-        <FleetTable rows={fleet} />
+        <FleetTable rows={fleet} onOpen={openVehicle} />
       </div>
 
       <LogServiceModal
