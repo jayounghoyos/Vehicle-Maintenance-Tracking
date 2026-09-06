@@ -70,7 +70,7 @@ createRoot(document.getElementById('root')!).render(
               <Route
                 path="/reports"
                 element={
-                  <RequireAuth kind="user">
+                  <RequireAuth kind="user" need="view_reports">
                     <Suspense fallback={null}>
                       <Reports />
                     </Suspense>

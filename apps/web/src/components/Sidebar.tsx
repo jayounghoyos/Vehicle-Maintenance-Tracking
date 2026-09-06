@@ -41,7 +41,13 @@ const NAV: NavItem[] = [
     ready: true,
     need: 'view_service_log',
   },
-  { to: '/reports', label: 'Reports', icon: BarChart3, ready: true },
+  {
+    to: '/reports',
+    label: 'Reports',
+    icon: BarChart3,
+    ready: true,
+    need: 'view_reports',
+  },
   // the mockup's Settings slot, spent on the team: accounts are the only
   // thing there is anything to configure yet
   { to: '/team', label: 'Team', icon: Users, ready: true, need: 'view_team' },

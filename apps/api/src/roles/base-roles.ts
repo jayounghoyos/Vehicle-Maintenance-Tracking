@@ -1,8 +1,11 @@
 import { ALL_PERMISSIONS, Permission } from '../entities';
 
 /**
- * The three roles a new organization starts with, carrying exactly what
- * the three enum values used to carry.
+ * The three roles a new organization starts with.
+ *
+ * Reports read the whole fleet at once, so they go to the two roles that
+ * answer for it and not to the mechanic, who works one vehicle at a
+ * time. A client that disagrees ticks the box.
  *
  * Ordinary rows from the moment they are created: the client renames
  * them, changes what they grant, or adds a fourth. Nothing in the code
@@ -25,6 +28,7 @@ export const BASE_ROLES: { name: string; permissions: Permission[] }[] = [
       Permission.VIEW_VEHICLES,
       Permission.VIEW_TEAM,
       Permission.VIEW_SERVICE_LOG,
+      Permission.VIEW_REPORTS,
     ],
   },
 ];

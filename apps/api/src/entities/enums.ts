@@ -14,6 +14,7 @@ export enum Permission {
   VIEW_VEHICLES = 'view_vehicles',
   VIEW_TEAM = 'view_team',
   VIEW_SERVICE_LOG = 'view_service_log',
+  VIEW_REPORTS = 'view_reports',
   MANAGE_VEHICLES = 'manage_vehicles',
   MANAGE_TEAM = 'manage_team',
   MANAGE_SCHEDULES = 'manage_schedules',

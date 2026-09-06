@@ -6,6 +6,7 @@ Enum permission {
   view_vehicles
   view_team
   view_service_log
+  view_reports
   manage_vehicles
   manage_team
   manage_schedules
