@@ -12,6 +12,7 @@ export const PERMISSIONS = [
   'view_vehicles',
   'view_team',
   'view_service_log',
+  'view_reports',
   'manage_vehicles',
   'manage_team',
   'manage_schedules',
@@ -26,6 +27,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   view_vehicles: 'See the vehicles',
   view_team: 'See the team',
   view_service_log: 'See the service log',
+  view_reports: 'See the reports',
   manage_vehicles: 'Register and retire vehicles',
   manage_team: 'Add, edit and remove accounts',
   manage_schedules: 'Set maintenance intervals',
@@ -38,7 +40,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
 export const PERMISSION_GROUPS: { title: string; permissions: Permission[] }[] = [
   {
     title: 'Screens they can open',
-    permissions: ['view_vehicles', 'view_team', 'view_service_log'],
+    permissions: ['view_vehicles', 'view_team', 'view_service_log', 'view_reports'],
   },
   {
     title: 'Things they can change',
