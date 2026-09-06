@@ -89,6 +89,7 @@ export class DashboardService {
 
     const recentEvents: RecentEventItem[] = events.map((event) => ({
       id: event.id,
+      vehicleId: event.vehicle.id,
       task: event.task.name,
       plate: event.vehicle.plate,
       recorder: event.recorder.fullName,

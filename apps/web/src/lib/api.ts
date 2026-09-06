@@ -73,6 +73,7 @@ export type DashboardResponse = {
   }[];
   recentEvents: {
     id: number;
+    vehicleId: number;
     task: string;
     plate: string;
     recorder: string;

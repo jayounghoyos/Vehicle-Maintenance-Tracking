@@ -37,6 +37,10 @@ export default function Dashboard() {
   const openVehicle = can(principal, 'view_vehicles')
     ? (vehicleId: number) => navigate(`/vehicles?vehicle=${vehicleId}`)
     : undefined;
+  // and the same for the log, which has a permission of its own
+  const openLogbook = can(principal, 'view_service_log')
+    ? (vehicleId: number) => navigate(`/service-log?vehicle=${vehicleId}`)
+    : undefined;
 
   // one way in, two ways to reach it: the header button starts blank, a
   // row starts on the vehicle it names
@@ -97,7 +101,7 @@ export default function Dashboard() {
         <OverdueBanner count={counts.overdue} />
         <div className="grid items-start gap-5 xl:grid-cols-[1.6fr_1fr]">
           <NeedsAttention items={attention} onSelect={canLog ? openLog : undefined} />
-          <RecentEvents events={recentEvents} />
+          <RecentEvents events={recentEvents} onOpen={openLogbook} />
         </div>
         <FleetTable rows={fleet} onOpen={openVehicle} />
       </div>

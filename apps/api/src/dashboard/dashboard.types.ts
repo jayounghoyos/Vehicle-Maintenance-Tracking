@@ -27,6 +27,8 @@ export type AttentionItem = {
 
 export type RecentEventItem = {
   id: number;
+  /** so the dashboard can open the log filtered to that vehicle */
+  vehicleId: number;
   task: string;
   plate: string;
   recorder: string;
