@@ -20,7 +20,6 @@ export default function Dashboard() {
   const { principal } = useAuth();
   const navigate = useNavigate();
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
-  // which vehicle the form opens on, when the click named one
   const [logVehicleId, setLogVehicleId] = useState<number | undefined>(undefined);
 
   const { data, isPending, isError, error } = useQuery({
@@ -32,18 +31,15 @@ export default function Dashboard() {
   // the operations manager reads the fleet and decides on it; recording
   // the work belongs to whoever did it
   const canLog = can(principal, 'log_service');
-  // the fleet table hands a row to the screen that owns vehicles, which
-  // is closed to a role without the permission to open it
+  // each row goes to the screen that owns it, when the role may open it
   const openVehicle = can(principal, 'view_vehicles')
     ? (vehicleId: number) => navigate(`/vehicles?vehicle=${vehicleId}`)
     : undefined;
-  // and the same for the log, which has a permission of its own
   const openLogbook = can(principal, 'view_service_log')
     ? (vehicleId: number) => navigate(`/service-log?vehicle=${vehicleId}`)
     : undefined;
 
-  // one way in, two ways to reach it: the header button starts blank, a
-  // row starts on the vehicle it names
+  // the header button starts blank, a row starts on its own vehicle
   const openLog = (vehicleId?: number) => {
     setLogVehicleId(vehicleId);
     setIsLogModalOpen(true);

@@ -15,11 +15,9 @@ import { api, fetchServiceLog, type VehicleRow } from '../lib/api';
 export default function ServiceLog() {
   const { principal } = useAuth();
   const me = principal?.kind === 'user' ? principal : null;
-  /* The filter lives in the URL rather than in state, so it is the only
-   * copy of the answer and so a filtered log can be linked to. That is
-   * how the dashboard's recent events hand a vehicle over.
-   *
-   * undefined is every vehicle; the select's own "All vehicles" option. */
+  /* In the URL rather than in state: one copy of the answer, and a
+   * filtered log can be linked to, which is how the dashboard hands a
+   * vehicle over. undefined is the select's own "All vehicles". */
   const [searchParams, setSearchParams] = useSearchParams();
   const vehicleId = Number(searchParams.get('vehicle')) || undefined;
   const setVehicleId = (id?: number) =>

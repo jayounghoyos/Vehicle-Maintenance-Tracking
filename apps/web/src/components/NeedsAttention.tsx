@@ -25,8 +25,7 @@ export function NeedsAttention({
   onSelect,
 }: {
   items: DashboardResponse['attention'];
-  /** absent for a role that cannot record work, and then a row is a
-   *  reading rather than a control, chevron included */
+  /** absent for a role that cannot record work, chevron included */
   onSelect?: (vehicleId: number) => void;
 }) {
   return (

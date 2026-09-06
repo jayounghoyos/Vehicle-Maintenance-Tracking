@@ -1,16 +1,11 @@
 import { AlertTriangle } from 'lucide-react';
 
 /**
- * The overdue count, where the fleet is rather than tucked under the
- * account block in the sidebar.
+ * The overdue count, where the fleet is rather than in the sidebar.
  *
- * It states, it does not act. The vehicles it counts are named one by
- * one in Needs attention directly below, and each of those rows opens
- * the service form on the vehicle it names, so a button here could only
- * offer a blank form the header already offers.
- *
- * Nothing renders when the count is zero: an alert that is always there
- * stops being an alert.
+ * It states, it does not act: Needs attention names these vehicles one
+ * by one below, and those rows are what open the service form. Nothing
+ * renders at zero, since an alert that is always there is not one.
  */
 export function OverdueBanner({ count }: { count: number }) {
   if (count === 0) return null;

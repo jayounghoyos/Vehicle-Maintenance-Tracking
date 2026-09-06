@@ -32,9 +32,8 @@ export default function Vehicles() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [panel, setPanel] = useState<OpenPanel>(null);
-  /* ?vehicle=<id> opens that one's detail. It is how the dashboard's
-   * fleet table hands a row over, and it means a vehicle can be linked
-   * to rather than described over the phone. */
+  /* ?vehicle=<id> opens that one's detail: how the dashboard hands a
+   * row over, and what makes a vehicle linkable. */
   const [searchParams, setSearchParams] = useSearchParams();
   const asked = Number(searchParams.get('vehicle')) || null;
   // which row is waiting on the API, so its own controls go quiet
@@ -47,9 +46,8 @@ export default function Vehicles() {
     queryFn: () => api.get<VehicleRow[]>('/vehicles'),
   });
 
-  /* Derived rather than pushed into state by an effect: the list only
-   * arrives on a later render, and a click always wins over the URL. An
-   * id nobody recognises opens nothing and leaves the fleet on screen. */
+  /* Derived rather than set by an effect, so a click wins over the URL
+   * and an unknown id simply opens nothing. */
   const fromUrl = asked ? vehicles?.find((vehicle) => vehicle.id === asked) : undefined;
   const open: OpenPanel =
     panel ?? (fromUrl ? { kind: 'detail', vehicle: fromUrl } : null);
@@ -57,8 +55,7 @@ export default function Vehicles() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['vehicles'] });
   const close = () => {
     setPanel(null);
-    // the parameter goes with the panel, or closing would leave the URL
-    // still asking for it and the panel would come straight back
+    // or the URL would still be asking, and it would reopen
     if (asked) setSearchParams({}, { replace: true });
   };
   const failed = (err: unknown, fallback: string) =>

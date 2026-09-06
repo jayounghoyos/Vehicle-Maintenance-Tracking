@@ -11,8 +11,7 @@ export function FleetTable({
   onOpen,
 }: {
   rows: DashboardResponse['fleet'];
-  /** absent for a role that cannot open the vehicles screen, and then a
-   *  row is a reading: no pointer, no hover promising a panel */
+  /** absent for a role that cannot open the vehicles screen */
   onOpen?: (vehicleId: number) => void;
 }) {
   return (

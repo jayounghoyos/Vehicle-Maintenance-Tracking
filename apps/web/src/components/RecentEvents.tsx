@@ -12,9 +12,8 @@ export function RecentEvents({
   onOpen,
 }: {
   events: DashboardResponse['recentEvents'];
-  /** absent for a role without view_service_log, which the log itself
-   *  would turn away at the door: no rows to press, and no way out of
-   *  the panel that only leads back here */
+  /** absent for a role without view_service_log, which the log would
+   *  turn away anyway: no rows, and no link out either */
   onOpen?: (vehicleId: number) => void;
 }) {
   return (
