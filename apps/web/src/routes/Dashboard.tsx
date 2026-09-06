@@ -8,6 +8,7 @@ import { AppShell, PrimaryAction } from '../components/AppShell';
 import { FleetTable } from '../components/FleetTable';
 import { LogServiceModal } from '../components/LogServiceModal';
 import { NeedsAttention } from '../components/NeedsAttention';
+import { OverdueBanner } from '../components/OverdueBanner';
 import { RecentEvents } from '../components/RecentEvents';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { StatTiles } from '../components/StatTiles';
@@ -17,6 +18,8 @@ import { greeting, longDate } from '../lib/format';
 export default function Dashboard() {
   const { principal } = useAuth();
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  // which vehicle the form opens on, when the click named one
+  const [logVehicleId, setLogVehicleId] = useState<number | undefined>(undefined);
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['dashboard'],
@@ -26,8 +29,17 @@ export default function Dashboard() {
 
   // the operations manager reads the fleet and decides on it; recording
   // the work belongs to whoever did it
-  const action = can(principal, 'log_service') ? (
-    <PrimaryAction icon={Plus} onClick={() => setIsLogModalOpen(true)}>
+  const canLog = can(principal, 'log_service');
+
+  // one way in, two ways to reach it: the header button starts blank, a
+  // row starts on the vehicle it names
+  const openLog = (vehicleId?: number) => {
+    setLogVehicleId(vehicleId);
+    setIsLogModalOpen(true);
+  };
+
+  const action = canLog ? (
+    <PrimaryAction icon={Plus} onClick={() => openLog()}>
       Log service
     </PrimaryAction>
   ) : undefined;
@@ -71,18 +83,23 @@ export default function Dashboard() {
       title={`${greeting(today)}, ${user.fullName.split(' ')[0]}`}
       subtitle={`${user.roleName} · ${longDate(today.toISOString())}`}
       action={action}
-      sidebarFooter={<SidebarFooter user={user} overdueCount={counts.overdue} />}
+      sidebarFooter={<SidebarFooter user={user} />}
     >
       <div className="space-y-5">
         <StatTiles counts={counts} />
+        <OverdueBanner count={counts.overdue} />
         <div className="grid items-start gap-5 xl:grid-cols-[1.6fr_1fr]">
-          <NeedsAttention items={attention} />
+          <NeedsAttention items={attention} onSelect={canLog ? openLog : undefined} />
           <RecentEvents events={recentEvents} />
         </div>
         <FleetTable rows={fleet} />
       </div>
 
-      <LogServiceModal isOpen={isLogModalOpen} onClose={() => setIsLogModalOpen(false)} />
+      <LogServiceModal
+        isOpen={isLogModalOpen}
+        onClose={() => setIsLogModalOpen(false)}
+        initialVehicleId={logVehicleId}
+      />
     </AppShell>
   );
 }

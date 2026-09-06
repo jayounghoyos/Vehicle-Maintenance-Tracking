@@ -15,6 +15,8 @@ export type FleetCounts = {
 
 export type AttentionItem = {
   scheduleId: number;
+  /** so the dashboard can open the service form on the right vehicle */
+  vehicleId: number;
   plate: string;
   make: string;
   model: string;

@@ -63,6 +63,7 @@ export type DashboardResponse = {
   counts: { active: number; overdue: number; dueSoon: number; inShop: number };
   attention: {
     scheduleId: number;
+    vehicleId: number;
     plate: string;
     make: string;
     model: string;

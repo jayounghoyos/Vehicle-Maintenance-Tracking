@@ -19,7 +19,15 @@ const DUE_TEXT: Record<string, string> = {
   on_track: 'text-ink-muted',
 };
 
-export function NeedsAttention({ items }: { items: DashboardResponse['attention'] }) {
+export function NeedsAttention({
+  items,
+  onSelect,
+}: {
+  items: DashboardResponse['attention'];
+  /** absent for a role that cannot record work, and then a row is a
+   *  reading rather than a control, chevron included */
+  onSelect?: (vehicleId: number) => void;
+}) {
   return (
     <Panel
       data-tour="needs-attention"
@@ -40,44 +48,60 @@ export function NeedsAttention({ items }: { items: DashboardResponse['attention'
         </p>
       ) : (
         <ul className="divide-y divide-white/5 border-t border-white/5">
-          {items.map(({ scheduleId, plate, make, model, task, nextDueDate, state }) => {
-            const Icon = taskIcon(task);
-            return (
-              <li
-                key={scheduleId}
-                className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
-              >
-                {/* the square is tinted by state, so it reports status;
-                  the glyph comes from the task name */}
-                <span
-                  className={`grid size-10 shrink-0 place-items-center rounded-xl ${TINT[state]}`}
-                >
-                  <Icon className="size-4" strokeWidth={2} />
-                </span>
+          {items.map(
+            ({ scheduleId, vehicleId, plate, make, model, task, nextDueDate, state }) => {
+              const Icon = taskIcon(task);
+              const body = (
+                <>
+                  {/* the square is tinted by state, so it reports status;
+                    the glyph comes from the task name */}
+                  <span
+                    className={`grid size-10 shrink-0 place-items-center rounded-xl ${TINT[state]}`}
+                  >
+                    <Icon className="size-4" strokeWidth={2} />
+                  </span>
 
-                <div className="min-w-0 flex-1">
-                  <p className="truncate">
-                    <span className="font-semibold">{plate}</span>{' '}
-                    <span className="text-ink-muted">
-                      {make} {model}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">
+                      <span className="font-semibold">{plate}</span>{' '}
+                      <span className="text-ink-muted">
+                        {make} {model}
+                      </span>
                     </span>
-                  </p>
-                  <p className="mt-0.5 truncate text-body text-ink-muted">
-                    {task}
-                    {nextDueDate && (
-                      <>
-                        {' · '}
-                        <span className={DUE_TEXT[state]}>{dueLabel(nextDueDate)}</span>
-                      </>
-                    )}
-                  </p>
-                </div>
+                    <span className="mt-0.5 block truncate text-body text-ink-muted">
+                      {task}
+                      {nextDueDate && (
+                        <>
+                          {' · '}
+                          <span className={DUE_TEXT[state]}>{dueLabel(nextDueDate)}</span>
+                        </>
+                      )}
+                    </span>
+                  </span>
 
-                <StatusChip state={state} />
-                <ChevronRight className="size-4 shrink-0 text-ink-muted" />
-              </li>
-            );
-          })}
+                  <StatusChip state={state} />
+                </>
+              );
+
+              return (
+                <li key={scheduleId}>
+                  {onSelect ? (
+                    <button
+                      type="button"
+                      onClick={() => onSelect(vehicleId)}
+                      title={`Log service for ${plate}`}
+                      className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-white/[0.02]"
+                    >
+                      {body}
+                      <ChevronRight className="size-4 shrink-0 text-ink-muted" />
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-4 px-5 py-3.5">{body}</div>
+                  )}
+                </li>
+              );
+            },
+          )}
         </ul>
       )}
     </Panel>

@@ -60,6 +60,7 @@ export class DashboardService {
       .filter(({ state }) => state !== 'on_track')
       .map(({ schedule, state }) => ({
         scheduleId: schedule.id,
+        vehicleId: schedule.vehicle.id,
         plate: schedule.vehicle.plate,
         make: schedule.vehicle.model.make,
         model: schedule.vehicle.model.name,
