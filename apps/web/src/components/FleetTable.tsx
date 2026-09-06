@@ -1,6 +1,7 @@
 import type { DashboardResponse } from '../lib/api';
 import { odometer, shortDate } from '../lib/format';
 import { Panel } from './Panel';
+import { PRESSABLE_ROW } from './pressableRow';
 import { StatusChip } from './StatusChip';
 
 const TH = 'px-5 py-3 text-table-label font-semibold text-ink-muted uppercase';
@@ -51,11 +52,7 @@ export function FleetTable({
                 <tr
                   key={vehicleId}
                   onClick={onOpen ? () => onOpen(vehicleId) : undefined}
-                  className={
-                    onOpen
-                      ? 'cursor-pointer transition-colors hover:bg-white/[0.03]'
-                      : undefined
-                  }
+                  className={onOpen ? PRESSABLE_ROW : undefined}
                 >
                   <td className="px-5 py-4 font-semibold">{plate}</td>
                   <td className="px-5 py-4">

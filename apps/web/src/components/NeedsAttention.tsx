@@ -5,6 +5,7 @@ import { dueLabel } from '../domain/maintenance';
 import type { DashboardResponse } from '../lib/api';
 import { taskIcon } from '../lib/taskIcon';
 import { Panel } from './Panel';
+import { PRESSABLE_CHEVRON, PRESSABLE_ROW } from './pressableRow';
 import { StatusChip } from './StatusChip';
 
 const TINT: Record<string, string> = {
@@ -90,10 +91,10 @@ export function NeedsAttention({
                       type="button"
                       onClick={() => onSelect(vehicleId)}
                       title={`Log service for ${plate}`}
-                      className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-white/[0.02]"
+                      className={`flex w-full items-center gap-4 px-5 py-3.5 text-left ${PRESSABLE_ROW}`}
                     >
                       {body}
-                      <ChevronRight className="size-4 shrink-0 text-ink-muted" />
+                      <ChevronRight className={PRESSABLE_CHEVRON} />
                     </button>
                   ) : (
                     <div className="flex items-center gap-4 px-5 py-3.5">{body}</div>

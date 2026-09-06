@@ -5,6 +5,7 @@ import type { DashboardResponse } from '../lib/api';
 import { relativeDay } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
 import { Panel } from './Panel';
+import { PRESSABLE_ROW } from './pressableRow';
 
 export function RecentEvents({
   events,
@@ -72,7 +73,7 @@ export function RecentEvents({
                         type="button"
                         onClick={() => onOpen(vehicleId)}
                         title={`Open the log for ${plate}`}
-                        className="block w-full min-w-0 text-left"
+                        className={`-mx-2 block w-full min-w-0 rounded-lg px-2 py-1 text-left ${PRESSABLE_ROW}`}
                       >
                         {body}
                       </button>
