@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
@@ -14,8 +15,13 @@ import { api, fetchServiceLog, type VehicleRow } from '../lib/api';
 export default function ServiceLog() {
   const { principal } = useAuth();
   const me = principal?.kind === 'user' ? principal : null;
-  // undefined is every vehicle; the select's own "All vehicles" option
-  const [vehicleId, setVehicleId] = useState<number | undefined>(undefined);
+  /* In the URL rather than in state: one copy of the answer, and a
+   * filtered log can be linked to, which is how the dashboard hands a
+   * vehicle over. undefined is the select's own "All vehicles". */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const vehicleId = Number(searchParams.get('vehicle')) || undefined;
+  const setVehicleId = (id?: number) =>
+    setSearchParams(id ? { vehicle: String(id) } : {}, { replace: true });
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
 
   const { data: vehicles } = useQuery({

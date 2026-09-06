@@ -60,6 +60,7 @@ export class DashboardService {
       .filter(({ state }) => state !== 'on_track')
       .map(({ schedule, state }) => ({
         scheduleId: schedule.id,
+        vehicleId: schedule.vehicle.id,
         plate: schedule.vehicle.plate,
         make: schedule.vehicle.model.make,
         model: schedule.vehicle.model.name,
@@ -88,6 +89,7 @@ export class DashboardService {
 
     const recentEvents: RecentEventItem[] = events.map((event) => ({
       id: event.id,
+      vehicleId: event.vehicle.id,
       task: event.task.name,
       plate: event.vehicle.plate,
       recorder: event.recorder.fullName,

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Upload } from 'lucide-react';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
@@ -31,6 +32,10 @@ export default function Vehicles() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [panel, setPanel] = useState<OpenPanel>(null);
+  /* ?vehicle=<id> opens that one's detail: how the dashboard hands a
+   * row over, and what makes a vehicle linkable. */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const asked = Number(searchParams.get('vehicle')) || null;
   // which row is waiting on the API, so its own controls go quiet
   // instead of the whole table
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -41,8 +46,18 @@ export default function Vehicles() {
     queryFn: () => api.get<VehicleRow[]>('/vehicles'),
   });
 
+  /* Derived rather than set by an effect, so a click wins over the URL
+   * and an unknown id simply opens nothing. */
+  const fromUrl = asked ? vehicles?.find((vehicle) => vehicle.id === asked) : undefined;
+  const open: OpenPanel =
+    panel ?? (fromUrl ? { kind: 'detail', vehicle: fromUrl } : null);
+
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['vehicles'] });
-  const close = () => setPanel(null);
+  const close = () => {
+    setPanel(null);
+    // or the URL would still be asking, and it would reopen
+    if (asked) setSearchParams({}, { replace: true });
+  };
   const failed = (err: unknown, fallback: string) =>
     toast.show(err instanceof Error ? err.message : fallback, 'failed');
 
@@ -96,7 +111,7 @@ export default function Vehicles() {
       }
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
-      <div className={panel ? PANEL_LAYOUT.open : PANEL_LAYOUT.closed}>
+      <div className={open ? PANEL_LAYOUT.open : PANEL_LAYOUT.closed}>
         <Panel
           title="Fleet"
           subtitle={
@@ -111,7 +126,7 @@ export default function Vehicles() {
                   type="button"
                   data-tour="vehicle-import"
                   onClick={() =>
-                    setPanel(panel?.kind === 'import' ? null : { kind: 'import' })
+                    setPanel(open?.kind === 'import' ? null : { kind: 'import' })
                   }
                   className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink"
                 >
@@ -122,7 +137,7 @@ export default function Vehicles() {
                   icon={Plus}
                   size="panel"
                   data-tour="vehicle-add"
-                  onClick={() => setPanel(panel?.kind === 'add' ? null : { kind: 'add' })}
+                  onClick={() => setPanel(open?.kind === 'add' ? null : { kind: 'add' })}
                 >
                   Add vehicle
                 </PrimaryAction>
@@ -144,17 +159,17 @@ export default function Vehicles() {
           )}
         </Panel>
 
-        {panel?.kind === 'detail' && (
+        {open?.kind === 'detail' && (
           <SidePanel
-            title={panel.vehicle.plate}
+            title={open.vehicle.plate}
             subtitle="Profile, schedules and recent services"
             onClose={close}
           >
-            <VehicleDetail id={panel.vehicle.id} />
+            <VehicleDetail id={open.vehicle.id} />
           </SidePanel>
         )}
 
-        {panel?.kind === 'import' && canManage && (
+        {open?.kind === 'import' && canManage && (
           <SidePanel
             title="Import many"
             subtitle="Straight from your spreadsheet"
@@ -164,7 +179,7 @@ export default function Vehicles() {
           </SidePanel>
         )}
 
-        {panel?.kind === 'add' && canManage && (
+        {open?.kind === 'add' && canManage && (
           <SidePanel
             title="Add vehicle"
             subtitle="One vehicle, registered now"
@@ -178,16 +193,16 @@ export default function Vehicles() {
           </SidePanel>
         )}
 
-        {panel?.kind === 'edit' && canManage && (
+        {open?.kind === 'edit' && canManage && (
           <SidePanel
             title="Edit vehicle"
-            subtitle={`What the fleet knows about ${panel.vehicle.plate}`}
+            subtitle={`What the fleet knows about ${open.vehicle.plate}`}
             onClose={close}
           >
             <VehicleForm
-              vehicle={panel.vehicle}
+              vehicle={open.vehicle}
               pending={update.isPending}
-              onSubmit={(patch) => update.mutate({ id: panel.vehicle.id, patch })}
+              onSubmit={(patch) => update.mutate({ id: open.vehicle.id, patch })}
               onCancel={close}
             />
           </SidePanel>

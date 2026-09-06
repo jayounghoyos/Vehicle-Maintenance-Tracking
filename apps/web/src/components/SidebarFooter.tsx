@@ -1,4 +1,4 @@
-import { AlertTriangle, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
@@ -7,10 +7,8 @@ import { initials } from '../lib/format';
 
 export function SidebarFooter({
   user,
-  overdueCount,
 }: {
   user: { fullName: string; roleName?: string };
-  overdueCount?: number;
 }) {
   const { principal, signOut } = useAuth();
   const [open, setOpen] = useState(false);
@@ -20,18 +18,6 @@ export function SidebarFooter({
 
   return (
     <div className="space-y-4">
-      {overdueCount != null && overdueCount > 0 && (
-        <div className="rounded-xl bg-overdue/15 p-4">
-          <p className="flex items-center gap-2 font-semibold text-overdue">
-            <AlertTriangle className="size-4" strokeWidth={2.5} />
-            {overdueCount} {overdueCount === 1 ? 'vehicle' : 'vehicles'} overdue
-          </p>
-          <p className="mt-1.5 text-body text-overdue/70">
-            Schedule service to keep the fleet compliant.
-          </p>
-        </div>
-      )}
-
       <div data-tour="account" className="border-t border-white/5 pt-4">
         {open && (
           <button

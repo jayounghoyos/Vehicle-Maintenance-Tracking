@@ -5,8 +5,17 @@ import type { DashboardResponse } from '../lib/api';
 import { relativeDay } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
 import { Panel } from './Panel';
+import { PRESSABLE_ROW } from './pressableRow';
 
-export function RecentEvents({ events }: { events: DashboardResponse['recentEvents'] }) {
+export function RecentEvents({
+  events,
+  onOpen,
+}: {
+  events: DashboardResponse['recentEvents'];
+  /** absent for a role without view_service_log, which the log would
+   *  turn away anyway: no rows, and no link out either */
+  onOpen?: (vehicleId: number) => void;
+}) {
   return (
     <Panel
       data-tour="recent-events"
@@ -19,31 +28,19 @@ export function RecentEvents({ events }: { events: DashboardResponse['recentEven
         </p>
       ) : (
         <ul className="flex-1 border-t border-white/5 px-5 py-5">
-          {events.map(({ id, task, plate, recorder, performedAt, type }, index) => {
-            const Icon = taskIcon(task);
-            const last = index === events.length - 1;
-            // corrective work was unplanned, and that is the one thing
-            // worth telling apart here
-            const tone =
-              type === 'corrective'
-                ? 'bg-overdue/15 text-overdue'
-                : 'bg-on-track/15 text-on-track';
+          {events.map(
+            ({ id, vehicleId, task, plate, recorder, performedAt, type }, index) => {
+              const Icon = taskIcon(task);
+              const last = index === events.length - 1;
+              // corrective work was unplanned, and that is the one thing
+              // worth telling apart here
+              const tone =
+                type === 'corrective'
+                  ? 'bg-overdue/15 text-overdue'
+                  : 'bg-on-track/15 text-on-track';
 
-            return (
-              <li key={id} className="flex gap-3.5">
-                {/* the icon column doubles as the timeline: the rule
-                    stretches to fill whatever height the row needs, so
-                    the dots stay connected however long the text runs */}
-                <div className="flex flex-col items-center">
-                  <span
-                    className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}
-                  >
-                    <Icon className="size-4" strokeWidth={2} />
-                  </span>
-                  {!last && <span aria-hidden className="w-px flex-1 bg-white/10" />}
-                </div>
-
-                <div className={`min-w-0 pt-1 ${last ? '' : 'pb-6'}`}>
+              const body = (
+                <>
                   <p className="truncate font-medium">{task}</p>
                   <p className="mt-0.5 truncate text-body text-ink-muted">
                     <span className="text-lime">{plate}</span>
@@ -52,19 +49,52 @@ export function RecentEvents({ events }: { events: DashboardResponse['recentEven
                     {' · '}
                     {relativeDay(performedAt)}
                   </p>
-                </div>
-              </li>
-            );
-          })}
+                </>
+              );
+
+              return (
+                <li key={id} className="flex gap-3.5">
+                  {/* the icon column doubles as the timeline: the rule
+                    stretches to fill whatever height the row needs, so
+                    the dots stay connected however long the text runs */}
+                  <div className="flex flex-col items-center">
+                    <span
+                      className={`grid size-9 shrink-0 place-items-center rounded-full ${tone}`}
+                    >
+                      <Icon className="size-4" strokeWidth={2} />
+                    </span>
+                    {!last && <span aria-hidden className="w-px flex-1 bg-white/10" />}
+                  </div>
+
+                  <div className={`min-w-0 flex-1 pt-1 ${last ? '' : 'pb-6'}`}>
+                    {onOpen ? (
+                      <button
+                        type="button"
+                        onClick={() => onOpen(vehicleId)}
+                        title={`Open the log for ${plate}`}
+                        className={`-mx-2 block w-full min-w-0 rounded-lg px-2 py-1 text-left ${PRESSABLE_ROW}`}
+                      >
+                        {body}
+                      </button>
+                    ) : (
+                      body
+                    )}
+                  </div>
+                </li>
+              );
+            },
+          )}
         </ul>
       )}
 
-      <Link
-        to="/service-log"
-        className="flex items-center justify-center gap-2 border-t border-white/5 px-5 py-3.5 text-body text-ink-muted transition-colors hover:text-ink"
-      >
-        Open service log <ArrowUpRight className="size-3.5" />
-      </Link>
+      {onOpen && (
+        <Link
+          to="/service-log"
+          className="flex items-center justify-center gap-2 border-t border-white/5 px-5 py-3.5 text-body text-ink-muted transition-colors hover:text-ink"
+        >
+          Open service log <ArrowUpRight className="size-3.5" />
+        </Link>
+      )}
     </Panel>
   );
 }
