@@ -40,6 +40,18 @@ Set `DATABASE_URL` in `.env` to point at a database somewhere else instead, whic
 is the shape a managed provider hands over. When it is set the five `DB_` values are
 ignored.
 
+## Testing it
+
+```bash
+pnpm test                      # unit tests, no database
+pnpm --filter api test:e2e     # integration tests, through HTTP into postgres
+```
+
+The integration tests exist for the failure a mocked query builder cannot show: a
+query that loses its organization condition and reads another client's fleet. They
+create and wipe a database of their own, `mts_test`, so `pnpm db:up` is all the
+set-up they need.
+
 ## Deploying it
 
 Three free tiers: Vercel serves the client, Render runs the API, Neon holds the

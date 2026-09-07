@@ -1,24 +1,16 @@
-import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
+import { configure } from './bootstrap';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
-  app.setGlobalPrefix('api');
+  configure(app);
   app.enableCors({ origin: config.get<string>('WEB_ORIGIN', 'http://localhost:5173') });
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // drop properties the DTO does not declare
-      forbidNonWhitelisted: true, // and reject the request that sent them
-      transform: true,
-    }),
-  );
 
   const swagger = new DocumentBuilder()
     .setTitle('Vehicle Maintenance Tracking API')
