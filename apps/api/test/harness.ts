@@ -51,8 +51,8 @@ async function ensureDatabaseExists(): Promise<void> {
  * A running application on an empty, migrated database.
  *
  * The schema comes from the migrations rather than from synchronize, so
- * what the tests exercise is the schema that gets deployed — a migration
- * that fails to describe an entity fails here too.
+ * what the tests exercise is the schema that gets deployed, so a
+ * migration that fails to describe an entity fails here too.
  */
 export async function startTestApp(): Promise<INestApplication> {
   process.env.DATABASE_URL = '';

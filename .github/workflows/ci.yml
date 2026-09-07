@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # the integration tests talk to a real database, because the bug they
-    # exist to catch — a query that loses its organization condition — is
+    # exist to catch, a query that loses its organization condition, is
     # invisible to a mocked query builder
     services:
       postgres:

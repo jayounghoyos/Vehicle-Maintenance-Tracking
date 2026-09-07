@@ -9,7 +9,7 @@ import { registerOrganization, startTestApp } from './harness';
  *
  * The unit tests cannot answer this. They hand the services a mocked
  * query builder, so a query that quietly drops the organization
- * condition — using .where, which replaces it, instead of .andWhere —
+ * condition, by using .where, which replaces it, instead of .andWhere,
  * still passes them. Only a real database tells the difference.
  */
 describe('tenant isolation (e2e)', () => {
