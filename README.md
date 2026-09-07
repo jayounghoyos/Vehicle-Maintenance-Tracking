@@ -19,10 +19,24 @@ nvm use                 # node 24
 pnpm install
 cp .env.example .env
 pnpm db:up              # postgres in docker
+pnpm migration:run      # creates the schema, which migrations own
+pnpm seed               # demo fleet and a year of service history
 pnpm dev                # api on :3002, web on :5173
 ```
 
-Then open http://localhost:5173. The page reports whether the API and the database are reachable.
+The schema is never created by the API at start-up: `synchronize` is off, so
+migrations are the only thing that writes it. Skipping that step leaves a database
+that connects but has no tables, and the first login fails.
+
+Then open http://localhost:5173 and sign in with any of the seeded accounts, all of
+them with the password `mts-dev-password`:
+
+| Account                   | Sees                          |
+| ------------------------- | ----------------------------- |
+| `ana@citylogistics.co`    | Fleet coordinator, everything |
+| `carlos@citylogistics.co` | Mechanic, no reports          |
+| `laura@citylogistics.co`  | Operations manager            |
+| `admin@mts.local`         | Platform admin                |
 
 |          |                                  |
 | -------- | -------------------------------- |
