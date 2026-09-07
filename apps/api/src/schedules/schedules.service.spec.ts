@@ -122,7 +122,11 @@ describe('SchedulesService', () => {
             ),
           find: jest.fn().mockResolvedValue([mockTask]),
           builder: jest.fn().mockReturnValue({
-            where: jest.fn().mockReturnThis(),
+            // only andWhere: builder() has already applied the
+            // organization condition, so a service that reaches for
+            // .where is replacing it, and should fail here rather than
+            // pass and leak across clients
+            andWhere: jest.fn().mockReturnThis(),
             getOne: jest.fn().mockImplementation(() => Promise.resolve(mockTaskLookup)),
           }),
           save: mockTaskSave,

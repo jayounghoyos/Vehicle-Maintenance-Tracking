@@ -63,7 +63,10 @@ export class SchedulesService {
 
     const existing = await tasks
       .builder('t')
-      .where('LOWER(t.name) = LOWER(:name)', { name: trimmed })
+      // andWhere, never where: builder() has already applied the
+      // organization condition and .where would replace it, making this
+      // search the task catalog of every client at once
+      .andWhere('LOWER(t.name) = LOWER(:name)', { name: trimmed })
       .getOne();
     if (existing) {
       throw new ConflictException(`"${trimmed}" is already in the task catalog`);

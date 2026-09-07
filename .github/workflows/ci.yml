@@ -14,6 +14,34 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+
+    # the integration tests talk to a real database, because the bug they
+    # exist to catch, a query that loses its organization condition, is
+    # invisible to a mocked query builder
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: mts
+          POSTGRES_PASSWORD: mts
+          POSTGRES_DB: mts
+        ports:
+          - 5432:5432
+        # steps start as soon as the container does, which is before
+        # postgres is ready to answer
+        options: >-
+          --health-cmd "pg_isready -U mts"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: mts
+      DB_PASSWORD: mts
+      JWT_SECRET: ci-only-secret-not-used-anywhere-else
+
     steps:
       - uses: actions/checkout@v4
 
@@ -34,4 +62,8 @@ jobs:
       - run: pnpm lint
       # build stays because tsc catches type errors the linter does not
       - run: pnpm build
-      - run: pnpm test
+
+      # --coverage runs the same suites, so this reports coverage rather
+      # than testing twice. It includes the integration tests, which is
+      # why this job has a database
+      - run: pnpm --filter api test:cov

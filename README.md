@@ -12,82 +12,81 @@ MTS brings the vehicles, their maintenance schedules and the record of the servi
 
 ## Running it
 
-Requires Node (the version in `.nvmrc`), pnpm and Docker.
+Requires Node 24, pnpm and Docker.
 
 ```bash
-nvm use                 # node 24
 pnpm install
 cp .env.example .env
-pnpm db:up              # postgres in docker
+pnpm db:up              # postgres in docker, on 5433
+pnpm migration:run      # creates the schema, which migrations own
+pnpm seed               # demo fleet and a year of service history
 pnpm dev                # api on :3002, web on :5173
 ```
 
-Then open http://localhost:5173. The page reports whether the API and the database are reachable.
+Running the migrations is not optional. A fresh postgres container comes up
+empty, and the tables only exist once the migrations have created them. TypeORM
+can build them from the entity classes instead, through its synchronize option,
+but that is deliberately off here: the schema is only ever written by a migration
+somebody wrote and reviewed, so the database on a laptop is built the same way as
+the one in production.
 
-|          |                                  |
-| -------- | -------------------------------- |
-| Web      | http://localhost:5173            |
-| API      | http://localhost:3002/api        |
-| Health   | http://localhost:3002/api/health |
-| API docs | http://localhost:3002/docs       |
-| Postgres | `localhost:5433`                 |
+Skipping it fails confusingly rather than obviously. Postgres accepts the
+connection, the health endpoint reports the database up, and the first login is
+what finally errors, on a table that was never created.
 
-`pnpm up` runs the API in Docker too, instead of on the host.
+Then open http://localhost:5173 and sign in. Every seeded account uses the
+password mts-dev-password:
 
-Ports are set in `.env`. The defaults avoid 5432 and 3000 because a system Postgres and most editors' preview servers already hold them.
+| Account                 | Sees                          |
+| ----------------------- | ----------------------------- |
+| ana@citylogistics.co    | Fleet coordinator, everything |
+| carlos@citylogistics.co | Mechanic, no reports          |
+| laura@citylogistics.co  | Operations manager            |
+| admin@mts.local         | Platform admin                |
 
-Set `DATABASE_URL` in `.env` to point at a database somewhere else instead, which
-is the shape a managed provider hands over. When it is set the five `DB_` values are
-ignored.
+The API documents itself at http://localhost:3002/docs and reports its health at
+/api/health. Ports live in .env, and the defaults avoid 5432 and 3000 because
+a system Postgres and most editors' preview servers already hold them. Setting
+DATABASE_URL points everything at a database somewhere else and the five DB_
+values are ignored.
+
+## Testing it
+
+```bash
+pnpm test                      # unit tests, no database
+pnpm --filter api test:e2e     # integration tests, through HTTP into postgres
+```
+
+Every query in the API is scoped to one organization by the query builder, and a
+unit test cannot see when that scope goes missing, because the builder it was
+handed is a mock that agrees with whatever it is asked. The integration tests run
+the real thing instead, from the HTTP request through the guards and services
+into postgres, against a database of their own that they create and wipe.
 
 ## Deploying it
 
-Three free tiers: Vercel serves the client, Render runs the API, Neon holds the
-database. The browser only ever talks to Vercel, which forwards `/api` to Render,
-so no API host is baked into the client and there is no CORS to configure.
+Three free tiers: **Vercel** serves the client, **Render** runs the API, **Neon**
+holds the database. The browser only ever talks to Vercel, which forwards /api
+to Render, so no API host is baked into the client and there is no CORS to set up.
 
-**Neon.** Create a project and copy the connection string. The free plan does not
-expire and its limits are per project, so this one does not compete with anything
-else in the account.
+render.yaml and vercel.json configure both services. What is not in them, and
+has to be pasted into Render's dashboard, is DATABASE_URL from Neon,
+WEB_ORIGIN once Vercel has issued a domain, and the three CLOUDINARY_ values
+that send vehicle photos to an object store instead of to Render's disk, which is
+wiped on every deploy. Leave those three empty and the app runs with photo upload
+switched off.
 
-**Render.** Connect the repository; `render.yaml` configures the service. Two
-variables are not in the file and have to be pasted in the dashboard: `DATABASE_URL`
-from Neon, and `WEB_ORIGIN` once Vercel has given the client a domain. Migrations
-run on start rather than as a pre-deploy step, which Render offers only on paid
-plans; they are idempotent, so repeating them costs one query.
+Migrations run on start, since Render offers pre-deploy steps only on paid plans.
+For the demo data, run pnpm seed:prod from Render's shell.
 
-**Vercel.** Import the repository. `vercel.json` sets the build and the forwarding.
-Its destination has to be the hostname Render actually assigned, which is not
-always the service name: `onrender.com` subdomains are unique across every
-account, so a taken name gets a suffix. Check the URL on the service page after
-the first deploy and make `vercel.json` match. JSON takes no comments, so
-`render.yaml` carries the warning beside the name.
+Two things that bite:
 
-The second rewrite is what makes `/vehicles` and `/team/organization` work when
-somebody types them or refreshes: those paths are React Router's, not files on
-disk, so everything that is not `/api` and not a real file has to be answered with
-`index.html`.
-
-To put the demo data in the deployed database, run `pnpm seed:prod` from Render's
-shell, or point `DATABASE_URL` at Neon locally and run `pnpm seed`.
-
-**Cloudinary.** Vehicle photos go to an object store, not to Render's disk, which
-is wiped on every deploy and every wake-up. The free plan is permanent and the
-three values go in the dashboard like the others: `CLOUDINARY_CLOUD_NAME`,
-`CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET`. Leave them unset and everything
-runs with photo upload switched off.
-
-One thing worth knowing before a live demo: a free Render service sleeps after
-fifteen minutes and takes about a minute to wake, so open the app before
-presenting.
-
-## Layout
-
-```
-apps/api    NestJS + TypeORM
-apps/web    React + Vite + Tailwind
-docs        RFP, proposals, design
-```
+- **The Render hostname is not always the service name.** onrender.com
+  subdomains are unique across every account, so a taken name gets a suffix. Read
+  the real URL off the service page after the first deploy and make vercel.json
+  match, or the client forwards /api into nothing.
+- **A free Render service sleeps after fifteen minutes** and takes about a minute
+  to wake. Open the app before presenting.
 
 ## Docs
 
