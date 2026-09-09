@@ -450,7 +450,7 @@ export const schedulesTour = ({ canManage }: Audience): DriveStep[] => [
           popover: {
             title: 'Changing or removing one',
             description:
-              'Correct how often a rule repeats here. A rule with no work recorded against it yet can also be removed.',
+              'Correct how often a rule repeats here, or anywhere on its line. A rule with no work recorded against it yet can also be removed.',
             side: 'left' as const,
             align: 'start' as const,
           },
