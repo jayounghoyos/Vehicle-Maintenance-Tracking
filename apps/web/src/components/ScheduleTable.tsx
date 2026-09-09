@@ -14,6 +14,7 @@ import { sortRows, useMultiSort, type Sort } from '../hooks/useMultiSort';
 import { odometer, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
 import type { ScheduleItem } from '../lib/api';
+import { PRESSABLE_ROW } from './pressableRow';
 import { SortHeader } from './SortHeader';
 import { StatusChip } from './StatusChip';
 
@@ -45,6 +46,8 @@ const DUE_TEXT: Record<MaintenanceState, string> = {
   due_soon: 'text-due-soon',
   on_track: 'text-ink-muted',
 };
+
+const TH = 'px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase';
 
 function compare(a: ScheduleItem, b: ScheduleItem, key: SortKey): number {
   switch (key) {
@@ -130,6 +133,24 @@ export function ScheduleTable({
   }, [schedules, query, state]);
 
   const shown = sortRows(filtered, sort.order, compare);
+
+  /* Written out one by one rather than mapped, because the sortable
+   * columns are not next to each other: next due sits between last done
+   * and status, where the cells put it. */
+  const sortHeader = (key: SortKey) => {
+    const { label } = COLUMNS.find((column) => column.key === key)!;
+    return (
+      <SortHeader
+        label={label}
+        sort={sort.find(key)}
+        rank={sort.rankOf(key)}
+        showRank={sort.showRank}
+        ascendingLabel={key === 'next' ? 'soonest first' : 'A to Z'}
+        descendingLabel={key === 'next' ? 'latest first' : 'Z to A'}
+        onClick={() => sort.toggle(key)}
+      />
+    );
+  };
   const vehicleCount = new Set(shown.map((schedule) => schedule.vehicleId)).size;
 
   const filters: { value: MaintenanceState | 'all'; label: string; count: number }[] = [
@@ -188,30 +209,17 @@ export function ScheduleTable({
         <table className="w-full min-w-[920px] text-left">
           <thead>
             <tr data-tour="schedules-headings" className="border-b border-white/5">
-              {COLUMNS.map(({ key, label }) => (
-                <SortHeader
-                  key={key}
-                  label={label}
-                  sort={sort.find(key)}
-                  rank={sort.rankOf(key)}
-                  showRank={sort.showRank}
-                  ascendingLabel={key === 'next' ? 'soonest first' : 'A to Z'}
-                  descendingLabel={key === 'next' ? 'latest first' : 'Z to A'}
-                  onClick={() => sort.toggle(key)}
-                />
-              ))}
-              <th className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase">
-                Interval
-              </th>
-              <th
-                data-tour="schedules-last-done"
-                className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase"
-              >
+              {/* This order is the cells' order, below. They disagreed
+                  once, and every date on the screen read as the wrong
+                  thing until somebody noticed. */}
+              {sortHeader('vehicle')}
+              {sortHeader('task')}
+              <th className={TH}>Interval</th>
+              <th data-tour="schedules-last-done" className={TH}>
                 Last done
               </th>
-              <th className="px-5 py-3.5 text-table-label font-semibold text-ink-muted uppercase">
-                Status
-              </th>
+              {sortHeader('next')}
+              <th className={TH}>Status</th>
               <th />
             </tr>
           </thead>
@@ -224,7 +232,10 @@ export function ScheduleTable({
               return (
                 <tr
                   key={schedule.id}
-                  className={`transition-colors hover:bg-white/[0.03] ${busy ? 'opacity-50' : ''}`}
+                  onClick={canManage && !busy ? () => onEdit(schedule) : undefined}
+                  className={`${
+                    canManage ? PRESSABLE_ROW : 'transition-colors hover:bg-white/[0.03]'
+                  } ${busy ? 'opacity-50' : ''}`}
                 >
                   <td className="px-5 py-3.5 whitespace-nowrap">
                     <span className="font-semibold">{schedule.plate ?? '—'}</span>
@@ -271,6 +282,9 @@ export function ScheduleTable({
                             ? 'schedules-row-actions'
                             : undefined
                         }
+                        /* the row underneath opens the editor; a press
+                           on either of these means only itself */
+                        onClick={(event) => event.stopPropagation()}
                         className="flex justify-end gap-1"
                       >
                         <button
