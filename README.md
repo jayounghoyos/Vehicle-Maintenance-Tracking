@@ -119,6 +119,7 @@ Everything about how the project is run rather than how the code works lives in 
 - [Status updates](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Status-updates) — the weekly report to the client
 - [Client meetings](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Client-meetings) — what was agreed, and which features came out of it
 - [Mockups](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Mockups) — the design each screen was built against
+
 ## Stack
 
 React 19 + Vite (web client), NestJS 11 (back-end API), PostgreSQL 18 and TypeORM, in Docker. Styling is Tailwind 4, data fetching is TanStack Query. Deployment options are compared in [`architecture_diagram.md`](docs/design/architecture_diagram.md).
