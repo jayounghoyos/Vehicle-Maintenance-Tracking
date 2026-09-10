@@ -1,29 +1,18 @@
-# Architecture
+### Architecture Overview
 
-## Overview
 
-![Architecture](./architecture_diagram.svg)
+This diagram illustrates the end-to-end architecture of a full-stack vehicle maintenance tracking system (MTS):
 
-React in the browser, a NestJS API in a Docker container, PostgreSQL for storage. The five API modules are in [`components_diagram.md`](./components_diagram.md); the tables are in [`data_model.md`](./data_model.md).
-
-## Tools
-
-![Tools in each layer](./architecture_detail.svg)
-
-| Layer | Tool | For |
-|---|---|---|
-| Front-end | React + Vite | Screens and build |
-| | React Router | Navigation between the four screens |
-| | TanStack Query | Calls the API and caches the answers |
-| | Tailwind CSS | Styling, following the brand manual |
-| Back-end | NestJS | The API |
-| | Passport + JWT | Login and role permissions |
-| | class-validator | Rejects a bad request before it reaches the service |
-| | TypeORM | Queries and database migrations |
-| | Swagger | API documentation, generated from the code |
-| Data | PostgreSQL 16 | Storage |
-| Development | Docker Compose | Runs API and database locally with one command |
-| | Jest | Tests |
-| | GitHub Actions | Runs the tests on every push |
-
-These are the choices for the first delivery, not a commitment. Swapping TypeORM for Prisma, or moving off AWS, changes one layer and leaves the rest of the design intact.
+* **Client & Presentation (Vercel):** Users access a responsive Single Page Application through a web browser over HTTPS (REST/JSON). The frontend is bootstrapped with **Vite**, written in **React**, styled with **Tailwind CSS**, and uses **React Router** for routing and **TanStack Query** for asynchronous data fetching and state caching.
+* **Application API (Render):** The frontend forwards REST requests to a containerized **NestJS** backend running inside a **Docker** container on Render. Using **TypeORM** for data persistence, the service isolates core business modules:
+  * Authentication & Session Control (`Auth/JWT`)
+  * Fleet Registry (`Vehicles`, `Vehicle Models`)
+  * Maintenance Planning (`Maintenance Scheduling`, `Maintenance Tasks`)
+  * Operations Logging (`Service Events`)
+  * Aggregation & Metrics (`Dashboard`, `Reports`)
+* **Relational Storage (Neon):** The API executes SQL queries over an encrypted TLS connection to a serverless **PostgreSQL** database hosting the schema for:
+  * Multi-tenancy & Access Control (`Organizations`, `Users`, `Roles / Permissions`)
+  * Asset Tracking (`Vehicles`, `Vehicle Models`)
+  * Work Orders & Schedules (`Maintenance Tasks`, `Maintenance Schedules`, `Service Events`)
+  * Media References (`Vehicle Photos metadata`)
+* **Media & Asset Storage (Cloudinary):** Handles direct object/image storage for vehicle photos and service inspection imagery, referenced relationally via metadata URLs in the PostgreSQL instance.
