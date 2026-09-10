@@ -1,4 +1,5 @@
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule, type OpenAPIObject } from '@nestjs/swagger';
 
 /**
  * Everything that decides how a request is read, in one place.
@@ -19,4 +20,24 @@ export function configure(app: INestApplication): void {
       transform: true,
     }),
   );
+}
+
+/**
+ * The OpenAPI description of this API, built from the controllers.
+ *
+ * addBearerAuth is what makes the Authorize button appear: the
+ * controllers are annotated with ApiBearerAuth, and Swagger ignores that
+ * annotation unless the document also declares the scheme it names.
+ * Without it the page offers no way to send a token, so every protected
+ * endpoint answers 401 when somebody tries it.
+ */
+export function openApiDocument(app: INestApplication): OpenAPIObject {
+  const config = new DocumentBuilder()
+    .setTitle('Vehicle Maintenance Tracking API')
+    .setDescription('MTS, RFP-012')
+    .setVersion('0.1.0')
+    .addBearerAuth()
+    .build();
+
+  return SwaggerModule.createDocument(app, config);
 }
