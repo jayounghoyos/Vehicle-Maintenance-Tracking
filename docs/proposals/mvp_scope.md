@@ -1,36 +1,40 @@
 # MVP Scope — Vehicle Maintenance Tracking System (RFP-012)
 
-Framework: **IN** (build now) / **OUT** (explicitly excluded) / **LATER** (future phase, not MVP) / **UNKNOWN** (needs a decision before/while building)
+Framework: **IN** (built & verified) / **OUT** (explicitly excluded) / **LATER** (future phase, not MVP) / **RESOLVED / IMPLEMENTED** (previously unknown or deferred, now settled in code)
 
 ## IN
 
-- **Vehicle profiles**: create, view, edit vehicle records (plate, make, model, year, odometer, status)
-- **User accounts & roles**: fleet coordinator, mechanic/service recorder, operations manager, each with role-based access
-- **Planned maintenance schedule**: define recurring service items per vehicle (task, interval in days/km, next due date/km)
-- **Service event log**: record completed maintenance or breakdown events per vehicle (type, date, odometer, notes, recorded by)
-- **Overdue / upcoming maintenance view**: derive and display maintenance items that are due soon or overdue, based on schedule vs. logged events
-- **Reporting snapshot**: exportable/viewable summary of maintenance status for delivery
-- **QA evidence**: test results/checklist delivered alongside the MVP
+- **Vehicle profiles**: Create, view, edit, filter, and track vehicle records (license plate, VIN, make, model, year, odometer, operational status)[cite: 2]. Includes a vehicle gallery with multi-photo uploads and primary thumbnail selection[cite: 2].
+- **User accounts & roles**: Complete authentication and authorization supporting fleet managers, technicians, coordinators, and platform admins[cite: 2]. Expanded into configurable role-based access control (RBAC) with granular permissions[cite: 2].
+- **Planned maintenance schedule**: Configurable recurring service tasks linked to vehicle models or specific vehicles, tracking intervals by calendar days, mileage (km), or both[cite: 2].
+- **Service event log**: Comprehensive logging of completed preventative maintenance and repairs (service task, date, odometer reading, costs, notes, technician attribution, and Cloudinary-backed receipt/photo attachments)[cite: 1, 2].
+- **Overdue / upcoming maintenance view**: Real-time fleet status evaluation with visual indicators, overdue alert banners, and dedicated "Needs Attention" tables comparing current odometer/date against schedule thresholds[cite: 2].
+- **Reporting snapshot**: Interactive analytical reports with summary KPI cards and configurable charts (cost trends, service volume, status breakdowns)[cite: 2].
+- **Multi-tenant organization management**: Complete tenant isolation allowing distinct organizations to manage their own fleets, users, and custom branding (accent colors and logos)[cite: 2].
+- **Bulk spreadsheet import**: In-app CSV/TSV copy-paste import tooling to onboard vehicle fleets (`ImportVehicles.tsx`) and team rosters (`ImportTeam.tsx`) without manual entry[cite: 2].
+- **QA & test coverage**: Unit test suites, end-to-end integration workflows (`fleet-workflow.e2e-spec.ts`, `tenant-isolation.e2e-spec.ts`), and CI pipelines (`ci.yml`)[cite: 2].
 
 ## OUT
 
-- Route planning or fuel optimization
-- Telematics or live vehicle data integration
-- Complex spare-parts inventory management
+- Route planning or fuel consumption optimization[cite: 2].
+- Real-time telematics hardware or direct OBD-II live stream integration[cite: 2].
+- Complex spare-parts inventory stockroom management and supplier procurement[cite: 2].
 
-*(These are explicitly excluded per RFP-012 — not a "maybe later," but out of scope for this engagement entirely.)*
+*(These remain explicitly excluded per RFP-012 guidelines[cite: 2].)*
 
 ## LATER
 
-- Automated reminders/notifications (email or SMS) for upcoming maintenance
-- Support for multiple fleet teams within the same instance
-- Advanced analytics/reporting dashboards (trends, cost tracking over time)
-- Mobile-friendly or native mobile app version
-- Data import tooling from the client's existing spreadsheets
+- **Automated external notifications**: Push notifications, email digests, or SMS alerts (e.g., via SendGrid or Twilio) for pending/overdue maintenance items.
+- **Exportable audit packages**: Direct PDF generation for work order receipts and compliance history exports.
+- **Parts catalog per event**: Line-item tracking of parts used during service logging.
+- **Native mobile applications**: Dedicated iOS and Android native apps (currently served as a responsive mobile-friendly web layout)[cite: 2].
 
-## UNKNOWN
+## RESOLVED / IMPLEMENTED
 
-- Authentication mechanism for the MVP (session-based vs. token/JWT) — data model has a `password` field but the auth strategy isn't decided yet
-- Hosting/CI-CD specifics beyond "AWS" (which services, how deployment is triggered) — architecture diagram shows AWS but deployment approach is still "to be confirmed during design phase" per the proposal
-- How overdue logic will be validated against real fleet expectations, given there's no historical digital data to test against
-- Whether odometer-based intervals (km) or date-based intervals (days) take priority when both are defined for the same schedule item
+*(Items previously classified as UNKNOWN or deferred to LATER that are now fully resolved and implemented in the repository[cite: 2]):*
+
+- **Authentication mechanism**: Resolved using stateless JWT Bearer authentication with hashed passwords (bcrypt), Passport JWT strategy, and persistent client session storage[cite: 2].
+- **Hosting & CI/CD pipeline**: Resolved and deployed using **Vercel** for the React + Vite frontend and **Render** (via containerized Dockerfile) for the NestJS backend, connected to a serverless **Neon PostgreSQL** database with Cloudinary asset storage[cite: 1, 2]. Automation is handled via GitHub Actions (`ci.yml`)[cite: 2].
+- **Interval priority & overdue logic**: Resolved in `fleet-state.ts` and `maintenance.ts`[cite: 2]. The evaluation engine checks both days and odometer thresholds independently[cite: 2]; a schedule item triggers **OVERDUE** or **DUE SOON** whenever *either* condition breaches its respective threshold[cite: 2].
+- **Spreadsheet onboarding**: Shifted from LATER to IN[cite: 2]. Built-in parsers (`parseVehicleRows.ts`, `parseTeamRows.ts`) and modal UI components allow direct spreadsheet table pasting during initial fleet setup[cite: 2].
+- **Multi-tenant architecture**: Shifted from LATER to IN[cite: 2]. Full multi-tenancy is implemented at the schema level with tenant ID isolation on all primary repositories and a separate platform admin console[cite: 2].
