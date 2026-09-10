@@ -103,6 +103,22 @@ Two things that bite:
 - [`docs/design/mockup.md`](docs/design/mockup.md) Mockup and brand manual
 - [Figma](https://www.figma.com/design/fMaBXAqdPYR5PV6qh3xMvY/Pen.dev-to-Figma-%C2%B7-FREE--Community-?t=WU94WV9zbpYN4iTN-1) Screens and flow
 
+## Working on the code
+
+[`AGENTS.md`](AGENTS.md) holds the conventions this repository follows — how queries are scoped to an organization, where a permission is checked, how commits and branches are named, which commands are safe to run. Read it before the first change, whether you are writing the code yourself or handing the task to an assistant.
+
+[`docs/ai/prompts/`](docs/ai/prompts) holds three reusable prompt templates: [adding an API module](docs/ai/prompts/api-module.md), [building a web screen](docs/ai/prompts/web-screen.md), and [fixing a bug](docs/ai/prompts/bug-fix.md).
+
+## Project wiki
+
+Everything about how the project is run rather than how the code works lives in the [wiki](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki).
+
+- [Backlog](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Backlog) — milestone status, user stories, and the questions still open with the client
+- [Architecture](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Architecture) — how the pieces fit together
+- [AI usage](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/AI-usage) — which tools were used, how their output was checked, and where it failed
+- [Status updates](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Status-updates) — the weekly report to the client
+- [Client meetings](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Client-meetings) — what was agreed, and which features came out of it
+- [Mockups](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Mockups) — the design each screen was built against
 ## Stack
 
 React 19 + Vite (web client), NestJS 11 (back-end API), PostgreSQL 18 and TypeORM, in Docker. Styling is Tailwind 4, data fetching is TanStack Query. Deployment options are compared in [`architecture_diagram.md`](docs/design/architecture_diagram.md).
