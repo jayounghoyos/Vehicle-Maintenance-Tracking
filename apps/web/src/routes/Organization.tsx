@@ -16,11 +16,26 @@ import { api, type OrganizationProfile } from '../lib/api';
 import { shortDate } from '../lib/format';
 
 const FIELDS = [
-  { name: 'name', label: 'Organization name', type: 'text' },
-  { name: 'ownerName', label: 'Director', type: 'text' },
-  { name: 'address', label: 'Address', type: 'text' },
-  { name: 'phone', label: 'Phone', type: 'tel' },
-  { name: 'email', label: 'Contact email', type: 'email' },
+  {
+    name: 'name',
+    label: 'Organization name',
+    type: 'text',
+    hint: 'What your team sees across the app.',
+  },
+  {
+    name: 'ownerName',
+    label: 'Director',
+    type: 'text',
+    hint: 'Who to call about the account.',
+  },
+  { name: 'address', label: 'Address', type: 'text', hint: 'Street, city.' },
+  { name: 'phone', label: 'Phone', type: 'tel', hint: 'Where the fleet can be reached.' },
+  {
+    name: 'email',
+    label: 'Contact email',
+    type: 'email',
+    hint: 'For the account. Not a login.',
+  },
 ] as const;
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -136,12 +151,13 @@ export default function Organization() {
                   save.mutate(Object.fromEntries(form) as Record<string, string>);
                 }}
               >
-                {FIELDS.map(({ name, label, type }) => (
+                {FIELDS.map(({ name, label, type, hint }) => (
                   <Field
                     key={name}
                     label={label}
                     name={name}
                     type={type}
+                    hint={hint}
                     defaultValue={org[name]}
                     required
                   />

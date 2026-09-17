@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { Logo } from './Logo';
 
 /** The shell the signed-out screens share. */
@@ -25,17 +27,76 @@ export function AuthLayout({
   );
 }
 
+/**
+ * What is wrong with a field, said the way the person filling it in
+ * would say it.
+ *
+ * The browser already knows: it is holding a ValidityState and a message
+ * for it. The message is the problem. "Please include an '@' in the email
+ * address. 'dsadas' is missing an '@'." describes the string rather than
+ * telling anybody what to type, and it only appears on submit, in a
+ * bubble that vanishes.
+ */
+function describeValidity(input: HTMLInputElement, label: string): string {
+  const { validity } = input;
+
+  if (validity.valueMissing) return `${label} is needed`;
+  if (validity.typeMismatch && input.type === 'email') {
+    return 'An email address looks like name@company.com';
+  }
+  if (validity.tooShort) return `At least ${input.minLength} characters`;
+  if (validity.tooLong) return `At most ${input.maxLength} characters`;
+  if (validity.rangeUnderflow) return `${label} cannot be below ${input.min}`;
+  if (validity.rangeOverflow) return `${label} cannot be above ${input.max}`;
+  if (validity.stepMismatch || validity.badInput) return `${label} is not a number`;
+
+  // whatever is left is rarer than the phrasing needed to cover it
+  return input.validationMessage;
+}
+
 export function Field({
   label,
+  hint,
   ...props
-}: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+}: {
+  label: string;
+  /** What to put here, said before anybody types rather than after. */
+  hint?: string;
+} & React.InputHTMLAttributes<HTMLInputElement>) {
+  const [problem, setProblem] = useState<string | null>(null);
+
   return (
     <label className="block">
-      <span className="mb-1.5 block text-body text-ink-muted">{label}</span>
+      <span className="mb-1 block text-body text-ink-muted">{label}</span>
+      {hint && <span className="mb-1.5 block text-[12px] text-ink-muted/70">{hint}</span>}
       <input
         {...props}
-        className="w-full rounded-xl border border-white/10 bg-panel px-3.5 py-2.5 text-body placeholder:text-ink-muted/60 focus:border-lime/40 focus:outline-none"
+        aria-invalid={problem ? true : undefined}
+        // the native bubble is what we are replacing, so it never opens
+        onInvalid={(event) => {
+          event.preventDefault();
+          setProblem(describeValidity(event.currentTarget, label));
+        }}
+        onBlur={(event) => {
+          const input = event.currentTarget;
+          // an empty field somebody has not filled in yet is not a mistake
+          const quiet = input.value === '' || input.validity.valid;
+          setProblem(quiet ? null : describeValidity(input, label));
+          props.onBlur?.(event);
+        }}
+        onChange={(event) => {
+          if (problem && event.currentTarget.validity.valid) setProblem(null);
+          props.onChange?.(event);
+        }}
+        className={`w-full rounded-xl border bg-panel px-3.5 py-2.5 text-body placeholder:text-ink-muted/60 focus:outline-none ${
+          problem
+            ? 'border-overdue/60 focus:border-overdue'
+            : 'border-white/10 focus:border-lime/40'
+        }`}
       />
+      {problem && (
+        <span className="mt-1.5 block text-[12px] text-overdue">{problem}</span>
+      )}
     </label>
   );
 }
@@ -44,15 +105,18 @@ export function Field({
  *  hand and the vehicle form needs two of them. */
 export function Select({
   label,
+  hint,
   options,
   ...props
 }: {
   label: string;
+  hint?: string;
   options: { value: string; label: string }[];
 } & React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-body text-ink-muted">{label}</span>
+      <span className="mb-1 block text-body text-ink-muted">{label}</span>
+      {hint && <span className="mb-1.5 block text-[12px] text-ink-muted/70">{hint}</span>}
       <select
         {...props}
         className="w-full rounded-xl border border-white/10 bg-panel px-3.5 py-2.5 text-body focus:border-lime/40 focus:outline-none"

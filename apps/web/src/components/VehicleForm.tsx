@@ -52,6 +52,7 @@ export function VehicleForm({
       <Field
         label="Plate"
         name="plate"
+        hint="Spaces and case do not matter. One per fleet."
         defaultValue={vehicle?.plate}
         placeholder="ABC123"
         required
@@ -80,6 +81,7 @@ export function VehicleForm({
           label="Year"
           name="year"
           type="number"
+          hint="Optional, from 1950."
           defaultValue={vehicle?.year ?? ''}
           placeholder="2019"
           min={1950}
@@ -89,6 +91,7 @@ export function VehicleForm({
           label="Odometer (km)"
           name="odometerKm"
           type="number"
+          hint="Optional. Whole kilometres as they read on the dash."
           defaultValue={vehicle?.odometerKm ?? ''}
           placeholder="0"
           min={0}
