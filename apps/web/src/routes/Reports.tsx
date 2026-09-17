@@ -130,7 +130,16 @@ export default function Reports() {
       subtitle="What the fleet has been doing"
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
-      <div className="space-y-5" style={printWidth ? { width: printWidth } : undefined}>
+      <div
+        /* A resize is not enough for every chart: a radar redraws its
+           polygon at the new size while its labels keep the old centre,
+           and the two end up 16px apart. Changing the key throws the
+           charts away and builds them once at the printed width, which
+           is the only state Recharts computes consistently. */
+        key={printWidth ?? 'screen'}
+        className="space-y-5"
+        style={printWidth ? { width: printWidth } : undefined}
+      >
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <div
             data-tour="report-range"
@@ -204,6 +213,7 @@ export default function Reports() {
             >
               <div className="px-2 pb-4">
                 <ReportChart
+                  animate={!printWidth}
                   points={data.metrics[HERO]}
                   type="area"
                   metric={METRICS[HERO]}
@@ -219,6 +229,7 @@ export default function Reports() {
                 <Panel key={id} title={METRICS[id].label}>
                   <div className="px-5 pb-5">
                     <ReportChart
+                      animate={!printWidth}
                       points={data.metrics[id]}
                       type={METRICS[id].charts[0]}
                       metric={METRICS[id]}
@@ -248,6 +259,7 @@ export default function Reports() {
             >
               <div className="px-2 pb-4">
                 <ReportChart
+                  animate={!printWidth}
                   points={data.metrics[choice.metric]}
                   type={choice.chart}
                   metric={METRICS[choice.metric]}
