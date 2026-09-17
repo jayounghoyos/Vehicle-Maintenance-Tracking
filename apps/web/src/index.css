@@ -289,9 +289,11 @@
  * border around every block reads as clutter once there is nothing to
  * separate it from. */
 @media print {
+  /* landscape, because the page being printed is charts: portrait gives
+     them 180mm of width and they are drawn wider than that */
   @page {
-    size: A4;
-    margin: 14mm;
+    size: A4 landscape;
+    margin: 12mm;
   }
 
   body {

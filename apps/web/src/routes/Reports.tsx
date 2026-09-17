@@ -25,6 +25,8 @@ const RANGES = [3, 6, 12];
    about. The two below answer what and how much. */
 const HERO: MetricId = 'servicesPerMonth';
 const SUPPORTING: MetricId[] = ['fleetByState', 'servicesByTask'];
+const PRINT_WIDTH = 1030;
+
 const REMEMBERED = 'mts.report';
 
 export default function Reports() {
@@ -80,6 +82,10 @@ export default function Reports() {
     );
   };
 
+  // what A4 landscape holds at 96dpi, once the @page margins are taken
+  // off: 297mm wide, 12mm each side
+  const [printWidth, setPrintWidth] = useState<number | null>(null);
+
   // both buttons, said once
   const exportStyle =
     'flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink disabled:opacity-50';
@@ -92,10 +98,30 @@ export default function Reports() {
    *
    * The document title is what the dialog offers as the file name. */
   const exportPdf = () => {
+    // Recharts measures its container once and draws an svg that wide.
+    // Printing does not make it measure again, so a chart sized for the
+    // screen keeps that width on a page half as wide and loses its
+    // right-hand side. Narrowing the page to what A4 landscape holds is
+    // a resize it does notice, so it redraws at the printed width.
     const previous = document.title;
-    document.title = datedName(`reports-${months}m`, 'pdf');
-    window.print();
-    document.title = previous;
+    setPrintWidth(PRINT_WIDTH);
+
+    // afterprint rather than the line below window.print(), because
+    // print() blocks until the dialog closes in some browsers and
+    // returns straight away in others
+    const restore = () => {
+      document.title = previous;
+      setPrintWidth(null);
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+
+    // long enough for the charts to redraw at the new width, which they
+    // do in well under a frame budget's worth of this
+    setTimeout(() => {
+      document.title = datedName(`reports-${months}m`, 'pdf');
+      window.print();
+    }, 150);
   };
 
   return (
@@ -104,7 +130,7 @@ export default function Reports() {
       subtitle="What the fleet has been doing"
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
-      <div className="space-y-5">
+      <div className="space-y-5" style={printWidth ? { width: printWidth } : undefined}>
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <div
             data-tour="report-range"
