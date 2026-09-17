@@ -276,7 +276,7 @@ export default function Team() {
                   label="Email"
                   name="email"
                   type="email"
-                  hint="They sign in with this. It has to be one nobody here uses yet."
+                  hint="They sign in with this. One address, one account."
                   required
                 />
                 <Field
