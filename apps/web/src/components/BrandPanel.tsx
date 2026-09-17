@@ -1,5 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ImagePlus, RotateCcw, Trash2, Wrench } from 'lucide-react';
+import {
+  AlertTriangle,
+  ImagePlus,
+  Pipette,
+  RotateCcw,
+  Trash2,
+  Wrench,
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { DEFAULT_ACCENT, isFaint, isValidAccent, readableOn } from '../lib/brand';
@@ -59,6 +66,9 @@ export function BrandPanel({
   const busy = saveAccent.isPending || uploadLogo.isPending || removeLogo.isPending;
   const dirty = draft.toLowerCase() !== (org.accentColor ?? DEFAULT_ACCENT).toLowerCase();
   const usable = isValidAccent(draft);
+  // a colour that is none of the five was picked by hand, and the control
+  // that did it should look chosen
+  const custom = !PRESETS.some((preset) => preset.toLowerCase() === draft.toLowerCase());
 
   const choose = (file: File | undefined) => {
     if (!file) return;
@@ -148,6 +158,10 @@ export function BrandPanel({
             </h3>
             {canEdit ? (
               <>
+                <p className="mb-2.5 text-[12px] text-ink-muted">
+                  Pick one of these, or choose any colour of your own.
+                </p>
+
                 <div className="flex flex-wrap items-center gap-2">
                   {PRESETS.map((preset) => (
                     <button
@@ -163,26 +177,36 @@ export function BrandPanel({
                       }`}
                     />
                   ))}
-                  {/* the picker is a swatch too, so the row reads as one
-                      set of choices rather than a list plus an escape */}
+
+                  {/* Not a sixth swatch. It was one, and a client read the
+                      row as six colours rather than five and a way out of
+                      them, so now it says what it is. */}
                   <label
-                    className="relative size-8 cursor-pointer overflow-hidden rounded-lg border border-dashed border-white/25"
-                    title="Any other colour"
+                    className={`relative ml-1 flex cursor-pointer items-center gap-2 rounded-xl border px-2.5 py-1.5 transition-colors ${
+                      custom
+                        ? 'border-lime/50 bg-lime/10'
+                        : 'border-white/15 hover:border-white/30 hover:bg-white/5'
+                    }`}
                   >
                     <span
-                      className="block size-full"
+                      className="size-5 rounded-md border border-white/20"
                       style={{ backgroundColor: usable ? draft : 'transparent' }}
                     />
+                    <span className="flex items-center gap-1.5 text-[12px] font-medium text-ink">
+                      <Pipette className="size-3.5" strokeWidth={2} />
+                      Custom colour
+                    </span>
                     <input
                       type="color"
                       value={usable ? draft : DEFAULT_ACCENT}
                       onChange={(event) => setDraft(event.target.value.toUpperCase())}
-                      className="absolute inset-0 cursor-pointer opacity-0"
+                      className="absolute inset-0 size-full cursor-pointer opacity-0"
+                      aria-label="Choose any colour"
                     />
                   </label>
+
                   <code className="ml-1 text-[12px] text-ink-muted">{draft}</code>
                 </div>
-
                 {usable && isFaint(draft) && (
                   <p className="mt-3 flex items-start gap-2 text-[12px] text-due-soon">
                     <AlertTriangle className="mt-px size-3.5 shrink-0" strokeWidth={2} />

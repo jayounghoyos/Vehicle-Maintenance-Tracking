@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
@@ -8,7 +8,7 @@ import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { useBrand } from '../hooks/useBrand';
 import { api } from '../lib/api';
-import { downloadCsv, toCsv } from '../lib/csv';
+import { downloadCsv, toCsv, datedName } from '../lib/csv';
 import { ChartPicker } from '../reports/ChartPicker';
 import { ReportChart } from '../reports/ReportChart';
 import { ReportSummary } from '../reports/ReportSummary';
@@ -25,6 +25,8 @@ const RANGES = [3, 6, 12];
    about. The two below answer what and how much. */
 const HERO: MetricId = 'servicesPerMonth';
 const SUPPORTING: MetricId[] = ['fleetByState', 'servicesByTask'];
+const PRINT_WIDTH = 1030;
+
 const REMEMBERED = 'mts.report';
 
 export default function Reports() {
@@ -60,10 +62,66 @@ export default function Reports() {
 
   const exportAll = () => {
     if (!data) return;
+    // the range belongs in the rows, not only in the file name: two
+    // exports pasted into one sheet are otherwise indistinguishable
+    const range = `Last ${months} months`;
     const rows = Object.entries(data.metrics).flatMap(([id, points]) =>
-      points.map((point) => [METRICS[id as MetricId].label, point.label, point.value]),
+      points.map((point) => [
+        range,
+        METRICS[id as MetricId].label,
+        // the key is what the API grouped by, and for the time series it
+        // is the sortable YYYY-MM behind a label like "Sep 26"
+        point.key,
+        point.label,
+        point.value,
+      ]),
     );
-    downloadCsv(`reports-${months}m.csv`, toCsv(['Report', 'Item', 'Value'], rows));
+    downloadCsv(
+      datedName(`reports-${months}m`),
+      toCsv(['Range', 'Report', 'Key', 'Item', 'Value'], rows),
+    );
+  };
+
+  // what A4 landscape holds at 96dpi, once the @page margins are taken
+  // off: 297mm wide, 12mm each side
+  const [printWidth, setPrintWidth] = useState<number | null>(null);
+
+  // both buttons, said once
+  const exportStyle =
+    'flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink disabled:opacity-50';
+
+  /* No PDF library. The browser already writes this page to PDF with the
+   * fonts and the charts that are on screen, and the print sheet in
+   * index.css is what makes the result worth keeping. Sending the same
+   * numbers through a second renderer would mean a second definition of
+   * every chart, one that drifts from the first.
+   *
+   * The document title is what the dialog offers as the file name. */
+  const exportPdf = () => {
+    // Recharts measures its container once and draws an svg that wide.
+    // Printing does not make it measure again, so a chart sized for the
+    // screen keeps that width on a page half as wide and loses its
+    // right-hand side. Narrowing the page to what A4 landscape holds is
+    // a resize it does notice, so it redraws at the printed width.
+    const previous = document.title;
+    setPrintWidth(PRINT_WIDTH);
+
+    // afterprint rather than the line below window.print(), because
+    // print() blocks until the dialog closes in some browsers and
+    // returns straight away in others
+    const restore = () => {
+      document.title = previous;
+      setPrintWidth(null);
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+
+    // long enough for the charts to redraw at the new width, which they
+    // do in well under a frame budget's worth of this
+    setTimeout(() => {
+      document.title = datedName(`reports-${months}m`, 'pdf');
+      window.print();
+    }, 150);
   };
 
   return (
@@ -72,7 +130,16 @@ export default function Reports() {
       subtitle="What the fleet has been doing"
       sidebarFooter={me ? <SidebarFooter user={me} /> : undefined}
     >
-      <div className="space-y-5">
+      <div
+        /* A resize is not enough for every chart: a radar redraws its
+           polygon at the new size while its labels keep the old centre,
+           and the two end up 16px apart. Changing the key throws the
+           charts away and builds them once at the printed width, which
+           is the only state Recharts computes consistently. */
+        key={printWidth ?? 'screen'}
+        className="space-y-5"
+        style={printWidth ? { width: printWidth } : undefined}
+      >
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <div
             data-tour="report-range"
@@ -98,16 +165,27 @@ export default function Reports() {
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={exportAll}
-            disabled={!data}
-            data-tour="report-export"
-            className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
-          >
-            <Download className="size-4" />
-            Export CSV
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={exportAll}
+              disabled={!data}
+              data-tour="report-export"
+              className={exportStyle}
+            >
+              <Download className="size-4" />
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={exportPdf}
+              disabled={!data}
+              className={exportStyle}
+            >
+              <Printer className="size-4" />
+              Export PDF
+            </button>
+          </div>
         </div>
 
         {isError && (
@@ -135,6 +213,7 @@ export default function Reports() {
             >
               <div className="px-2 pb-4">
                 <ReportChart
+                  animate={!printWidth}
                   points={data.metrics[HERO]}
                   type="area"
                   metric={METRICS[HERO]}
@@ -150,6 +229,7 @@ export default function Reports() {
                 <Panel key={id} title={METRICS[id].label}>
                   <div className="px-5 pb-5">
                     <ReportChart
+                      animate={!printWidth}
                       points={data.metrics[id]}
                       type={METRICS[id].charts[0]}
                       metric={METRICS[id]}
@@ -179,6 +259,7 @@ export default function Reports() {
             >
               <div className="px-2 pb-4">
                 <ReportChart
+                  animate={!printWidth}
                   points={data.metrics[choice.metric]}
                   type={choice.chart}
                   metric={METRICS[choice.metric]}

@@ -283,7 +283,19 @@
    the PDF, so there is no library to carry for it. Tailwind's own print:
    variant hides the controls; this only has to repaint the page, since a
    dark background is not what anyone wants out of a printer. */
+/* The PDF export on Reports. The browser writes the page; this decides
+ * whether what comes out is worth keeping. The interface is dark and
+ * lives in panels, and neither survives paper: ink costs money and a
+ * border around every block reads as clutter once there is nothing to
+ * separate it from. */
 @media print {
+  /* landscape, because the page being printed is charts: portrait gives
+     them 180mm of width and they are drawn wider than that */
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
   body {
     background: #fff;
     color: #000;
@@ -291,5 +303,27 @@
 
   main {
     padding: 0;
+  }
+
+  [class*='bg-panel'],
+  [class*='bg-page'] {
+    background: #fff !important;
+  }
+
+  [class*='border-white'] {
+    border-color: #d4d4d8 !important;
+  }
+
+  [class*='text-ink'] {
+    color: #000 !important;
+  }
+
+  [class*='text-ink-muted'] {
+    color: #52525b !important;
+  }
+
+  /* a chart split over two pages is a chart nobody can read */
+  section {
+    break-inside: avoid;
   }
 }

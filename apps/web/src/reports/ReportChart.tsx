@@ -40,6 +40,9 @@ type Props = {
   height?: number;
   /** 'key' only where the categories are being narrowed. */
   pairing?: 'index' | 'key';
+  /** Off for the PDF: the print dialog freezes the page, so a chart
+   *  halfway through growing is the one that ends up on the paper. */
+  animate?: boolean;
 };
 
 const TICK = { fill: AXIS, fontSize: 11 };
@@ -69,6 +72,7 @@ export function ReportChart({
   accent,
   height = 240,
   pairing = 'index',
+  animate = true,
 }: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
   const gradient = useId();
@@ -138,6 +142,7 @@ export function ReportChart({
               endAngle={-270}
             >
               <RadialBar
+                isAnimationActive={animate}
                 dataKey="value"
                 animationMatchBy={match}
                 background={{ fill: 'rgba(255,255,255,.04)' }}
@@ -168,6 +173,7 @@ export function ReportChart({
           <PolarGrid stroke={GRID} />
           <PolarAngleAxis dataKey="label" tick={TICK} />
           <Radar
+            isAnimationActive={animate}
             dataKey="value"
             animationMatchBy={match}
             stroke={accent}
@@ -186,6 +192,7 @@ export function ReportChart({
     return (
       <ResponsiveContainer width="100%" height={height}>
         <Treemap
+          isAnimationActive={animate}
           data={points}
           dataKey="value"
           stroke="#141718"
@@ -212,6 +219,7 @@ export function ReportChart({
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
+                isAnimationActive={animate}
                 data={points}
                 dataKey="value"
                 animationMatchBy={match}
@@ -274,6 +282,7 @@ export function ReportChart({
 
   const bars = (
     <Bar
+      isAnimationActive={animate}
       dataKey="value"
       animationMatchBy={match}
       radius={type === 'row' ? [0, 6, 6, 0] : [6, 6, 0, 0]}
@@ -338,6 +347,7 @@ export function ReportChart({
             </defs>
             {axes}
             <Area
+              isAnimationActive={animate}
               dataKey="value"
               animationMatchBy={match}
               stroke={accent}
@@ -351,6 +361,7 @@ export function ReportChart({
           <LineChart data={points} margin={{ top: 8, right: 8 }}>
             {axes}
             <Line
+              isAnimationActive={animate}
               dataKey="value"
               animationMatchBy={match}
               stroke={accent}

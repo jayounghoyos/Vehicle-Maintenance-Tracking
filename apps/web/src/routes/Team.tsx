@@ -216,6 +216,7 @@ export default function Team() {
                   label="Email"
                   name="email"
                   type="email"
+                  hint="What they sign in with."
                   defaultValue={editing.email}
                   required
                 />
@@ -265,12 +266,24 @@ export default function Team() {
                   create.mutate(Object.fromEntries(form) as Record<string, string>);
                 }}
               >
-                <Field label="Full name" name="fullName" required />
-                <Field label="Email" name="email" type="email" required />
+                <Field
+                  label="Full name"
+                  name="fullName"
+                  hint="How the rest of the team will see them."
+                  required
+                />
+                <Field
+                  label="Email"
+                  name="email"
+                  type="email"
+                  hint="They sign in with this. One address, one account."
+                  required
+                />
                 <Field
                   label="Password"
                   name="password"
                   type="password"
+                  hint="At least 8 characters. You will have to pass it on yourself."
                   required
                   minLength={8}
                 />

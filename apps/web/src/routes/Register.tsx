@@ -45,21 +45,56 @@ export default function Register() {
         <p className="text-table-label font-semibold text-ink-muted uppercase">
           The organization
         </p>
-        <Field label="Name" name="organizationName" required autoFocus />
-        <Field label="Director or owner" name="ownerName" required />
-        <Field label="Address" name="address" required />
-        <Field label="Phone" name="phone" required />
-        <Field label="Contact email" name="organizationEmail" type="email" required />
+        <Field
+          label="Name"
+          name="organizationName"
+          hint="As your team should see it across the app."
+          required
+          autoFocus
+        />
+        <Field
+          label="Director or owner"
+          name="ownerName"
+          hint="Who to call about the account. They do not have to sign in."
+          required
+        />
+        <Field label="Address" name="address" hint="Street, city." required />
+        <Field
+          label="Phone"
+          name="phone"
+          hint="Where the fleet can be reached."
+          required
+        />
+        <Field
+          label="Contact email"
+          name="organizationEmail"
+          type="email"
+          hint="For the account itself. This one is not a login."
+          required
+        />
 
         <p className="pt-2 text-table-label font-semibold text-ink-muted uppercase">
           Your account
         </p>
-        <Field label="Full name" name="fullName" required />
-        <Field label="Email" name="email" type="email" required autoComplete="email" />
+        <Field
+          label="Full name"
+          name="fullName"
+          hint="How your team will see you."
+          required
+        />
+        <Field
+          label="Email"
+          name="email"
+          type="email"
+          hint="You will sign in with this address."
+          required
+          autoComplete="email"
+        />
         <Field
           label="Password"
           name="password"
           type="password"
+          hint="At least 8 characters."
           required
           minLength={8}
           autoComplete="new-password"

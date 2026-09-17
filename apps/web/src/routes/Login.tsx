@@ -48,6 +48,7 @@ export default function Login() {
           label="Email"
           name="email"
           type="email"
+          hint="The address your account was created with."
           required
           autoComplete="email"
           autoFocus

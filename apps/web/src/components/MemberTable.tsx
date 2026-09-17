@@ -2,7 +2,7 @@ import { Download, Pencil, RotateCcw, Search, Trash2, UserMinus } from 'lucide-r
 import { useMemo, useState } from 'react';
 
 import { sortRows, useMultiSort, type Sort } from '../hooks/useMultiSort';
-import { toCsv, downloadCsv } from '../lib/csv';
+import { toCsv, downloadCsv, datedName } from '../lib/csv';
 import { initials, shortDate } from '../lib/format';
 import type { RoleSummary, TeamMember } from '../lib/api';
 import { SortHeader } from './SortHeader';
@@ -90,17 +90,19 @@ export function MemberTable({
 
   const exportAll = () =>
     downloadCsv(
-      'team.csv',
+      datedName('team'),
       // everybody, not the filtered view, and never a password: those
       // exist in readable form once and are not kept anywhere
       toCsv(
-        ['Full name', 'Email', 'Role', 'Status', 'Added'],
+        ['Full name', 'Email', 'Role', 'Status', 'Services recorded', 'Added'],
         members.map((member) => [
           member.fullName,
           member.email,
           member.roleName,
           member.active ? 'Active' : 'Retired',
-          shortDate(member.createdAt),
+          member.recordedEvents,
+          // the timestamp as it was stored, so a spreadsheet can sort it
+          member.createdAt.slice(0, 10),
         ]),
       ),
     );
