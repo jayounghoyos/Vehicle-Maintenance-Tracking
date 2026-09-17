@@ -1,7 +1,7 @@
 import { Download, Pencil, Search, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { dueLabel } from '../domain/maintenance';
+import { dueLabel, STATE_LABEL } from '../domain/maintenance';
 import {
   VEHICLE_STATUSES,
   VEHICLE_STATUS_LABEL,
@@ -9,7 +9,7 @@ import {
   type VehicleStatus,
 } from '../domain/vehicleStatus';
 import { sortRows, useMultiSort, type Sort } from '../hooks/useMultiSort';
-import { toCsv, downloadCsv } from '../lib/csv';
+import { toCsv, downloadCsv, datedName } from '../lib/csv';
 import { odometer, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
 import type { VehicleRow } from '../lib/api';
@@ -137,7 +137,7 @@ export function VehicleTable({
 
   const exportAll = () =>
     downloadCsv(
-      'fleet.csv',
+      datedName('fleet'),
       // the whole fleet, not the filtered view
       toCsv(
         [
@@ -147,8 +147,9 @@ export function VehicleTable({
           'Year',
           'Odometer (km)',
           'Status',
+          'Maintenance',
           'Next service',
-          'Due',
+          'Next due',
         ],
         vehicles.map((vehicle) => [
           vehicle.plate,
@@ -157,8 +158,13 @@ export function VehicleTable({
           vehicle.year ?? '',
           vehicle.odometerKm,
           VEHICLE_STATUS_LABEL[vehicle.status],
+          // the answer the product exists to give, which the export left
+          // to whoever read the dates
+          STATE_LABEL[vehicle.state],
           vehicle.nextTask ?? '',
-          vehicle.nextDueDate ? shortDate(vehicle.nextDueDate) : '',
+          // the date as the API sent it: a spreadsheet sorts and filters
+          // YYYY-MM-DD, and can do neither with "28 Jul 2026"
+          vehicle.nextDueDate ?? '',
         ]),
       ),
     );
