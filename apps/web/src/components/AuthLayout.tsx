@@ -45,7 +45,6 @@ function describeValidity(input: HTMLInputElement, label: string): string {
     return 'An email address looks like name@company.com';
   }
   if (validity.tooShort) return `At least ${input.minLength} characters`;
-  if (validity.tooLong) return `At most ${input.maxLength} characters`;
   if (validity.rangeUnderflow) return `${label} cannot be below ${input.min}`;
   if (validity.rangeOverflow) return `${label} cannot be above ${input.max}`;
   if (validity.stepMismatch || validity.badInput) return `${label} is not a number`;
@@ -105,18 +104,15 @@ export function Field({
  *  hand and the vehicle form needs two of them. */
 export function Select({
   label,
-  hint,
   options,
   ...props
 }: {
   label: string;
-  hint?: string;
   options: { value: string; label: string }[];
 } & React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <label className="block">
-      <span className="mb-1 block text-body text-ink-muted">{label}</span>
-      {hint && <span className="mb-1.5 block text-[12px] text-ink-muted/70">{hint}</span>}
+      <span className="mb-1.5 block text-body text-ink-muted">{label}</span>
       <select
         {...props}
         className="w-full rounded-xl border border-white/10 bg-panel px-3.5 py-2.5 text-body focus:border-lime/40 focus:outline-none"
