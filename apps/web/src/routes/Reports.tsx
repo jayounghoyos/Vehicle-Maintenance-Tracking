@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
@@ -8,7 +8,7 @@ import { Panel } from '../components/Panel';
 import { SidebarFooter } from '../components/SidebarFooter';
 import { useBrand } from '../hooks/useBrand';
 import { api } from '../lib/api';
-import { downloadCsv, toCsv } from '../lib/csv';
+import { downloadCsv, toCsv, datedName } from '../lib/csv';
 import { ChartPicker } from '../reports/ChartPicker';
 import { ReportChart } from '../reports/ReportChart';
 import { ReportSummary } from '../reports/ReportSummary';
@@ -60,10 +60,42 @@ export default function Reports() {
 
   const exportAll = () => {
     if (!data) return;
+    // the range belongs in the rows, not only in the file name: two
+    // exports pasted into one sheet are otherwise indistinguishable
+    const range = `Last ${months} months`;
     const rows = Object.entries(data.metrics).flatMap(([id, points]) =>
-      points.map((point) => [METRICS[id as MetricId].label, point.label, point.value]),
+      points.map((point) => [
+        range,
+        METRICS[id as MetricId].label,
+        // the key is what the API grouped by, and for the time series it
+        // is the sortable YYYY-MM behind a label like "Sep 26"
+        point.key,
+        point.label,
+        point.value,
+      ]),
     );
-    downloadCsv(`reports-${months}m.csv`, toCsv(['Report', 'Item', 'Value'], rows));
+    downloadCsv(
+      datedName(`reports-${months}m`),
+      toCsv(['Range', 'Report', 'Key', 'Item', 'Value'], rows),
+    );
+  };
+
+  // both buttons, said once
+  const exportStyle =
+    'flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink disabled:opacity-50';
+
+  /* No PDF library. The browser already writes this page to PDF with the
+   * fonts and the charts that are on screen, and the print sheet in
+   * index.css is what makes the result worth keeping. Sending the same
+   * numbers through a second renderer would mean a second definition of
+   * every chart, one that drifts from the first.
+   *
+   * The document title is what the dialog offers as the file name. */
+  const exportPdf = () => {
+    const previous = document.title;
+    document.title = datedName(`reports-${months}m`, 'pdf');
+    window.print();
+    document.title = previous;
   };
 
   return (
@@ -98,16 +130,27 @@ export default function Reports() {
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={exportAll}
-            disabled={!data}
-            data-tour="report-export"
-            className="flex items-center gap-2 rounded-xl border border-white/10 px-3.5 py-2 text-body text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
-          >
-            <Download className="size-4" />
-            Export CSV
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={exportAll}
+              disabled={!data}
+              data-tour="report-export"
+              className={exportStyle}
+            >
+              <Download className="size-4" />
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={exportPdf}
+              disabled={!data}
+              className={exportStyle}
+            >
+              <Printer className="size-4" />
+              Export PDF
+            </button>
+          </div>
         </div>
 
         {isError && (
