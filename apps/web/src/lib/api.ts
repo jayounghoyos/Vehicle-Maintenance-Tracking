@@ -69,6 +69,7 @@ export type DashboardResponse = {
     model: string;
     task: string;
     nextDueDate: string | null;
+    kmLeft: number | null;
     state: MaintenanceState;
   }[];
   recentEvents: {
@@ -89,6 +90,7 @@ export type DashboardResponse = {
     odometerKm: number;
     nextTask: string | null;
     nextDueDate: string | null;
+    kmLeft: number | null;
     state: MaintenanceState;
   }[];
 };
@@ -131,6 +133,8 @@ export type VehicleRow = {
   photoUrl: string | null;
   nextTask: string | null;
   nextDueDate: string | null;
+  /** kilometres left on the schedule that names it, negative once past */
+  kmLeft: number | null;
   scheduleCount: number;
   serviceEventCount: number;
   createdAt: string;
@@ -143,6 +147,7 @@ export type ScheduleItem = {
   intervalKm: number | null;
   nextDueDate: string | null;
   nextDueKm: number | null;
+  kmLeft: number | null;
   state: MaintenanceState;
   /** absent from a vehicle's own embedded list, where it is already
    *  implied; present on the fleet-wide /schedules list, which is not

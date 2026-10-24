@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { useAuth } from '../auth/context';
 import { can } from '../auth/permissions';
-import { STATE_LABEL, dueLabel } from '../domain/maintenance';
+import { STATE_LABEL, dueSummary } from '../domain/maintenance';
 import { VEHICLE_STATUS_LABEL, type VehicleStatus } from '../domain/vehicleStatus';
 import { api, type PhotoItem, type VehicleDetail as Detail } from '../lib/api';
 import { odometer, shortDate } from '../lib/format';
@@ -108,11 +108,13 @@ export function VehicleDetail({ id }: { id: number }) {
         )}
       </div>
 
-      {vehicle.nextDueDate && vehicle.state !== 'on_track' && (
-        <p className={`text-body font-medium ${HUE[vehicle.state]}`}>
-          {vehicle.nextTask} {dueLabel(vehicle.nextDueDate).toLowerCase()}
-        </p>
-      )}
+      {(vehicle.nextDueDate || vehicle.kmLeft !== null) &&
+        vehicle.state !== 'on_track' && (
+          <p className={`text-body font-medium ${HUE[vehicle.state]}`}>
+            {vehicle.nextTask}{' '}
+            {dueSummary(vehicle.nextDueDate, vehicle.kmLeft).toLowerCase()}
+          </p>
+        )}
 
       <section>
         <h3 className="mb-1 text-table-label font-semibold text-ink-muted uppercase">
@@ -168,10 +170,10 @@ export function VehicleDetail({ id }: { id: number }) {
                         {interval(schedule.intervalDays, schedule.intervalKm)}
                       </span>
                     </p>
-                    {schedule.nextDueDate && (
+                    {(schedule.nextDueDate || schedule.kmLeft !== null) && (
                       <p className={`text-body ${HUE[schedule.state]}`}>
-                        {shortDate(schedule.nextDueDate)} ·{' '}
-                        {dueLabel(schedule.nextDueDate)}
+                        {schedule.nextDueDate && `${shortDate(schedule.nextDueDate)} · `}
+                        {dueSummary(schedule.nextDueDate, schedule.kmLeft)}
                       </p>
                     )}
                   </div>

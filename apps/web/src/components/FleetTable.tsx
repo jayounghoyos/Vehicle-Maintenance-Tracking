@@ -1,3 +1,4 @@
+import { kmLabel } from '../domain/maintenance';
 import type { DashboardResponse } from '../lib/api';
 import { odometer, shortDate } from '../lib/format';
 import { Panel } from './Panel';
@@ -46,6 +47,7 @@ export function FleetTable({
                 odometerKm,
                 nextTask,
                 nextDueDate,
+                kmLeft,
                 state,
               }) => (
                 <tr
@@ -76,6 +78,9 @@ export function FleetTable({
                             {' '}
                             · {shortDate(nextDueDate)}
                           </span>
+                        )}
+                        {kmLeft !== null && (
+                          <span className="text-ink-muted"> · {kmLabel(kmLeft)}</span>
                         )}
                       </>
                     ) : (
