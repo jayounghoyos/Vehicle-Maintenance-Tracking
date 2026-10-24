@@ -22,6 +22,8 @@ export type AttentionItem = {
   model: string;
   task: string;
   nextDueDate: string | null;
+  /** kilometres left before it is due by distance, negative once past */
+  kmLeft: number | null;
   state: MaintenanceState;
 };
 
@@ -45,6 +47,8 @@ export type FleetRowItem = {
   odometerKm: number;
   nextTask: string | null;
   nextDueDate: string | null;
+  /** kilometres left before it is due by distance, negative once past */
+  kmLeft: number | null;
   state: MaintenanceState;
 };
 

@@ -70,7 +70,7 @@ export const dashboardTour = (): DriveStep[] => [
     popover: {
       title: 'The four numbers at the top',
       description:
-        'Your fleet right now. Overdue means the day for a job has passed and nobody recorded doing it. Due soon means within two weeks. In shop means it is being worked on.',
+        'Your fleet right now. Overdue means the day or the kilometres for a job have passed and nobody recorded doing it. Due soon means within two weeks or 1,000 km. In shop means it is being worked on.',
       side: 'bottom',
       align: 'start',
     },
@@ -408,7 +408,7 @@ export const schedulesTour = ({ canManage }: Audience): DriveStep[] => [
     popover: {
       title: 'Showing only some of them',
       description:
-        'Overdue means the day for a job has passed and nobody recorded it. Due soon means within two weeks. The number is how many you have. Click one to see only those.',
+        'Overdue means the day or the kilometres for a job have passed and nobody recorded it. Due soon means within two weeks or 1,000 km. The number is how many you have. Click one to see only those.',
       side: 'bottom',
       align: 'start',
     },

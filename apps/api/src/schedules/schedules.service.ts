@@ -7,7 +7,7 @@ import {
 import { QueryFailedError } from 'typeorm';
 
 import { MaintenanceSchedule, MaintenanceTask, ServiceEvent, Vehicle } from '../entities';
-import { scheduleState } from '../maintenance/maintenance';
+import { kmUntil, scheduleState } from '../maintenance/maintenance';
 import { TenantRepositories } from '../tenant/tenant-repository';
 import type { CreateScheduleDto, UpdateScheduleDto } from './dto';
 import type { ScheduleRow, TaskItem } from './schedules.types';
@@ -196,7 +196,8 @@ export class SchedulesService {
       lastServiceOdometerKm: lastService?.odometerKm ?? null,
       nextDueDate: schedule.nextDueDate,
       nextDueKm: schedule.nextDueKm,
-      state: scheduleState(schedule.nextDueDate, today),
+      kmLeft: kmUntil(schedule.nextDueKm, schedule.vehicle.odometerKm),
+      state: scheduleState(schedule, schedule.vehicle.odometerKm, today),
     };
   }
 

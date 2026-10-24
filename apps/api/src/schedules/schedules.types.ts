@@ -13,12 +13,14 @@ export type ScheduleRow = {
   intervalKm: number | null;
   /** the most recent service event logged against this schedule, if
    *  any — a date for a day-based schedule, an odometer reading for a
-   *  km-only one. Display only; which interval governs next due is
-   *  still open (issue #11). */
+   *  km-only one. Display only: the state reads nextDueDate and
+   *  nextDueKm, whichever comes first (issue #11). */
   lastServiceDate: string | null;
   lastServiceOdometerKm: number | null;
   nextDueDate: string | null;
   nextDueKm: number | null;
+  /** kilometres left before it is due by distance, negative once past */
+  kmLeft: number | null;
   state: MaintenanceState;
 };
 

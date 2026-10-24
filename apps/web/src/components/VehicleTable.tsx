@@ -1,7 +1,7 @@
 import { Download, Pencil, Search, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { dueLabel, STATE_LABEL } from '../domain/maintenance';
+import { dueSummary, kmLabel, STATE_LABEL } from '../domain/maintenance';
 import {
   VEHICLE_STATUSES,
   VEHICLE_STATUS_LABEL,
@@ -73,7 +73,7 @@ function StatusBadge({ status }: { status: VehicleStatus }) {
  *  A function rather than a component, which is what it is: it holds no
  *  state and the icon it picks is a lookup, not a definition. */
 function nextService(vehicle: VehicleRow) {
-  if (!vehicle.nextTask || !vehicle.nextDueDate) {
+  if (!vehicle.nextTask || (!vehicle.nextDueDate && vehicle.kmLeft === null)) {
     return <span className="text-ink-muted">No schedule</span>;
   }
   const Icon = taskIcon(vehicle.nextTask);
@@ -87,8 +87,11 @@ function nextService(vehicle: VehicleRow) {
     <span className="flex items-center gap-2 whitespace-nowrap">
       <Icon className={`size-4 shrink-0 ${hue}`} strokeWidth={1.75} />
       {vehicle.nextTask}
-      <span className={hue} title={dueLabel(vehicle.nextDueDate)}>
-        · {shortDate(vehicle.nextDueDate)}
+      <span className={hue} title={dueSummary(vehicle.nextDueDate, vehicle.kmLeft)}>
+        ·{' '}
+        {vehicle.nextDueDate
+          ? shortDate(vehicle.nextDueDate)
+          : kmLabel(vehicle.kmLeft ?? 0)}
       </span>
     </span>
   );

@@ -1,7 +1,7 @@
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { dueLabel } from '../domain/maintenance';
+import { dueSummary } from '../domain/maintenance';
 import type { DashboardResponse } from '../lib/api';
 import { taskIcon } from '../lib/taskIcon';
 import { Panel } from './Panel';
@@ -49,7 +49,17 @@ export function NeedsAttention({
       ) : (
         <ul className="divide-y divide-white/5 border-t border-white/5">
           {items.map(
-            ({ scheduleId, vehicleId, plate, make, model, task, nextDueDate, state }) => {
+            ({
+              scheduleId,
+              vehicleId,
+              plate,
+              make,
+              model,
+              task,
+              nextDueDate,
+              kmLeft,
+              state,
+            }) => {
               const Icon = taskIcon(task);
               const body = (
                 <>
@@ -70,10 +80,12 @@ export function NeedsAttention({
                     </span>
                     <span className="mt-0.5 block truncate text-body text-ink-muted">
                       {task}
-                      {nextDueDate && (
+                      {(nextDueDate || kmLeft !== null) && (
                         <>
                           {' · '}
-                          <span className={DUE_TEXT[state]}>{dueLabel(nextDueDate)}</span>
+                          <span className={DUE_TEXT[state]}>
+                            {dueSummary(nextDueDate, kmLeft)}
+                          </span>
                         </>
                       )}
                     </span>

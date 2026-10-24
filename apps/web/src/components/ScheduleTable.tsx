@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 
-import { STATE_LABEL, type MaintenanceState } from '../domain/maintenance';
+import { kmLabel, STATE_LABEL, type MaintenanceState } from '../domain/maintenance';
 import { sortRows, useMultiSort, type Sort } from '../hooks/useMultiSort';
 import { odometer, shortDate } from '../lib/format';
 import { taskIcon } from '../lib/taskIcon';
@@ -63,9 +63,9 @@ function compare(a: ScheduleItem, b: ScheduleItem, key: SortKey): number {
 }
 
 /**
- * Which interval reads first when both are set is not decided here —
- * that is issue #11, still open. This only picks which unit to show
- * for a schedule that has only one; a schedule with both shows both.
+ * Which interval decides is the API's rule — whichever comes first
+ * (issue #11). This only picks which unit to show for a schedule that
+ * has only one; a schedule with both shows both.
  */
 function intervalLabel(schedule: ScheduleItem): { icon: LucideIcon; text: string } {
   const parts: string[] = [];
@@ -283,7 +283,12 @@ export function ScheduleTable({
                   >
                     {schedule.nextDueDate
                       ? shortDate(schedule.nextDueDate)
-                      : 'Not logged yet'}
+                      : schedule.kmLeft === null && 'Not logged yet'}
+                    {schedule.kmLeft !== null && (
+                      <span className="block text-[12px] font-normal">
+                        {kmLabel(schedule.kmLeft)}
+                      </span>
+                    )}
                   </td>
                   <td className="px-5 py-3.5">
                     <StatusChip state={schedule.state} />

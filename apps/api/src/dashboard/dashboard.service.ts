@@ -58,7 +58,7 @@ export class DashboardService {
 
     const attention: AttentionItem[] = stated
       .filter(({ state }) => state !== 'on_track')
-      .map(({ schedule, state }) => ({
+      .map(({ schedule, state, kmLeft }) => ({
         scheduleId: schedule.id,
         vehicleId: schedule.vehicle.id,
         plate: schedule.vehicle.plate,
@@ -66,6 +66,7 @@ export class DashboardService {
         model: schedule.vehicle.model.name,
         task: schedule.task.name,
         nextDueDate: schedule.nextDueDate,
+        kmLeft,
         state,
       }));
 
@@ -81,6 +82,7 @@ export class DashboardService {
           odometerKm: vehicle.odometerKm,
           nextTask: next?.nextTask ?? null,
           nextDueDate: next?.nextDueDate ?? null,
+          kmLeft: next?.kmLeft ?? null,
           // a vehicle nobody scheduled anything for is not overdue
           state: next?.state ?? 'on_track',
         };

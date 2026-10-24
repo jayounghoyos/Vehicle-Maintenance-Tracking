@@ -260,6 +260,38 @@ describe('fleet workflow (e2e)', () => {
     ).toBe(true);
   });
 
+  it('reports the vehicle overdue by kilometres, whichever interval comes first', async () => {
+    // serviced today: the date is 60 days off, the kilometres 5,000
+    await http()
+      .post('/api/service-events')
+      .set(auth())
+      .send({
+        vehicleId,
+        scheduleId,
+        taskName: 'Oil change',
+        type: 'preventive',
+        performedAt: isoDaysAgo(0),
+        odometerKm: 130000,
+        notes: 'Oil and filter changed',
+        performedByName: 'Taller El Poblado',
+      })
+      .expect(201);
+    let dashboard = await http().get('/api/dashboard').set(auth()).expect(200);
+    expect(dashboard.body.counts.overdue).toBe(0);
+
+    // then driven past the due reading long before the due date
+    await http()
+      .patch(`/api/vehicles/${vehicleId}`)
+      .set(auth())
+      .send({ odometerKm: 135200 })
+      .expect(200);
+
+    dashboard = await http().get('/api/dashboard').set(auth()).expect(200);
+    expect(dashboard.body.counts.overdue).toBe(1);
+    const list = await http().get('/api/schedules').set(auth()).expect(200);
+    expect(list.body[0]).toMatchObject({ state: 'overdue', kmLeft: -200 });
+  });
+
   it('deletes a vehicle nothing is attached to', async () => {
     const spare = await http()
       .post('/api/vehicles')
