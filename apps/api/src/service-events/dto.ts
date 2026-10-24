@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
   Min,
 } from 'class-validator';
 
@@ -67,13 +68,15 @@ export class RecordServiceEventDto {
   @Min(0)
   odometerKm?: number | null;
 
-  @ApiPropertyOptional({
+  // required (issue #8): a log that does not say what was done or found
+  // is the same gap the spreadsheets left
+  @ApiProperty({
     example: 'Replaced oil filter and topped up fluid.',
-    description: 'Observations and mechanic notes',
+    description: 'What was done and what was found. Required.',
   })
-  @IsOptional()
   @IsString()
-  notes?: string | null;
+  @Matches(/\S/, { message: 'notes must say what was done or found' })
+  notes: string;
 
   @ApiPropertyOptional({
     type: [String],

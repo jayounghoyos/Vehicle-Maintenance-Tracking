@@ -59,7 +59,10 @@ function backfill(
       type: i % 5 === 0 ? ServiceType.CORRECTIVE : ServiceType.PREVENTIVE,
       performedAt: isoDaysFromToday(day),
       odometerKm: 40_000 + i * 1_500,
-      notes: null,
+      notes:
+        i % 5 === 0
+          ? 'Breakdown on route, repaired and returned to service'
+          : 'Routine service, nothing unusual found',
     });
   }
   return events;
