@@ -1,5 +1,6 @@
 import type { MaintenanceState } from '../maintenance/maintenance';
 import type { ServiceType, VehicleStatus } from '../entities';
+import type { Performer } from '../service-events/performer';
 
 /** One line of the fleet list. */
 export type VehicleRow = {
@@ -44,7 +45,7 @@ export type PhotoItem = {
   url: string;
 };
 
-export type ServiceEventItem = {
+export type ServiceEventItem = Performer & {
   id: number;
   task: string;
   type: ServiceType;
