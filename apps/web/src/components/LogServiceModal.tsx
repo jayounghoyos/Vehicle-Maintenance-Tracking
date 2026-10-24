@@ -169,6 +169,11 @@ function LogServiceDialog({
       return;
     }
 
+    if (!notes.trim()) {
+      setErrorMsg('Say what was done or found in the notes');
+      return;
+    }
+
     const odo = odometerKm.trim() === '' ? null : Number(odometerKm);
     if (odo !== null && isNaN(odo)) {
       setErrorMsg('Odometer must be a valid number');
@@ -182,7 +187,7 @@ function LogServiceDialog({
       type,
       performedAt,
       odometerKm: odo,
-      notes: notes.trim() === '' ? null : notes.trim(),
+      notes: notes.trim(),
       photos: photos.map((p) => p.dataUrl),
     });
   };
@@ -492,12 +497,13 @@ function LogServiceDialog({
           {/* Notes */}
           <div>
             <label className="block text-body font-medium text-ink">
-              Notes & observations
+              Notes & observations <span className="text-overdue">*</span>
             </label>
             <textarea
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              required
               placeholder="Add details about parts replaced, diagnostic findings, technician comments…"
               className="mt-1.5 w-full rounded-xl border border-white/10 bg-page px-4 py-2.5 text-body text-ink focus:border-lime/40 focus:outline-none"
             />
