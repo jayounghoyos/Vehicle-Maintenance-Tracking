@@ -123,6 +123,13 @@ describe('fleet workflow (e2e)', () => {
   });
 
   it('US-04: reports the vehicle overdue once the interval has passed', async () => {
+    // done by a member of the team, picked from the same list the form uses
+    const performers = await http()
+      .get('/api/service-events/performers')
+      .set(auth())
+      .expect(200);
+    expect(performers.body).toHaveLength(1);
+
     // the rule is 30 days and the last service was 90 days ago
     await http()
       .post('/api/service-events')
@@ -135,6 +142,7 @@ describe('fleet workflow (e2e)', () => {
         performedAt: isoDaysAgo(90),
         odometerKm: 120000,
         notes: 'Oil and filter changed',
+        performedById: performers.body[0].id,
       })
       .expect(201);
 
@@ -157,6 +165,7 @@ describe('fleet workflow (e2e)', () => {
         performedAt: isoDaysAgo(0),
         odometerKm: 130000,
         notes: 'Oil and filter changed again',
+        performedByName: 'Taller El Poblado',
       })
       .expect(201);
 
@@ -172,6 +181,33 @@ describe('fleet workflow (e2e)', () => {
 
     expect(log.body).toHaveLength(2);
     expect(log.body[0].performedAt >= log.body[1].performedAt).toBe(true);
+    // who did the work is kept apart from who typed it in
+    expect(log.body[0]).toMatchObject({
+      performer: 'Taller El Poblado',
+      performerExternal: true,
+    });
+    expect(log.body[1].performerExternal).toBe(false);
+    expect(log.body[1].performer).toBe(log.body[1].recorder);
+
+    const detail = await http().get(`/api/vehicles/${vehicleId}`).set(auth()).expect(200);
+    expect(detail.body.recentEvents[0]).toMatchObject({
+      performer: 'Taller El Poblado',
+      performerExternal: true,
+    });
+  });
+
+  it('will not log a service without saying who did it', async () => {
+    await http()
+      .post('/api/service-events')
+      .set(auth())
+      .send({
+        vehicleId,
+        taskName: 'Oil change',
+        type: 'preventive',
+        performedAt: isoDaysAgo(0),
+        notes: 'Nobody knows who did this',
+      })
+      .expect(400);
   });
 
   it('will not log a service that does not say what was done', async () => {
@@ -180,6 +216,7 @@ describe('fleet workflow (e2e)', () => {
       taskName: 'Oil change',
       type: 'preventive',
       performedAt: isoDaysAgo(0),
+      performedByName: 'Taller El Poblado',
     };
     await http().post('/api/service-events').set(auth()).send(service).expect(400);
     await http()

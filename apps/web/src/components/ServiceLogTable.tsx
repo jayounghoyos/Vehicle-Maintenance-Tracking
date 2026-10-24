@@ -8,7 +8,8 @@ import type { PhotoItem, ServiceLogItem } from '../lib/api';
 import { PhotoViewerModal } from './PhotoViewerModal';
 import { SortHeader } from './SortHeader';
 
-type SortKey = 'date' | 'vehicle' | 'task' | 'type' | 'odometer' | 'recorder';
+type SortKey =
+  'date' | 'vehicle' | 'task' | 'type' | 'odometer' | 'performer' | 'recorder';
 
 const COLUMNS: { key: SortKey; label: string }[] = [
   { key: 'date', label: 'Date' },
@@ -16,6 +17,7 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: 'task', label: 'Task' },
   { key: 'type', label: 'Type' },
   { key: 'odometer', label: 'Odometer (km)' },
+  { key: 'performer', label: 'Done by' },
   { key: 'recorder', label: 'Recorded by' },
 ];
 
@@ -38,6 +40,8 @@ function compare(a: ServiceLogItem, b: ServiceLogItem, key: SortKey): number {
       return a.type.localeCompare(b.type);
     case 'odometer':
       return (a.odometerKm ?? 0) - (b.odometerKm ?? 0);
+    case 'performer':
+      return (a.performer ?? '').localeCompare(b.performer ?? '');
     case 'recorder':
       return a.recorder.localeCompare(b.recorder);
   }
@@ -144,6 +148,14 @@ export function ServiceLogTable({ events }: { events: ServiceLogItem[] }) {
                 </td>
                 <td className="px-5 py-3.5 text-body tabular-nums">
                   {event.odometerKm !== null ? odometer(event.odometerKm) : '—'}
+                </td>
+                <td className="px-5 py-3.5 text-body whitespace-nowrap">
+                  {event.performer ?? '—'}
+                  {event.performerExternal && (
+                    <span className="block text-[12px] text-ink-muted">
+                      Outside workshop
+                    </span>
+                  )}
                 </td>
                 <td className="px-5 py-3.5 text-body whitespace-nowrap">
                   {event.recorder}

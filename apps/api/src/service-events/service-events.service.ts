@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { IsNull } from 'typeorm';
 
 import {
   MaintenanceSchedule,
@@ -14,7 +15,8 @@ import {
 import { PhotoStorage } from '../photos/photo-storage.service';
 import { TenantRepositories } from '../tenant/tenant-repository';
 import type { RecordServiceEventDto } from './dto';
-import type { ServiceLogRow, TaskItem } from './service-events.types';
+import { performerOf } from './performer';
+import type { PerformerItem, ServiceLogRow, TaskItem } from './service-events.types';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'photos');
 
@@ -50,6 +52,7 @@ export class ServiceEventsService {
         vehicle: { model: true },
         task: true,
         recorder: true,
+        performer: true,
         photos: true,
       },
       // id breaks the tie: two events logged in the same visit share a date
@@ -68,6 +71,7 @@ export class ServiceEventsService {
       odometerKm: event.odometerKm,
       notes: event.notes,
       recorder: event.recorder?.fullName ?? 'Unknown',
+      ...performerOf(event.performer, event.performedByName),
       photos: (event.photos ?? []).map((photo) => ({
         id: photo.id,
         storageKey: photo.storageKey,
@@ -82,6 +86,17 @@ export class ServiceEventsService {
     return list.map((task) => ({ id: task.id, name: task.name }));
   }
 
+  /** Current members, for naming who did the work. Only names: logging
+   *  a service must not need permission to see the team screen. */
+  async getPerformers(organizationId: number): Promise<PerformerItem[]> {
+    const users = this.tenants.for(User, organizationId);
+    const list = await users.find({
+      where: { deletedAt: IsNull() },
+      order: { fullName: 'ASC' },
+    });
+    return list.map((user) => ({ id: user.id, fullName: user.fullName }));
+  }
+
   async recordService(
     organizationId: number,
     userId: number,
@@ -94,6 +109,31 @@ export class ServiceEventsService {
     });
     if (!vehicle) {
       throw new NotFoundException('Vehicle not found');
+    }
+
+    // checked before anything is written: a refused request must not
+    // leave a new task behind
+    const users = this.tenants.for(User, organizationId);
+    const workshop = dto.performedByName?.trim() || null;
+    if (dto.performedById && workshop) {
+      throw new BadRequestException(
+        'Name either the member or the outside workshop who did the work, not both',
+      );
+    }
+    let performer: User | null = null;
+    if (dto.performedById) {
+      performer = await users.findOne({
+        where: { id: dto.performedById, deletedAt: IsNull() },
+      });
+      if (!performer) {
+        throw new BadRequestException(
+          'The member named as doing the work is not on the team',
+        );
+      }
+    } else if (!workshop) {
+      throw new BadRequestException(
+        'Say who did the work: a member of the team or an outside workshop',
+      );
     }
 
     const tasks = this.tenants.for(MaintenanceTask, organizationId);
@@ -159,6 +199,8 @@ export class ServiceEventsService {
         scheduleId: schedule?.id ?? null,
         taskId: task.id,
         recordedBy: userId,
+        performedBy: performer?.id ?? null,
+        performedByName: performer ? null : workshop,
         type: dto.type,
         performedAt: dto.performedAt,
         odometerKm: dto.odometerKm ?? null,
@@ -194,7 +236,6 @@ export class ServiceEventsService {
       }
     }
 
-    const users = this.tenants.for(User, organizationId);
     const recorder = await users.findOne({ where: { id: userId } });
 
     return {
@@ -209,6 +250,7 @@ export class ServiceEventsService {
       odometerKm: event.odometerKm,
       notes: event.notes,
       recorder: recorder?.fullName ?? 'Unknown',
+      ...performerOf(performer, workshop),
       photos: savedPhotos.map((photo) => ({
         id: photo.id,
         storageKey: photo.storageKey,

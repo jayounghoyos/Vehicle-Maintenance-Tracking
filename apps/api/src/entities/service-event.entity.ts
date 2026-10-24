@@ -1,4 +1,5 @@
 import {
+  Check,
   Column,
   Entity,
   Index,
@@ -20,6 +21,11 @@ import { Vehicle } from './vehicle.entity';
 @Index('service_events_vehicle_idx', ['vehicleId'])
 @Index('service_events_schedule_idx', ['scheduleId'])
 @Index('service_events_recorded_by_idx', ['recordedBy'])
+@Index('service_events_performed_by_idx', ['performedBy'])
+@Check(
+  'service_events_performer_check',
+  `"performed_by" IS NOT NULL OR "performed_by_name" IS NOT NULL`,
+)
 @Entity('service_events')
 export class ServiceEvent {
   @PrimaryGeneratedColumn()
@@ -65,6 +71,19 @@ export class ServiceEvent {
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'recorded_by' })
   recorder: User;
+
+  /** who did the work, when they hold an account. Not the recorder:
+   *  a coordinator often logs what a mechanic did (issue #39) */
+  @Column({ type: 'int', name: 'performed_by', nullable: true })
+  performedBy: number | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'performed_by' })
+  performer: User | null;
+
+  /** an outside workshop with no account, used instead of performed_by */
+  @Column({ type: 'varchar', name: 'performed_by_name', length: 120, nullable: true })
+  performedByName: string | null;
 
   @Column({ type: 'enum', enum: ServiceType, enumName: 'service_type' })
   type: ServiceType;

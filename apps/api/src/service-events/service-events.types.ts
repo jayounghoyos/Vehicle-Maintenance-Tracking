@@ -1,4 +1,5 @@
 import type { ServiceType } from '../entities';
+import type { Performer } from './performer';
 
 export type ServiceEventPhotoItem = {
   id: number;
@@ -7,7 +8,7 @@ export type ServiceEventPhotoItem = {
 };
 
 /** One row of the fleet-wide service log. */
-export type ServiceLogRow = {
+export type ServiceLogRow = Performer & {
   id: number;
   performedAt: string;
   vehicleId: number;
@@ -20,6 +21,12 @@ export type ServiceLogRow = {
   notes: string | null;
   recorder: string;
   photos: ServiceEventPhotoItem[];
+};
+
+/** A member who can be named as having done the work. */
+export type PerformerItem = {
+  id: number;
+  fullName: string;
 };
 
 export type TaskItem = {
