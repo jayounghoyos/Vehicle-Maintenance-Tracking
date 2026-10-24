@@ -17,7 +17,7 @@ Build: [WHAT THE SCREEN SHOWS AND DOES].
 Rules for this codebase:
 
 - The primary action lives in the `action` prop of the table's `Panel`, next to the table it acts on — not in the page header.
-- Reuse `Panel`, `StatusChip`, `SortHeader` and `PrimaryAction` rather than restyling. `PrimaryAction` takes `size="sm"` inside a `Panel`.
+- Reuse `Panel`, `StatusChip`, `SortHeader` and `PrimaryAction` rather than restyling. `PrimaryAction` takes `size="panel"` inside a `Panel` and `size="header"` in `AppShell`'s header.
 - Every write control is wrapped in `can(principal, '[PERMISSION]')`. The API guards it too; hiding it on the web is not the check.
 - Table headings must be in the same order as the cells. They disagreed once and every date on the screen read as the wrong thing.
 - A screen gets a tour, registered in `TOURS` before the `'/'` entry, with `data-tour` anchors. No permanent explanatory panel on the screen itself.

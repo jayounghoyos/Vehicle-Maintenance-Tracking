@@ -1,5 +1,5 @@
 /**
- * Mirrors apps/api/src/reports/metrics.ts. Hand-kept, like
+ * Mirrors apps/api/src/reports/reports.types.ts. Hand-kept, like
  * auth/permissions.ts mirrors the Permission enum: there is no shared
  * package and one table is not worth inventing one.
  *
