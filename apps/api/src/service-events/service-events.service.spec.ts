@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import {
@@ -53,6 +54,8 @@ describe('ServiceEventsService', () => {
     scheduleId: 5,
     taskId: 2,
     recordedBy: 20,
+    performedBy: 20,
+    performedByName: null,
     type: ServiceType.PREVENTIVE,
     performedAt: '2026-09-02',
     odometerKm: 52000,
@@ -106,6 +109,7 @@ describe('ServiceEventsService', () => {
               vehicle: mockVehicle,
               task: mockTask,
               recorder: mockUser,
+              performer: mockUser,
               photos: [],
             },
           ]),
@@ -125,6 +129,7 @@ describe('ServiceEventsService', () => {
       if (entity === User) {
         return {
           findOne: jest.fn().mockResolvedValue(mockUser),
+          find: jest.fn().mockResolvedValue([mockUser]),
         };
       }
       return {};
@@ -163,6 +168,7 @@ describe('ServiceEventsService', () => {
       performedAt: '2026-09-02',
       odometerKm: 52000,
       notes: 'Synthetic oil 5W-30',
+      performedById: 20,
       photos: ['data:image/jpeg;base64,/9j/4AAQSkZJRg=='],
     });
 
@@ -173,6 +179,8 @@ describe('ServiceEventsService', () => {
     expect(result.type).toBe(ServiceType.PREVENTIVE);
     expect(result.odometerKm).toBe(52000);
     expect(result.recorder).toBe('Carlos Mejia');
+    expect(result.performer).toBe('Carlos Mejia');
+    expect(result.performerExternal).toBe(false);
     expect(mockPhotos.upload).toHaveBeenCalledWith(expect.any(Buffer), 10);
     expect(result.photos.length).toBe(1);
     expect(result.photos[0].storageKey).toBe('mts/org-10/photo_abc123');
@@ -184,6 +192,48 @@ describe('ServiceEventsService', () => {
     expect(rows.length).toBe(1);
     expect(rows[0].plate).toBe('ABC123');
     expect(rows[0].photos).toEqual([]);
+    expect(rows[0].performer).toBe('Carlos Mejia');
+  });
+
+  describe('who did the work', () => {
+    const logged = {
+      vehicleId: 1,
+      taskName: 'Oil change',
+      type: ServiceType.PREVENTIVE,
+      performedAt: '2026-09-02',
+      notes: 'Done at the dealer',
+    };
+
+    it('records an outside workshop by name', async () => {
+      const result = await service.recordService(10, 20, {
+        ...logged,
+        performedByName: '  Taller El Poblado ',
+      });
+      expect(result.performer).toBe('Taller El Poblado');
+      expect(result.performerExternal).toBe(true);
+      expect(result.recorder).toBe('Carlos Mejia');
+    });
+
+    it.each([
+      ['nobody', {}],
+      ['a blank workshop', { performedByName: '   ' }],
+      ['both a member and a workshop', { performedById: 20, performedByName: 'Taller' }],
+    ])('refuses %s before writing anything', async (_, performer) => {
+      mockTenants.for.mockClear();
+      await expect(
+        service.recordService(10, 20, { ...logged, ...performer }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      const touched: unknown[] = mockTenants.for.mock.calls.map(
+        ([entity]): unknown => entity,
+      );
+      expect(touched).not.toContain(MaintenanceTask);
+      expect(touched).not.toContain(ServiceEvent);
+    });
+  });
+
+  it('lists the members who can be named as doing the work', async () => {
+    const performers = await service.getPerformers(10);
+    expect(performers).toEqual([{ id: 20, fullName: 'Carlos Mejia' }]);
   });
 
   it('lists task catalog', async () => {

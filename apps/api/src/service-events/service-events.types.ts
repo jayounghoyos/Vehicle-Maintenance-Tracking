@@ -19,7 +19,18 @@ export type ServiceLogRow = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  /** who did the work: a member's name or an outside workshop's. null
+   *  only for an event the history cannot attribute */
+  performer: string | null;
+  /** true when the performer is an outside workshop with no account */
+  performerExternal: boolean;
   photos: ServiceEventPhotoItem[];
+};
+
+/** A member who can be named as having done the work. */
+export type PerformerItem = {
+  id: number;
+  fullName: string;
 };
 
 export type TaskItem = {

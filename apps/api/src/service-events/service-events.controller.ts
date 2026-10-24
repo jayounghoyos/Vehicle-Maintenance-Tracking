@@ -17,7 +17,7 @@ import { CurrentUser, JwtAuthGuard, PermissionsGuard, Requires } from '../auth/g
 import { Permission } from '../entities';
 import { RecordServiceEventDto, ServiceLogQueryDto } from './dto';
 import { ServiceEventsService } from './service-events.service';
-import type { ServiceLogRow, TaskItem } from './service-events.types';
+import type { PerformerItem, ServiceLogRow, TaskItem } from './service-events.types';
 
 @ApiTags('service-events')
 @ApiBearerAuth()
@@ -49,6 +49,16 @@ export class ServiceEventsController {
       throw new ForbiddenException('Admins have no task catalog');
     }
     return this.serviceEvents.getTasks(principal.organizationId);
+  }
+
+  @Get('performers')
+  @Requires(Permission.LOG_SERVICE)
+  @ApiOperation({ summary: 'Current members who can be named as doing the work' })
+  performers(@CurrentUser() principal: Principal): Promise<PerformerItem[]> {
+    if (principal.kind !== 'user') {
+      throw new ForbiddenException('Admins have no team');
+    }
+    return this.serviceEvents.getPerformers(principal.organizationId);
   }
 
   @Post()
