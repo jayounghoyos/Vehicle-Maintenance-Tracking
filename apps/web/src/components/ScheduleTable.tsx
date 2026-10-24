@@ -90,7 +90,8 @@ function lastDoneLabel(schedule: ScheduleItem): string {
 }
 
 /* Last done is filled from the service events logged against the
- * schedule, so a value there means the API will refuse the delete. */
+ * schedule, so a value there means deleting it detaches that history
+ * rather than deleting a rule nothing was ever logged against (#50). */
 function hasHistory(schedule: ScheduleItem): boolean {
   return schedule.lastServiceDate != null || schedule.lastServiceOdometerKm != null;
 }
@@ -317,32 +318,19 @@ export function ScheduleTable({
                           >
                             <p className="max-w-64 text-body text-ink-muted">
                               {hasHistory(schedule)
-                                ? 'Service is logged against this schedule, so it cannot be deleted. You can edit it instead.'
+                                ? 'Delete this schedule? The services logged against it stay in the history, as unplanned work.'
                                 : 'Delete this schedule? This cannot be undone.'}
                             </p>
-                            {hasHistory(schedule) ? (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setArmedId(null);
-                                  onEdit(schedule);
-                                }}
-                                className="rounded-lg bg-white/10 px-3 py-1.5 text-body font-medium text-ink transition-colors hover:bg-white/15"
-                              >
-                                Edit
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setArmedId(null);
-                                  onRemove(schedule);
-                                }}
-                                className="rounded-lg bg-overdue/15 px-3 py-1.5 text-body font-medium text-overdue transition-colors hover:bg-overdue/25"
-                              >
-                                Delete
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setArmedId(null);
+                                onRemove(schedule);
+                              }}
+                              className="rounded-lg bg-overdue/15 px-3 py-1.5 text-body font-medium text-overdue transition-colors hover:bg-overdue/25"
+                            >
+                              Delete
+                            </button>
                             {/* the safe choice takes focus, so a stray
                                 Enter backs out rather than deletes */}
                             <button
@@ -351,7 +339,7 @@ export function ScheduleTable({
                               onClick={disarm}
                               className="rounded-lg px-3 py-1.5 text-body text-ink-muted transition-colors hover:bg-white/5 hover:text-ink"
                             >
-                              {hasHistory(schedule) ? 'Close' : 'Cancel'}
+                              Cancel
                             </button>
                           </div>
                         ) : (
