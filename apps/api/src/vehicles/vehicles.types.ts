@@ -16,6 +16,8 @@ export type VehicleRow = {
   state: MaintenanceState;
   nextTask: string | null;
   nextDueDate: string | null;
+  /** kilometres left on the schedule that names it, negative once past */
+  kmLeft: number | null;
   /** ready to put in an <img>, already sized for whoever asked: the
    *  list gets a thumbnail, the profile gets the big one. Null when
    *  nobody has added a picture. */
@@ -33,6 +35,7 @@ export type ScheduleItem = {
   intervalKm: number | null;
   nextDueDate: string | null;
   nextDueKm: number | null;
+  kmLeft: number | null;
   state: MaintenanceState;
 };
 

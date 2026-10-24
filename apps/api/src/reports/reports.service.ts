@@ -50,7 +50,7 @@ export class ReportsService {
 
     const schedules = await this.tenants
       .for(MaintenanceSchedule, organizationId)
-      .find({ relations: { task: true } });
+      .find({ relations: { task: true, vehicle: true } });
 
     const totalEvents = perMonth.reduce((sum, row) => sum + Number(row.count), 0);
 

@@ -1,20 +1,24 @@
 import type { MaintenanceSchedule } from '../entities';
 import { maintenanceByVehicle, stateSchedules } from './fleet-state';
 
-// the instant a date-only due date of 24 Oct 2026 parses to, so the
-// suite gives the same answer in any time zone
-const today = () => new Date('2026-10-24');
+// a local date, so the suite gives the same answer in any time zone
+const today = () => new Date(2026, 9, 24, 12, 0);
+
+const ODOMETER = 50_000;
 
 let nextId = 1;
 function schedule(
   vehicleId: number,
   taskName: string,
   nextDueDate: string | null,
+  nextDueKm: number | null = null,
 ): MaintenanceSchedule {
   return {
     id: nextId++,
     vehicleId,
     nextDueDate,
+    nextDueKm,
+    vehicle: { odometerKm: ODOMETER },
     task: { name: taskName },
   } as MaintenanceSchedule;
 }
@@ -42,19 +46,26 @@ describe('fleet-state', () => {
       ]);
     });
 
-    // current behaviour: '' sorts before any date, so an undated
-    // schedule comes ahead of the dated on_track ones
-    it('puts a schedule with no due date first among the on_track ones', () => {
+    it('puts a schedule with no due date after the dated ones in its state', () => {
       const result = stateSchedules(
         [schedule(1, 'Tyres', '2027-03-01'), schedule(1, 'Inspection', null)],
         today(),
       );
 
       expect(result.map(({ schedule }) => schedule.task.name)).toEqual([
-        'Inspection',
         'Tyres',
+        'Inspection',
       ]);
       expect(result.every(({ state }) => state === 'on_track')).toBe(true);
+    });
+
+    it('states a schedule overdue by kilometres when its date is far off', () => {
+      const [stated] = stateSchedules(
+        [schedule(1, 'Oil change', '2027-04-01', ODOMETER - 200)],
+        today(),
+      );
+
+      expect(stated).toMatchObject({ state: 'overdue', kmLeft: -200 });
     });
 
     it('returns an empty list for no schedules', () => {
@@ -82,16 +93,19 @@ describe('fleet-state', () => {
         state: 'overdue',
         nextTask: 'Oil change',
         nextDueDate: '2026-10-20',
+        kmLeft: null,
       });
       expect(byVehicle.get(2)).toEqual({
         state: 'due_soon',
         nextTask: 'Brakes',
         nextDueDate: '2026-11-01',
+        kmLeft: null,
       });
       expect(byVehicle.get(3)).toEqual({
         state: 'on_track',
         nextTask: 'Tyres',
         nextDueDate: '2027-01-01',
+        kmLeft: null,
       });
     });
 
@@ -120,29 +134,31 @@ describe('fleet-state', () => {
         id: 99,
         vehicleId: 4,
         nextDueDate: '2026-10-01',
+        nextDueKm: null,
+        vehicle: { odometerKm: ODOMETER },
       } as MaintenanceSchedule;
 
       expect(maintenanceByVehicle(stateSchedules([bare], today())).get(4)).toEqual({
         state: 'overdue',
         nextTask: null,
         nextDueDate: '2026-10-01',
+        kmLeft: null,
       });
     });
 
-    // current behaviour, following from the sort above: a vehicle whose
-    // only schedules are on_track is named by its undated one
-    it('names an undated schedule over a dated on_track one', () => {
+    it('names a dated on_track schedule over an undated one', () => {
       const byVehicle = maintenanceByVehicle(
         stateSchedules(
-          [schedule(1, 'Tyres', '2027-03-01'), schedule(1, 'Inspection', null)],
+          [schedule(1, 'Inspection', null), schedule(1, 'Tyres', '2027-03-01')],
           today(),
         ),
       );
 
       expect(byVehicle.get(1)).toEqual({
         state: 'on_track',
-        nextTask: 'Inspection',
-        nextDueDate: null,
+        nextTask: 'Tyres',
+        nextDueDate: '2027-03-01',
+        kmLeft: null,
       });
     });
   });

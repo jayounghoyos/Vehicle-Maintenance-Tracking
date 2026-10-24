@@ -11,7 +11,7 @@ import {
   VehicleStatus,
 } from '../entities';
 import { maintenanceByVehicle, stateSchedules } from '../maintenance/fleet-state';
-import { scheduleState } from '../maintenance/maintenance';
+import { kmUntil, scheduleState } from '../maintenance/maintenance';
 import { PhotoStorage } from '../photos/photo-storage.service';
 import { performerOf } from '../service-events/performer';
 import { TenantRepositories, type TenantRepository } from '../tenant/tenant-repository';
@@ -81,7 +81,9 @@ export class VehiclesService {
       // id breaks the tie: a whole import shares one timestamp
       order: { plate: 'ASC', id: 'ASC' },
     });
-    const allSchedules = await schedules.find({ relations: { task: true } });
+    const allSchedules = await schedules.find({
+      relations: { task: true, vehicle: true },
+    });
     const byVehicle = maintenanceByVehicle(stateSchedules(allSchedules, today));
     const eventCounts = await this.eventCounts(organizationId);
 
@@ -106,6 +108,7 @@ export class VehiclesService {
       state: byVehicle.get(vehicle.id)?.state ?? 'on_track',
       nextTask: byVehicle.get(vehicle.id)?.nextTask ?? null,
       nextDueDate: byVehicle.get(vehicle.id)?.nextDueDate ?? null,
+      kmLeft: byVehicle.get(vehicle.id)?.kmLeft ?? null,
       scheduleCount: scheduleCounts.get(vehicle.id) ?? 0,
       serviceEventCount: eventCounts.get(vehicle.id) ?? 0,
       createdAt: vehicle.createdAt,
@@ -147,7 +150,8 @@ export class VehiclesService {
       intervalKm: schedule.intervalKm,
       nextDueDate: schedule.nextDueDate,
       nextDueKm: schedule.nextDueKm,
-      state: scheduleState(schedule.nextDueDate, today),
+      kmLeft: kmUntil(schedule.nextDueKm, row.odometerKm),
+      state: scheduleState(schedule, row.odometerKm, today),
     }));
 
     const recentEvents: ServiceEventItem[] = history.map((event) => ({
