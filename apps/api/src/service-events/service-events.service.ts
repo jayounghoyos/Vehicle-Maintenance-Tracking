@@ -36,7 +36,7 @@ export class ServiceEventsService {
     }
   }
 
-  resolvePhotoUrl(storageKey: string): string {
+  private resolvePhotoUrl(storageKey: string): string {
     const cloudinaryUrl = this.photos.url(storageKey, 1600, { crop: 'limit' });
     return (
       cloudinaryUrl ?? `/api/service-events/photos/${encodeURIComponent(storageKey)}`
