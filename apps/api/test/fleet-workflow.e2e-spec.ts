@@ -134,6 +134,7 @@ describe('fleet workflow (e2e)', () => {
         type: 'preventive',
         performedAt: isoDaysAgo(90),
         odometerKm: 120000,
+        notes: 'Oil and filter changed',
       })
       .expect(201);
 
@@ -155,6 +156,7 @@ describe('fleet workflow (e2e)', () => {
         type: 'preventive',
         performedAt: isoDaysAgo(0),
         odometerKm: 130000,
+        notes: 'Oil and filter changed again',
       })
       .expect(201);
 
@@ -170,6 +172,21 @@ describe('fleet workflow (e2e)', () => {
 
     expect(log.body).toHaveLength(2);
     expect(log.body[0].performedAt >= log.body[1].performedAt).toBe(true);
+  });
+
+  it('will not log a service that does not say what was done', async () => {
+    const service = {
+      vehicleId,
+      taskName: 'Oil change',
+      type: 'preventive',
+      performedAt: isoDaysAgo(0),
+    };
+    await http().post('/api/service-events').set(auth()).send(service).expect(400);
+    await http()
+      .post('/api/service-events')
+      .set(auth())
+      .send({ ...service, notes: '   ' })
+      .expect(400);
   });
 
   it('will not delete a schedule that services were logged against', async () => {

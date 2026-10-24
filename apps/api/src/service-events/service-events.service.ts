@@ -162,7 +162,7 @@ export class ServiceEventsService {
         type: dto.type,
         performedAt: dto.performedAt,
         odometerKm: dto.odometerKm ?? null,
-        notes: dto.notes ? dto.notes.trim() : null,
+        notes: dto.notes.trim(),
       }),
     );
 

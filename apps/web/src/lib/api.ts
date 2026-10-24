@@ -254,7 +254,7 @@ export type RecordServicePayload = {
   type: 'preventive' | 'corrective';
   performedAt: string;
   odometerKm?: number | null;
-  notes?: string | null;
+  notes: string;
   photos?: string[];
 };
 
