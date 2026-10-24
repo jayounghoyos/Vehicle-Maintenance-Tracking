@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../auth/context';
 import {
   api,
+  fetchPerformers,
   fetchTasks,
   recordServiceEvent,
   type RecordServicePayload,
@@ -22,6 +23,10 @@ import {
 } from '../lib/api';
 import { odometer, shortDate } from '../lib/format';
 import { useToast } from '../toast/context';
+
+/** The choice in the performer list that stands for a workshop with
+ *  no account, which is then named in a text field instead. */
+const EXTERNAL = 'external';
 
 type Props = {
   isOpen: boolean;
@@ -58,6 +63,11 @@ function LogServiceDialog({
   );
   const [odometerKm, setOdometerKm] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
+  // whoever is logging is the likeliest to have done the work
+  const [performer, setPerformer] = useState<string>(
+    principal?.kind === 'user' ? String(principal.id) : '',
+  );
+  const [workshop, setWorkshop] = useState<string>('');
   const [photos, setPhotos] = useState<
     { id: string; preview: string; dataUrl: string }[]
   >([]);
@@ -73,6 +83,11 @@ function LogServiceDialog({
   const { data: taskOptions } = useQuery({
     queryKey: ['maintenance-tasks'],
     queryFn: fetchTasks,
+  });
+
+  const { data: performers } = useQuery({
+    queryKey: ['service-performers'],
+    queryFn: fetchPerformers,
   });
 
   // Load selected vehicle details to see active schedules & odometer
@@ -174,6 +189,14 @@ function LogServiceDialog({
       return;
     }
 
+    const external = performer === EXTERNAL;
+    if (!performer || (external && !workshop.trim())) {
+      setErrorMsg(
+        external ? 'Name the workshop that did the work' : 'Say who did the work',
+      );
+      return;
+    }
+
     const odo = odometerKm.trim() === '' ? null : Number(odometerKm);
     if (odo !== null && isNaN(odo)) {
       setErrorMsg('Odometer must be a valid number');
@@ -188,6 +211,8 @@ function LogServiceDialog({
       performedAt,
       odometerKm: odo,
       notes: notes.trim(),
+      performedById: external ? null : Number(performer),
+      performedByName: external ? workshop.trim() : null,
       photos: photos.map((p) => p.dataUrl),
     });
   };
@@ -507,6 +532,50 @@ function LogServiceDialog({
               placeholder="Add details about parts replaced, diagnostic findings, technician comments…"
               className="mt-1.5 w-full rounded-xl border border-white/10 bg-page px-4 py-2.5 text-body text-ink focus:border-lime/40 focus:outline-none"
             />
+          </div>
+
+          {/* Who did the work */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-body font-medium text-ink">
+                Done by <span className="text-overdue">*</span>
+              </label>
+              <select
+                value={performer}
+                onChange={(e) => setPerformer(e.target.value)}
+                required
+                className="mt-1.5 w-full rounded-xl border border-white/10 bg-page px-4 py-2.5 text-body text-ink focus:border-lime/40 focus:outline-none"
+              >
+                <option value="" disabled className="bg-panel text-ink-muted">
+                  Select who did it…
+                </option>
+                {(performers ?? []).map((p) => (
+                  <option key={p.id} value={p.id} className="bg-panel">
+                    {p.fullName}
+                  </option>
+                ))}
+                <option value={EXTERNAL} className="bg-panel">
+                  An outside workshop…
+                </option>
+              </select>
+            </div>
+
+            {performer === EXTERNAL && (
+              <div>
+                <label className="block text-body font-medium text-ink">
+                  Workshop name <span className="text-overdue">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={workshop}
+                  onChange={(e) => setWorkshop(e.target.value)}
+                  placeholder="e.g. Taller El Poblado"
+                  maxLength={120}
+                  required
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-page px-4 py-2.5 text-body text-ink focus:border-lime/40 focus:outline-none"
+                />
+              </div>
+            )}
           </div>
 
           {/* Performer Info */}

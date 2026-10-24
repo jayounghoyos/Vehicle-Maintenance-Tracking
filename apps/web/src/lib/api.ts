@@ -174,6 +174,9 @@ export type ServiceEventItem = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  /** who did the work: a member or an outside workshop */
+  performer: string | null;
+  performerExternal: boolean;
   photos?: PhotoItem[];
 };
 
@@ -226,6 +229,9 @@ export type ServiceLogItem = {
   odometerKm: number | null;
   notes: string | null;
   recorder: string;
+  /** who did the work: a member or an outside workshop */
+  performer: string | null;
+  performerExternal: boolean;
   photos?: PhotoItem[];
 };
 
@@ -247,6 +253,12 @@ export type TaskItem = {
   name: string;
 };
 
+/** A member who can be named as having done the work. */
+export type PerformerItem = {
+  id: number;
+  fullName: string;
+};
+
 export type RecordServicePayload = {
   vehicleId: number;
   scheduleId?: number | null;
@@ -255,6 +267,9 @@ export type RecordServicePayload = {
   performedAt: string;
   odometerKm?: number | null;
   notes: string;
+  /** one of the two: a member, or an outside workshop by name */
+  performedById?: number | null;
+  performedByName?: string | null;
   photos?: string[];
 };
 
@@ -268,6 +283,8 @@ export const fetchServiceLog = (vehicleId?: number) =>
   );
 
 export const fetchTasks = () => api.get<TaskItem[]>('/service-events/tasks');
+export const fetchPerformers = () =>
+  api.get<PerformerItem[]>('/service-events/performers');
 
 export const recordServiceEvent = (payload: RecordServicePayload) =>
   api.post<ServiceLogItem>('/service-events', payload);
