@@ -227,7 +227,10 @@ export function VehicleDetail({ id }: { id: number }) {
                       )}
                     </div>
                     <p className="text-body text-ink-muted">
-                      {event.recorder} · {shortDate(event.performedAt)}
+                      {event.performer
+                        ? `Done by ${event.performer}${event.performerExternal ? ' (outside workshop)' : ''} · `
+                        : ''}
+                      Logged by {event.recorder} · {shortDate(event.performedAt)}
                       {event.odometerKm !== null && ` · ${odometer(event.odometerKm)} km`}
                     </p>
                     {event.notes && (
