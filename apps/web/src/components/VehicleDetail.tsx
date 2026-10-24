@@ -272,7 +272,7 @@ export function VehicleDetail({ id }: { id: number }) {
 
       <p className="flex items-start gap-2 text-[12px] text-ink-muted">
         <CalendarClock className="mt-0.5 size-3.5 shrink-0" strokeWidth={1.75} />
-        Schedules are set on the Schedules screen, which is not built yet.
+        Schedules are set on the Schedules screen.
       </p>
 
       <LogServiceModal
