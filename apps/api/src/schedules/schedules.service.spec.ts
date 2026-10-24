@@ -13,7 +13,6 @@ function isoDaysFromToday(days: number): string {
 
 describe('SchedulesService', () => {
   let service: SchedulesService;
-  let mockEventCount: number;
   let mockTaskLookup: { name: string } | null;
 
   // organization 10 is "us"; organization 20 exists only to prove a
@@ -102,7 +101,15 @@ describe('SchedulesService', () => {
     .fn()
     .mockImplementation((t) => Promise.resolve({ id: 3, ...t }));
 
+  // stable for the same reason: remove() asks for these inside a
+  // transaction, and the test reads them back afterwards
+  const mockEventUpdate = jest.fn().mockResolvedValue(2);
+  const mockScheduleDelete = jest.fn().mockResolvedValue(1);
+
+  const mockTransaction = jest.fn();
+
   const mockTenants = {
+    transaction: mockTransaction,
     for: jest.fn((entity, organizationId: number) => {
       if (entity === Vehicle) {
         return {
@@ -157,12 +164,12 @@ describe('SchedulesService', () => {
             .mockImplementation(
               (s: Partial<MaintenanceSchedule>) => s as MaintenanceSchedule,
             ),
-          delete: jest.fn().mockResolvedValue({ affected: 1 }),
+          delete: mockScheduleDelete,
         };
       }
       if (entity === ServiceEvent) {
         return {
-          count: jest.fn().mockImplementation(() => Promise.resolve(mockEventCount)),
+          update: mockEventUpdate,
           builder: jest.fn().mockReturnValue({
             distinctOn: jest.fn().mockReturnThis(),
             andWhere: jest.fn().mockReturnThis(),
@@ -175,10 +182,15 @@ describe('SchedulesService', () => {
       return {};
     }),
   };
+  // the work runs against the same scoped repositories, as the real
+  // transaction() hands out for() bound to its own manager
+  mockTransaction.mockImplementation(
+    (work: (tenants: typeof mockTenants) => Promise<unknown>) => work(mockTenants),
+  );
 
   beforeEach(async () => {
-    mockEventCount = 0;
     mockTaskLookup = null;
+    jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -255,11 +267,26 @@ describe('SchedulesService', () => {
     ).rejects.toThrow('At least one of intervalDays or intervalKm is required');
   });
 
-  it('refuses to delete a schedule with service events logged against it', async () => {
-    mockEventCount = 2;
-    await expect(service.remove(10, 5)).rejects.toThrow(
-      '2 service events logged against this schedule, so it cannot be deleted',
+  it('deletes a schedule with history and detaches its service events, in one transaction (#50)', async () => {
+    await service.remove(10, 5);
+
+    expect(mockTransaction).toHaveBeenCalledTimes(1);
+    // scoped to this organization as well as this schedule, so the
+    // detach cannot reach anybody else's log
+    expect(mockTenants.for).toHaveBeenCalledWith(ServiceEvent, 10);
+    expect(mockEventUpdate).toHaveBeenCalledWith({ scheduleId: 5 }, { scheduleId: null });
+    expect(mockScheduleDelete).toHaveBeenCalledWith({ id: 5 });
+    // detached first: the foreign key refuses the delete otherwise
+    expect(mockEventUpdate.mock.invocationCallOrder[0]).toBeLessThan(
+      mockScheduleDelete.mock.invocationCallOrder[0],
     );
+  });
+
+  it('still answers 404 for a schedule that is not in the organization, touching nothing', async () => {
+    await expect(service.remove(10, 999)).rejects.toThrow('No such schedule');
+    expect(mockTransaction).not.toHaveBeenCalled();
+    expect(mockEventUpdate).not.toHaveBeenCalled();
+    expect(mockScheduleDelete).not.toHaveBeenCalled();
   });
 
   it('rejects a duplicate task name found by the case-insensitive lookup', async () => {

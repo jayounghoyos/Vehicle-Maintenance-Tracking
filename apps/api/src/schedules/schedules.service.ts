@@ -150,31 +150,27 @@ export class SchedulesService {
   }
 
   /**
-   * Permanent, and only for a schedule nothing has been logged against.
-   * service_events.schedule_id has no cascade, so deleting one that has
-   * history fails in the database as a 500 unless it is refused here
-   * first — the same reasoning vehicles.service.ts uses for a vehicle.
+   * Permanent. Decided in #50: a schedule with history is deleted too,
+   * and its service events are detached rather than deleted with it —
+   * schedule_id goes back to null, the same as a breakdown nobody
+   * planned, so the work stays in the log and only the rule is gone.
+   * service_events.schedule_id has no cascade, so the detach is done
+   * here, explicitly, before the delete the foreign key would refuse.
    *
-   * Whether a schedule with history should instead be deletable by
-   * detaching its service events (schedule_id is nullable precisely so
-   * that is possible) is a business decision, not this fix — see the
-   * tracking issue.
+   * One transaction, so a failed delete cannot leave a schedule standing
+   * with its history already taken off it.
    */
   async remove(organizationId: number, id: number): Promise<void> {
     const schedules = this.tenants.for(MaintenanceSchedule, organizationId);
     const schedule = await schedules.findOne({ where: { id } });
     if (!schedule) throw new NotFoundException('No such schedule');
 
-    const events = this.tenants.for(ServiceEvent, organizationId);
-    const eventCount = await events.count({ where: { scheduleId: id } });
-    if (eventCount > 0) {
-      throw new ConflictException(
-        `${eventCount} service event${eventCount === 1 ? '' : 's'} logged against ` +
-          `this schedule, so it cannot be deleted`,
-      );
-    }
-
-    await schedules.delete({ id });
+    await this.tenants.transaction(async (tx) => {
+      await tx
+        .for(ServiceEvent, organizationId)
+        .update({ scheduleId: id }, { scheduleId: null });
+      await tx.for(MaintenanceSchedule, organizationId).delete({ id });
+    });
   }
 
   private toRow(

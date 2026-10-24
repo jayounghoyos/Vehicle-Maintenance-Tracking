@@ -187,7 +187,7 @@ Table service_events {
   id integer [primary key]
   organization_id integer [not null]
   vehicle_id integer [not null]
-  schedule_id integer [note: 'Null when the work was not planned, e.g. a breakdown']
+  schedule_id integer [note: 'Null when the work was not planned, e.g. a breakdown, or when its schedule was deleted afterwards (#50)']
   task_id integer [not null]
   recorded_by integer [not null]
   type service_type [not null]

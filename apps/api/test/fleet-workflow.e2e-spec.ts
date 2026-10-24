@@ -226,10 +226,6 @@ describe('fleet workflow (e2e)', () => {
       .expect(400);
   });
 
-  it('will not delete a schedule that services were logged against', async () => {
-    await http().delete(`/api/schedules/${scheduleId}`).set(auth()).expect(409);
-  });
-
   it('edits the interval on an existing schedule', async () => {
     await http()
       .patch(`/api/schedules/${scheduleId}`)
@@ -307,5 +303,24 @@ describe('fleet workflow (e2e)', () => {
     // its log is the record the client came here for, and deleting the
     // vehicle would take it with them
     await http().delete(`/api/vehicles/${vehicleId}`).set(auth()).expect(409);
+  });
+
+  // last on purpose: every step above shares this schedule
+  it('deletes a schedule services were logged against, and keeps the services (#50)', async () => {
+    const logFor = () =>
+      http().get(`/api/service-events?vehicleId=${vehicleId}`).set(auth()).expect(200);
+    const before = (await logFor()).body as unknown[];
+    expect(before.length).toBeGreaterThan(0);
+
+    await http().delete(`/api/schedules/${scheduleId}`).set(auth()).expect(204);
+
+    const list = await http().get('/api/schedules').set(auth()).expect(200);
+    const ids = (list.body as { id: number }[]).map((s) => s.id);
+    expect(ids).not.toContain(scheduleId);
+
+    // detached, not deleted: the work stays in the log as unplanned work
+    expect((await logFor()).body).toHaveLength(before.length);
+
+    await http().delete(`/api/schedules/${scheduleId}`).set(auth()).expect(404);
   });
 });

@@ -81,7 +81,7 @@ What goes on top of the accent is derived from it, never chosen, so no client ca
 
 Due date passed and nobody logged that service = overdue.
 
-`schedule_id` can be empty. A breakdown is work nobody planned.
+`schedule_id` can be empty. A breakdown is work nobody planned. So is work whose schedule was later deleted: deleting a schedule detaches its service events rather than deleting them, so the history stays in the log (#50).
 
 A role somebody holds cannot be deleted, and the last role granting `manage_team` cannot drop it. Between them that is what stops a client locking itself out of its own team screen, which nobody but a platform admin could undo.
 
