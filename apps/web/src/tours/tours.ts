@@ -31,7 +31,7 @@ const workspace: DriveStep[] = [
     popover: {
       title: 'The list down the left',
       description:
-        'The parts of the system. The one in white is where you are now. The greyed out ones are not built yet.',
+        'The parts of the system. The one in white is where you are now. You only see the parts your job lets you open.',
       side: 'right',
       align: 'start',
     },

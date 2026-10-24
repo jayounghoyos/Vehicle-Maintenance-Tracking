@@ -17,40 +17,34 @@ type NavItem = {
   to: string;
   label: string;
   icon: LucideIcon;
-  ready: boolean;
   /** absent means everybody with an account sees it */
   need?: Permission;
 };
 
-// What is not built yet stays visible so the workspace reads as it does
-// in the mockup, but it does not pretend to navigate.
 const NAV: NavItem[] = [
-  { to: '/', label: 'Dashboard', icon: LayoutGrid, ready: true },
-  { to: '/vehicles', label: 'Vehicles', icon: Truck, ready: true, need: 'view_vehicles' },
+  { to: '/', label: 'Dashboard', icon: LayoutGrid },
+  { to: '/vehicles', label: 'Vehicles', icon: Truck, need: 'view_vehicles' },
   {
     to: '/schedules',
     label: 'Schedules',
     icon: CalendarClock,
-    ready: true,
     need: 'view_vehicles',
   },
   {
     to: '/service-log',
     label: 'Service Log',
     icon: Wrench,
-    ready: true,
     need: 'view_service_log',
   },
   {
     to: '/reports',
     label: 'Reports',
     icon: BarChart3,
-    ready: true,
     need: 'view_reports',
   },
   // the mockup's Settings slot, spent on the team: accounts are the only
   // thing there is anything to configure yet
-  { to: '/team', label: 'Team', icon: Users, ready: true, need: 'view_team' },
+  { to: '/team', label: 'Team', icon: Users, need: 'view_team' },
 ];
 
 export function Sidebar({
@@ -78,46 +72,35 @@ export function Sidebar({
           Workspace
         </p>
         <ul className="space-y-1">
-          {visible.map(({ to, label, icon: Icon, ready }) => (
+          {visible.map(({ to, label, icon: Icon }) => (
             <li key={to}>
-              {ready ? (
-                <NavLink
-                  to={to}
-                  // every path starts with "/", so without this the
-                  // dashboard reads as active on every screen. Team is
-                  // left prefix-matching so it stays lit on its own tabs
-                  end={to === '/'}
-                  className={({ isActive }) =>
-                    [
-                      'flex items-center gap-3 rounded-lg px-3 py-2.5 text-body transition-colors',
-                      // lime marks the active item — the manual's other
-                      // sanctioned use of the accent besides the primary action
-                      isActive
-                        ? 'bg-white/5 font-medium text-ink'
-                        : 'text-ink-muted hover:bg-white/5 hover:text-ink',
-                    ].join(' ')
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      <Icon
-                        className={`size-[18px] ${isActive ? 'text-lime' : ''}`}
-                        strokeWidth={1.75}
-                      />
-                      {label}
-                    </>
-                  )}
-                </NavLink>
-              ) : (
-                <span
-                  aria-disabled
-                  title="Not built yet"
-                  className="flex cursor-default items-center gap-3 rounded-lg px-3 py-2.5 text-body text-ink-muted/50"
-                >
-                  <Icon className="size-[18px]" strokeWidth={1.75} />
-                  {label}
-                </span>
-              )}
+              <NavLink
+                to={to}
+                // every path starts with "/", so without this the
+                // dashboard reads as active on every screen. Team is
+                // left prefix-matching so it stays lit on its own tabs
+                end={to === '/'}
+                className={({ isActive }) =>
+                  [
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-body transition-colors',
+                    // lime marks the active item — the manual's other
+                    // sanctioned use of the accent besides the primary action
+                    isActive
+                      ? 'bg-white/5 font-medium text-ink'
+                      : 'text-ink-muted hover:bg-white/5 hover:text-ink',
+                  ].join(' ')
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon
+                      className={`size-[18px] ${isActive ? 'text-lime' : ''}`}
+                      strokeWidth={1.75}
+                    />
+                    {label}
+                  </>
+                )}
+              </NavLink>
             </li>
           ))}
         </ul>
