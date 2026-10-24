@@ -7,7 +7,7 @@ import {
   Trash2,
   type LucideIcon,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { STATE_LABEL, type MaintenanceState } from '../domain/maintenance';
 import { sortRows, useMultiSort, type Sort } from '../hooks/useMultiSort';
@@ -89,6 +89,12 @@ function lastDoneLabel(schedule: ScheduleItem): string {
     : 'Never';
 }
 
+/* Last done is filled from the service events logged against the
+ * schedule, so a value there means the API will refuse the delete. */
+function hasHistory(schedule: ScheduleItem): boolean {
+  return schedule.lastServiceDate != null || schedule.lastServiceOdometerKm != null;
+}
+
 export function ScheduleTable({
   schedules,
   canManage,
@@ -106,6 +112,14 @@ export function ScheduleTable({
   const [query, setQuery] = useState('');
   const [state, setState] = useState<MaintenanceState | 'all'>('all');
   const sort = useMultiSort<SortKey>({ defaultSort: DEFAULT_SORT, startsAscending });
+  // the row whose delete was pressed once and now says what it will do
+  const [armedId, setArmedId] = useState<number | null>(null);
+  // backing out hands focus back to the delete button that started it
+  const refocusId = useRef<number | null>(null);
+  const disarm = () => {
+    refocusId.current = armedId;
+    setArmedId(null);
+  };
 
   const counts = useMemo(() => {
     const tally = new Map<MaintenanceState, number>();
@@ -287,24 +301,82 @@ export function ScheduleTable({
                         onClick={(event) => event.stopPropagation()}
                         className="flex justify-end gap-1"
                       >
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => onEdit(schedule)}
-                          title={`Edit ${schedule.task}`}
-                          className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-white/5 hover:text-ink disabled:opacity-40"
-                        >
-                          <Pencil className="size-4" strokeWidth={1.75} />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => onRemove(schedule)}
-                          title={`Delete ${schedule.task}`}
-                          className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-overdue/15 hover:text-overdue disabled:opacity-40"
-                        >
-                          <Trash2 className="size-4" strokeWidth={1.75} />
-                        </button>
+                        {armedId === schedule.id ? (
+                          <div
+                            role="group"
+                            aria-label={`Delete ${schedule.task}`}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Escape') disarm();
+                            }}
+                            className="flex items-center justify-end gap-2"
+                          >
+                            <p className="max-w-64 text-body text-ink-muted">
+                              {hasHistory(schedule)
+                                ? 'Service is logged against this schedule, so it cannot be deleted. You can edit it instead.'
+                                : 'Delete this schedule? This cannot be undone.'}
+                            </p>
+                            {hasHistory(schedule) ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setArmedId(null);
+                                  onEdit(schedule);
+                                }}
+                                className="rounded-lg bg-white/10 px-3 py-1.5 text-body font-medium text-ink transition-colors hover:bg-white/15"
+                              >
+                                Edit
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setArmedId(null);
+                                  onRemove(schedule);
+                                }}
+                                className="rounded-lg bg-overdue/15 px-3 py-1.5 text-body font-medium text-overdue transition-colors hover:bg-overdue/25"
+                              >
+                                Delete
+                              </button>
+                            )}
+                            {/* the safe choice takes focus, so a stray
+                                Enter backs out rather than deletes */}
+                            <button
+                              type="button"
+                              autoFocus
+                              onClick={disarm}
+                              className="rounded-lg px-3 py-1.5 text-body text-ink-muted transition-colors hover:bg-white/5 hover:text-ink"
+                            >
+                              {hasHistory(schedule) ? 'Close' : 'Cancel'}
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() => onEdit(schedule)}
+                              title={`Edit ${schedule.task}`}
+                              className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-white/5 hover:text-ink disabled:opacity-40"
+                            >
+                              <Pencil className="size-4" strokeWidth={1.75} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={busy}
+                              ref={(button) => {
+                                if (button && refocusId.current === schedule.id) {
+                                  refocusId.current = null;
+                                  button.focus();
+                                }
+                              }}
+                              onClick={() => setArmedId(schedule.id)}
+                              title={`Delete ${schedule.task}`}
+                              className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-overdue/15 hover:text-overdue disabled:opacity-40"
+                            >
+                              <Trash2 className="size-4" strokeWidth={1.75} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     )}
                   </td>
