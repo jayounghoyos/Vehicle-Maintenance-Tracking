@@ -102,7 +102,8 @@ export class SchedulesController {
   @Requires(Permission.MANAGE_SCHEDULES)
   @HttpCode(204)
   @ApiOperation({
-    summary: 'Remove a schedule item nothing has been logged against',
+    summary:
+      'Remove a schedule item; services logged against it stay in the log, detached from it',
   })
   remove(
     @CurrentUser() principal: Principal,

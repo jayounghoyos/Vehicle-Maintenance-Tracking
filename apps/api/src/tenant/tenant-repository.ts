@@ -109,4 +109,19 @@ export class TenantRepositories {
   ): TenantRepository<T> {
     return new TenantRepository(this.dataSource.getRepository(entity), organizationId);
   }
+
+  /** For writes that must land together or not at all. The repositories
+   *  `work` asks for are scoped exactly as for() scopes them, so going
+   *  transactional is never a reason to step around the organization. */
+  transaction<R>(work: (tenants: TenantScope) => Promise<R>): Promise<R> {
+    return this.dataSource.transaction((manager) =>
+      work({
+        for: (entity, organizationId) =>
+          new TenantRepository(manager.getRepository(entity), organizationId),
+      }),
+    );
+  }
 }
+
+/** What a transaction hands its work: for(), bound to that transaction. */
+export type TenantScope = Pick<TenantRepositories, 'for'>;
