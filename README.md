@@ -53,7 +53,8 @@ values are ignored.
 ## Testing it
 
 ```bash
-pnpm test                      # unit tests, no database
+pnpm --filter api test:unit    # unit tests, no database
+pnpm test                      # unit and integration together, needs postgres
 pnpm --filter api test:e2e     # integration tests, through HTTP into postgres
 ```
 
@@ -77,7 +78,10 @@ wiped on every deploy. Leave those three empty and the app runs with photo uploa
 switched off.
 
 Migrations run on start, since Render offers pre-deploy steps only on paid plans.
-For the demo data, run pnpm seed:prod from Render's shell.
+The demo data is loaded once, from a laptop: run pnpm build, then pnpm seed:prod
+with DATABASE_URL set to Neon's. The free plan has no shell on Render, and
+render.yaml explains why the seed is not a deploy hook either: it empties every
+table first.
 
 Two things that bite:
 
@@ -97,7 +101,7 @@ Two things that bite:
 - [`docs/design/context_diagram.md`](docs/design/context_diagram.md) Context diagram
 - [`docs/design/use_cases_diagram.md`](docs/design/use_cases_diagram.md) Use case diagram
 - [`docs/design/components_diagram.md`](docs/design/components_diagram.md) Component diagram
-- [`docs/design/architecture_diagram.md`](docs/design/architecture_diagram.md) AWS deployment architecture
+- [`docs/design/architecture_diagram.md`](docs/design/architecture_diagram.md) Deployment architecture (Vercel, Render, Neon)
 - [`docs/design/api_contracts.md`](docs/design/api_contracts.md) API contract
 - [`docs/design/data_model.md`](docs/design/data_model.md) Data model
 - [`docs/design/mockup.md`](docs/design/mockup.md) Mockup and brand manual
@@ -122,4 +126,4 @@ Everything about how the project is run rather than how the code works lives in 
 
 ## Stack
 
-React 19 + Vite (web client), NestJS 11 (back-end API), PostgreSQL 18 and TypeORM, in Docker. Styling is Tailwind 4, data fetching is TanStack Query. Deployment options are compared in [`architecture_diagram.md`](docs/design/architecture_diagram.md).
+React 19 + Vite (web client), NestJS 11 (back-end API), PostgreSQL 18 and TypeORM, in Docker. Styling is Tailwind 4, data fetching is TanStack Query. It is deployed on Vercel, Render and Neon, as drawn in [`architecture_diagram.md`](docs/design/architecture_diagram.md).
