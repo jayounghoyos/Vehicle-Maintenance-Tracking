@@ -2,6 +2,26 @@
 
 Internal tool for a small delivery fleet to track vehicle records, preventive maintenance schedules, and service history (replacing spreadsheets and calendar reminders).
 
+## Stack
+
+<p align="center"><img src="https://skillicons.dev/icons?i=ts,nestjs,react,vite,tailwind,postgres,docker,pnpm,vercel,githubactions&perline=10" alt="Tech stack" /></p>
+
+<p align="center">
+<img src="https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white" alt="NestJS" />
+<img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React" />
+<img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite" />
+<img src="https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+<img src="https://img.shields.io/badge/TanStack%20Query-5-FF4154?logo=reactquery&logoColor=white" alt="TanStack Query" />
+<img src="https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" />
+<img src="https://img.shields.io/badge/TypeORM-1-FE0803?logo=typeorm&logoColor=white" alt="TypeORM" />
+<img src="https://img.shields.io/badge/Render-API-46E3B7?logo=render&logoColor=black" alt="Render" />
+<img src="https://img.shields.io/badge/Vercel-Web-000000?logo=vercel&logoColor=white" alt="Vercel" />
+<img src="https://img.shields.io/badge/Neon-Database-00E599?logo=neon&logoColor=black" alt="Neon" />
+<img src="https://img.shields.io/badge/GitHub%20Actions-CI-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions" />
+</p>
+
+How the pieces are deployed is drawn in [`architecture_diagram.md`](docs/design/architecture_diagram.md).
+
 ## The problem
 
 The fleet currently tracks service dates in spreadsheets and calendar reminders, and breakdown notes are not recorded consistently. As a result preventive maintenance gets missed, vehicles spend avoidable time out of service, and the people making operational decisions have no history at hand when they need it.
@@ -123,7 +143,3 @@ Everything about how the project is run rather than how the code works lives in 
 - [Status updates](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Status-updates) — the weekly report to the client
 - [Client meetings](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Client-meetings) — what was agreed, and which features came out of it
 - [Mockups](https://github.com/jayounghoyos/Vehicle-Maintenance-Tracking/wiki/Mockups) — the design each screen was built against
-
-## Stack
-
-React 19 + Vite (web client), NestJS 11 (back-end API), PostgreSQL 18 and TypeORM, in Docker. Styling is Tailwind 4, data fetching is TanStack Query. It is deployed on Vercel, Render and Neon, as drawn in [`architecture_diagram.md`](docs/design/architecture_diagram.md).
