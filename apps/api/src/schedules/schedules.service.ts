@@ -7,7 +7,13 @@ import {
 import { QueryFailedError } from 'typeorm';
 
 import { MaintenanceSchedule, MaintenanceTask, ServiceEvent, Vehicle } from '../entities';
-import { kmUntil, scheduleState } from '../maintenance/maintenance';
+import {
+  isoDay,
+  kmUntil,
+  nextDue,
+  scheduleState,
+  type Baseline,
+} from '../maintenance/maintenance';
 import { TenantRepositories } from '../tenant/tenant-repository';
 import type { CreateScheduleDto, UpdateScheduleDto } from './dto';
 import type { ScheduleRow, TaskItem } from './schedules.types';
@@ -101,18 +107,19 @@ export class SchedulesService {
     const task = await tasks.findOne({ where: { id: dto.taskId } });
     if (!task) throw new NotFoundException('Task not found');
 
+    const intervals = {
+      intervalDays: dto.intervalDays ?? null,
+      intervalKm: dto.intervalKm ?? null,
+    };
     const schedules = this.tenants.for(MaintenanceSchedule, organizationId);
     const saved = await schedules.save(
       schedules.create({
         vehicleId: vehicle.id,
         taskId: task.id,
-        intervalDays: dto.intervalDays ?? null,
-        intervalKm: dto.intervalKm ?? null,
-        // set only once a service is actually logged against this
-        // schedule — see service-events.service.ts#recordService, which
-        // owns that recalculation and is not duplicated here
-        nextDueDate: null,
-        nextDueKm: null,
+        ...intervals,
+        // counted from today and today's odometer until a service is
+        // logged (#7): a rule nobody has done yet must still come due
+        ...nextDue(intervals, { date: isoDay(new Date()), km: vehicle.odometerKm }),
       }),
     );
     return this.rowFor(organizationId, saved.id);
@@ -124,8 +131,14 @@ export class SchedulesService {
     dto: UpdateScheduleDto,
   ): Promise<ScheduleRow> {
     const schedules = this.tenants.for(MaintenanceSchedule, organizationId);
-    const schedule = await schedules.findOne({ where: { id } });
+    const schedule = await schedules.findOne({
+      where: { id },
+      relations: { vehicle: true },
+    });
     if (!schedule) throw new NotFoundException('No such schedule');
+    const reinterval = dto.intervalDays !== undefined || dto.intervalKm !== undefined;
+    // read before the intervals change: it is recovered from them
+    const from = reinterval ? await this.baseline(organizationId, schedule) : null;
 
     if (dto.taskId !== undefined) {
       const tasks = this.tenants.for(MaintenanceTask, organizationId);
@@ -145,8 +158,35 @@ export class SchedulesService {
       );
     }
 
+    // a new interval counts from the same point the old one did, so
+    // editing a rule moves its due date instead of leaving the old one
+    if (from) Object.assign(schedule, nextDue(schedule, from));
+
     await schedules.save(schedule);
     return this.rowFor(organizationId, schedule.id);
+  }
+
+  /**
+   * What the schedule's intervals count from today: its last service,
+   * or the day it was created. The odometer at creation is not stored,
+   * so it is read back from the due reading the old interval produced,
+   * and the vehicle's current reading is the last resort.
+   */
+  private async baseline(
+    organizationId: number,
+    schedule: MaintenanceSchedule,
+  ): Promise<Baseline> {
+    const last = (await this.lastServiceByScheduleId(organizationId, [schedule.id])).get(
+      schedule.id,
+    );
+    const counted =
+      schedule.nextDueKm !== null && schedule.intervalKm
+        ? schedule.nextDueKm - schedule.intervalKm
+        : null;
+    return {
+      date: last?.performedAt ?? isoDay(schedule.createdAt),
+      km: last?.odometerKm ?? counted ?? schedule.vehicle.odometerKm,
+    };
   }
 
   /**

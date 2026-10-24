@@ -3,6 +3,7 @@ import { QueryFailedError } from 'typeorm';
 
 import { MaintenanceSchedule, MaintenanceTask, ServiceEvent, Vehicle } from '../entities';
 import { TenantRepositories } from '../tenant/tenant-repository';
+import { isoDay } from '../maintenance/maintenance';
 import { SchedulesService } from './schedules.service';
 
 function isoDaysFromToday(days: number): string {
@@ -22,24 +23,28 @@ describe('SchedulesService', () => {
     id: 1,
     organizationId: 10,
     plate: 'ABC123',
+    odometerKm: 50_000,
     model: { make: 'Toyota', name: 'Hilux' },
   };
   const mockVehicleOverdue = {
     id: 6,
     organizationId: 10,
     plate: 'XYZ999',
+    odometerKm: 50_000,
     model: { make: 'Renault', name: 'Kangoo' },
   };
   const mockVehicleDueSoon = {
     id: 7,
     organizationId: 10,
     plate: 'QRS111',
+    odometerKm: 50_000,
     model: { make: 'Hyundai', name: 'H100' },
   };
   const mockOtherOrgVehicle = {
     id: 99,
     organizationId: 20,
     plate: 'OTHER1',
+    odometerKm: 50_000,
     model: { make: 'Ford', name: 'Transit' },
   };
   const vehiclesByOrg: Record<number, Record<number, typeof mockVehicle>> = {
@@ -67,6 +72,7 @@ describe('SchedulesService', () => {
     nextDueKm: null,
     vehicle: mockVehicle,
     task: mockTask,
+    createdAt: new Date(2026, 0, 1),
   };
   const mockScheduleOverdue = {
     id: 6,
@@ -79,6 +85,7 @@ describe('SchedulesService', () => {
     nextDueKm: null,
     vehicle: mockVehicleOverdue,
     task: mockTask,
+    createdAt: new Date(2026, 0, 1),
   };
   const mockScheduleDueSoon = {
     id: 7,
@@ -91,6 +98,7 @@ describe('SchedulesService', () => {
     nextDueKm: null,
     vehicle: mockVehicleDueSoon,
     task: mockTask,
+    createdAt: new Date(2026, 0, 1),
   };
   const allSchedules = [mockScheduleOnTrack, mockScheduleOverdue, mockScheduleDueSoon];
 
@@ -105,6 +113,9 @@ describe('SchedulesService', () => {
   // transaction, and the test reads them back afterwards
   const mockEventUpdate = jest.fn().mockResolvedValue(2);
   const mockScheduleDelete = jest.fn().mockResolvedValue(1);
+  const mockScheduleSave = jest
+    .fn()
+    .mockImplementation((s) => Promise.resolve({ id: 5, ...s }));
 
   const mockTransaction = jest.fn();
 
@@ -158,7 +169,7 @@ describe('SchedulesService', () => {
             .mockImplementation(({ where }: { where: { id: number } }) =>
               Promise.resolve(allSchedules.find((s) => s.id === where.id) ?? null),
             ),
-          save: jest.fn().mockImplementation((s) => Promise.resolve({ id: 5, ...s })),
+          save: mockScheduleSave,
           create: jest
             .fn()
             .mockImplementation(
@@ -236,6 +247,36 @@ describe('SchedulesService', () => {
     expect(row.vehicleId).toBe(1);
     expect(row.taskId).toBe(2);
     expect(row.plate).toBe('ABC123');
+  });
+
+  // #7: a rule nobody has done yet still comes due, counted from the day
+  // it was created and the odometer then
+  it('counts a new schedule from today and the current odometer', async () => {
+    await service.create(10, {
+      vehicleId: 1,
+      taskId: 2,
+      intervalDays: 30,
+      intervalKm: 5000,
+    });
+
+    const inThirtyDays = new Date();
+    inThirtyDays.setDate(inThirtyDays.getDate() + 30);
+    expect(mockScheduleSave).toHaveBeenCalledWith(
+      expect.objectContaining({ nextDueDate: isoDay(inThirtyDays), nextDueKm: 55_000 }),
+    );
+  });
+
+  it('moves the due date when an interval is edited, from the same starting point', async () => {
+    const before = { ...mockScheduleOverdue };
+    try {
+      // never serviced, so it still counts from the day it was created
+      await service.update(10, 6, { intervalDays: 120, intervalKm: 2000 });
+      expect(mockScheduleSave).toHaveBeenCalledWith(
+        expect.objectContaining({ nextDueDate: '2026-05-01', nextDueKm: 52_000 }),
+      );
+    } finally {
+      Object.assign(mockScheduleOverdue, before);
+    }
   });
 
   it('rejects a create with both intervals empty, before touching the vehicle or task', async () => {

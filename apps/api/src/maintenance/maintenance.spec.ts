@@ -3,7 +3,9 @@ import {
   DUE_SOON_KM,
   STATE_ORDER,
   daysUntil,
+  isoDay,
   kmUntil,
+  nextDue,
   scheduleState,
   worstState,
 } from './maintenance';
@@ -125,6 +127,33 @@ describe('maintenance', () => {
       expect(kmUntil(ODOMETER + 300, ODOMETER)).toBe(300);
       expect(kmUntil(ODOMETER - 300, ODOMETER)).toBe(-300);
     });
+  });
+
+  describe('nextDue', () => {
+    const from = { date: '2026-01-31', km: 40_000 };
+
+    it('adds each interval to where it counts from', () => {
+      expect(nextDue({ intervalDays: 30, intervalKm: 5_000 }, from)).toEqual({
+        nextDueDate: '2026-03-02',
+        nextDueKm: 45_000,
+      });
+    });
+
+    it('leaves the side of an interval that is not set empty', () => {
+      expect(nextDue({ intervalDays: null, intervalKm: 5_000 }, from)).toEqual({
+        nextDueDate: null,
+        nextDueKm: 45_000,
+      });
+      expect(nextDue({ intervalDays: 180, intervalKm: null }, from)).toEqual({
+        nextDueDate: '2026-07-30',
+        nextDueKm: null,
+      });
+    });
+  });
+
+  it('writes a local date as the calendar day it falls on', () => {
+    expect(isoDay(new Date(2026, 9, 24, 23, 59))).toBe('2026-10-24');
+    expect(isoDay(new Date(2026, 0, 5, 0, 1))).toBe('2026-01-05');
   });
 
   describe('worstState', () => {
