@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   Matches,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -77,6 +78,25 @@ export class RecordServiceEventDto {
   @IsString()
   @Matches(/\S/, { message: 'notes must say what was done or found' })
   notes: string;
+
+  @ApiPropertyOptional({
+    example: 4,
+    description:
+      'The member who did the work. Give this or performedByName; with neither, the request is refused',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  performedById?: number | null;
+
+  @ApiPropertyOptional({
+    example: 'Taller El Poblado',
+    description: 'An outside workshop with no account, used instead of performedById',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  performedByName?: string | null;
 
   @ApiPropertyOptional({
     type: [String],
