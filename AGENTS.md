@@ -52,15 +52,15 @@ organization condition instead of adding to it, which is a bug we have already s
 - **Maintenance task** — a job that gets done, e.g. an oil change. Unique by name within an organization.
 - **Maintenance schedule** — the rule: this task, on this vehicle, every N days or every N kilometres, or both. At least one interval is required.
 - **Service event** — the work as it happened, optionally against a schedule. Logging one moves that schedule's next due date forward.
-- Whether a schedule is `overdue`, `due_soon` or `on_track` is worked out in `apps/api/src/maintenance/maintenance.ts`. Never duplicate that logic.
+- Whether a schedule is `overdue`, `due_soon` or `on_track` is worked out in `apps/api/src/maintenance/maintenance.ts`: whichever interval comes first, days or kilometres, and due soon within 14 days or 1,000 km. Never duplicate that logic; the web only labels what the API decided.
 
 ## Do not touch
 
-- Which interval wins when days and kilometres disagree. Open question, issues #11 and #13. `maintenance.ts` reads `nextDueDate` only, on purpose.
+- The overdue rule itself, decided in #11 and #13. Changing which interval wins, or either threshold, is a product decision: ask first.
 - Migrations that already ran. Add a new one; never edit an old one.
 - `.env`, credentials or anything under `apps/api/src/seed/seed.ts` that looks like a password.
 - Anything outside the scope you were given. If a fix seems needed elsewhere, say so instead of doing it.
 
 ## Ask, do not guess
 
-When a decision is about what the client wants rather than how to write it — what a delete should do to existing history, what a row should open, which interval takes priority — stop and ask. Those get filed as issues with the `clarificacion-pendiente` label, not resolved in code.
+When a decision is about what the client wants rather than how to write it — what a delete should do to existing history, what a row should open, how a rule should count — stop and ask. Those get filed as issues with the `clarificacion-pendiente` label, not resolved in code.
