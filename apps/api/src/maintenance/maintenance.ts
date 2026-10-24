@@ -59,6 +59,41 @@ export function scheduleState(
   return 'on_track';
 }
 
+/** What a schedule's intervals count from: its last service, or for a
+ *  schedule never serviced, the day it was created and the odometer
+ *  then (decided in #7). */
+export type Baseline = { date: string; km: number };
+
+/** `date` as YYYY-MM-DD, the calendar day it falls on locally. */
+export function isoDay(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function addDays(iso: string, days: number): string {
+  const day = calendarDay(iso);
+  day.setDate(day.getDate() + days);
+  return isoDay(day);
+}
+
+/**
+ * When a schedule next comes due, counted from `from`. An interval that
+ * is not set leaves its side null, so removing one clears what it set.
+ * The one place this is worked out: logging a service, creating a
+ * schedule and editing its intervals all come here.
+ */
+export function nextDue(
+  intervals: { intervalDays: number | null; intervalKm: number | null },
+  from: Baseline,
+): Due {
+  return {
+    nextDueDate: intervals.intervalDays
+      ? addDays(from.date, intervals.intervalDays)
+      : null,
+    nextDueKm: intervals.intervalKm ? from.km + intervals.intervalKm : null,
+  };
+}
+
 /** A vehicle is as bad as its worst schedule. */
 export function worstState(states: MaintenanceState[]): MaintenanceState {
   if (states.includes('overdue')) return 'overdue';

@@ -109,6 +109,8 @@ describe('fleet workflow (e2e)', () => {
       .send({ vehicleId, taskId, intervalDays: 30 })
       .expect(201);
     scheduleId = schedule.body.id;
+    // never serviced, and still due: thirty days from today (#7)
+    expect(schedule.body.nextDueDate).toBe(isoDaysAgo(-30));
 
     const list = await http().get('/api/schedules').set(auth()).expect(200);
     expect(list.body).toHaveLength(1);

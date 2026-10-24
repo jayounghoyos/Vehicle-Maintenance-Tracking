@@ -12,6 +12,7 @@ import {
   User,
   Vehicle,
 } from '../entities';
+import { nextDue } from '../maintenance/maintenance';
 import { PhotoStorage } from '../photos/photo-storage.service';
 import { TenantRepositories } from '../tenant/tenant-repository';
 import type { RecordServiceEventDto } from './dto';
@@ -165,18 +166,14 @@ export class ServiceEventsService {
         throw new NotFoundException('Schedule item not found for this vehicle');
       }
 
-      // Recalculate next due date from performed date if intervalDays is set
-      if (schedule.intervalDays !== null && schedule.intervalDays > 0) {
-        const performedDate = new Date(dto.performedAt + 'T00:00:00Z');
-        performedDate.setUTCDate(performedDate.getUTCDate() + schedule.intervalDays);
-        schedule.nextDueDate = performedDate.toISOString().slice(0, 10);
-      }
-
-      // Recalculate next due km if intervalKm is set
-      if (schedule.intervalKm !== null && schedule.intervalKm > 0) {
-        const baseKm = dto.odometerKm ?? vehicle.odometerKm;
-        schedule.nextDueKm = baseKm + schedule.intervalKm;
-      }
+      // the service is the new baseline both intervals count from
+      Object.assign(
+        schedule,
+        nextDue(schedule, {
+          date: dto.performedAt,
+          km: dto.odometerKm ?? vehicle.odometerKm,
+        }),
+      );
 
       await schedules.save(schedule);
     }
