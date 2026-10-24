@@ -188,6 +188,12 @@ describe('fleet workflow (e2e)', () => {
     });
     expect(log.body[1].performerExternal).toBe(false);
     expect(log.body[1].performer).toBe(log.body[1].recorder);
+
+    const detail = await http().get(`/api/vehicles/${vehicleId}`).set(auth()).expect(200);
+    expect(detail.body.recentEvents[0]).toMatchObject({
+      performer: 'Taller El Poblado',
+      performerExternal: true,
+    });
   });
 
   it('will not log a service without saying who did it', async () => {

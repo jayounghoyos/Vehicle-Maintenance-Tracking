@@ -15,18 +15,10 @@ import {
 import { PhotoStorage } from '../photos/photo-storage.service';
 import { TenantRepositories } from '../tenant/tenant-repository';
 import type { RecordServiceEventDto } from './dto';
+import { performerOf } from './performer';
 import type { PerformerItem, ServiceLogRow, TaskItem } from './service-events.types';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'photos');
-
-/** A member's name when one did the work, otherwise the workshop's. */
-function performerOf(
-  member: User | null,
-  workshop: string | null,
-): Pick<ServiceLogRow, 'performer' | 'performerExternal'> {
-  if (member) return { performer: member.fullName, performerExternal: false };
-  return { performer: workshop, performerExternal: workshop !== null };
-}
 
 @Injectable()
 export class ServiceEventsService {

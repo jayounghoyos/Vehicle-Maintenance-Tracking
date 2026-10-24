@@ -13,6 +13,7 @@ import {
 import { maintenanceByVehicle, stateSchedules } from '../maintenance/fleet-state';
 import { scheduleState } from '../maintenance/maintenance';
 import { PhotoStorage } from '../photos/photo-storage.service';
+import { performerOf } from '../service-events/performer';
 import { TenantRepositories, type TenantRepository } from '../tenant/tenant-repository';
 import type { CreateVehicleDto, ImportVehiclesDto, UpdateVehicleDto } from './dto';
 import type {
@@ -134,7 +135,7 @@ export class VehiclesService {
     });
     const history = await events.find({
       where: { vehicleId: id },
-      relations: { task: true, recorder: true, photos: true },
+      relations: { task: true, recorder: true, performer: true, photos: true },
       order: { performedAt: 'DESC' },
       take: RECENT_EVENT_LIMIT,
     });
@@ -157,6 +158,7 @@ export class VehiclesService {
       odometerKm: event.odometerKm,
       notes: event.notes,
       recorder: event.recorder?.fullName ?? 'Unknown',
+      ...performerOf(event.performer, event.performedByName),
       photos: (event.photos ?? []).map((photo) => ({
         id: photo.id,
         storageKey: photo.storageKey,
